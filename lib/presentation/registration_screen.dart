@@ -296,7 +296,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
+//ad
                     // SIGN UP BUTTON with loading spinner
                     SizedBox(
                       width: double.infinity,
