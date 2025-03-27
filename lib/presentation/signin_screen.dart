@@ -236,7 +236,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             },
                             child: Text(
                               'Create Account',
-                              style: TextStyle(color: Colors.blue), // Replace with your button color if needed
+                              style: TextStyle(color: CommonColor.kbuttonColor), // Replace with your button color if needed
                             ),
                           ),
                         ],
