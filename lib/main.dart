@@ -23,6 +23,6 @@ class MyApp extends StatelessWidget {
 }
 
 class CommonColor {
-  static final kbuttonColor = Color(0xff3366ff);
+  static final kbuttonColor = Color(0xff3366FF);
   static final kGreyColor = Color(0xFF3A4A64);
 }

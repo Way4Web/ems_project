@@ -86,7 +86,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _firstNameCtrl,
-                      decoration: _buildInputDecoration('Enter your first name', Icons.person_outline),
+                      decoration: _buildInputDecoration(
+                        'Enter your first name',
+                        Icons.person_outline,
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your first name';
@@ -101,7 +104,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _lastNameCtrl,
-                      decoration: _buildInputDecoration('Enter your last name', Icons.person_outline),
+                      decoration: _buildInputDecoration(
+                        'Enter your last name',
+                        Icons.person_outline,
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your last name';
@@ -116,13 +122,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _emailCtrl,
-                      decoration: _buildInputDecoration('Enter Email Address', Icons.email_outlined),
+                      decoration: _buildInputDecoration(
+                        'Enter Email Address',
+                        Icons.email_outlined,
+                      ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your email';
-                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim().toLowerCase())) {
-                          return 'Please enter a valid email in lowercase';
+                        } else if (!RegExp(
+                          r'^[^@]+@[^@]+\.[^@]+',
+                        ).hasMatch(value.trim().toLowerCase())) {
+                          return 'Please enter a valid email id';
                         }
                         return null;
                       },
@@ -135,13 +146,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     DropdownButtonFormField<String>(
                       dropdownColor: Colors.white,
                       value: _selectedRole,
-                      decoration: _buildInputDecoration(null, Icons.person_outline),
-                      items: _roles.map((role) {
-                        return DropdownMenuItem(
-                          value: role,
-                          child: Text(role, style: const TextStyle(fontWeight: FontWeight.w400)),
-                        );
-                      }).toList(),
+                      decoration: _buildInputDecoration(
+                        null,
+                        Icons.person_outline,
+                      ),
+                      items:
+                          _roles.map((role) {
+                            return DropdownMenuItem(
+                              value: role,
+                              child: Text(
+                                role,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedRole = value ?? 'Student';
@@ -158,15 +178,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       decoration: InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFF3A4A64), width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            // width: 2.0,
+                          ),
                         ),
                         fillColor: Colors.white,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Color(
+                              0xFFE0E0E0,
+                            ), // Light grey color for enabled state
+                          ),
+                        ),
+
                         border: OutlineInputBorder(),
                       ),
                       initialCountryCode: 'IN',
                       pickerDialogStyle: PickerDialogStyle(
                         backgroundColor: Colors.white,
-                        searchFieldInputDecoration: const InputDecoration(labelText: 'Search country'),
+                        searchFieldInputDecoration: const InputDecoration(
+                          labelText: 'Search country',
+                        ),
                       ),
                       onChanged: (phone) {
                         // Save phone number if needed
@@ -185,11 +219,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       decoration: InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFF3A4A64), width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            // width: 2.0,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Color(
+                              0xFFE0E0E0,
+                            ), // Light grey color for enabled state
+                          ),
+                        ),
+
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 12,
+                        ),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
                           onPressed: () {
                             setState(() {
                               _obscurePassword = !_obscurePassword;
@@ -205,8 +258,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           return 'Password must be at least 12 characters long';
                         } else if (!RegExp(r'^[A-Z]').hasMatch(value)) {
                           return 'Password must start with an uppercase letter';
-                        }
-                        else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                        } else if (!RegExp(
+                          r'[!@#$%^&*(),.?":{}|<>]',
+                        ).hasMatch(value)) {
                           return 'Password must contain at least one special character';
                         }
                         return null;
@@ -218,9 +272,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _PasswordRequirement(label: 'First letter capital', isMet: _hasCapitalLetter),
-                        _PasswordRequirement(label: 'Minimum 12 characters', isMet: _hasMinLength),
-                        _PasswordRequirement(label: 'At least one special character', isMet: _hasSpecialChar),
+                        _PasswordRequirement(
+                          label: 'First letter capital',
+                          isMet: _hasCapitalLetter,
+                        ),
+                        _PasswordRequirement(
+                          label: 'Minimum 12 characters',
+                          isMet: _hasMinLength,
+                        ),
+                        _PasswordRequirement(
+                          label: 'At least one special character',
+                          isMet: _hasSpecialChar,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -234,14 +297,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       decoration: InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFF3A4A64), width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            // width: 2.0,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            // width: 2.0,
+                          ),
+                        ),
+
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 12,
+                        ),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
                           onPressed: () {
                             setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
                             });
                           },
                         ),
@@ -262,14 +344,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     // TERMS & PRIVACY
                     Row(
                       children: [
-                        Checkbox(
-                          activeColor: Colors.blue,
-                          value: _agreeToTerms,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _agreeToTerms = value ?? false;
-                            });
-                          },
+                        Theme(
+                          data: ThemeData(checkboxTheme: CheckboxThemeData(
+                            side: MaterialStateBorderSide.resolveWith((states) {
+                              if (!states.contains(MaterialState.selected)) {
+                                return BorderSide(color: const Color(0xFFE0E0E0).withOpacity(1.0));
+                              }
+                              return BorderSide(color: Colors.blue); // Active border color.
+                            }),
+
+                          ),),
+                          child: Checkbox(
+                            // focusColor: Color(0xFFE0E0E0),
+
+                            activeColor: Colors.blue,
+                            value: _agreeToTerms,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _agreeToTerms = value ?? false;
+                              });
+                            },
+                          ),
                         ),
                         Expanded(
                           child: GestureDetector(
@@ -296,7 +391,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-//ad
+                    //ad
                     // SIGN UP BUTTON with loading spinner
                     SizedBox(
                       width: double.infinity,
@@ -323,7 +418,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SignInScreen()),
+                              MaterialPageRoute(
+                                builder: (context) => const SignInScreen(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -347,15 +444,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return InputDecoration(
       // hintText: hint,
       hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-      suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: Colors.grey) : null,
+      suffixIcon:
+          suffixIcon != null ? Icon(suffixIcon, color: Colors.grey) : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: Color(0xFFDCE0E5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF3A4A64), width: 2.0),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
       ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(
+          color: Color(0xFFE0E0E0), // Light grey color for enabled state
+        ),
+      ),
+
       contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
     );
   }
@@ -363,7 +468,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget _buildFieldLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Colors.black87,
+      ),
     );
   }
 
@@ -408,9 +517,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         Navigator.pop(context);
 
         // Inform the user based on the response
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(response.message)));
       } catch (e) {
         // Remove the loading spinner in case of error
         Navigator.pop(context);
@@ -446,10 +555,12 @@ class _PasswordRequirement extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 14, color: isMet ? Colors.green : Colors.red),
+          style: TextStyle(
+            fontSize: 14,
+            color: isMet ? Colors.green : Colors.red,
+          ),
         ),
       ],
     );
   }
 }
-

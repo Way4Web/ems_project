@@ -76,8 +76,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF3A4A64),
-                                  width: 2.0,
+                                  color: Color(0xFFDCE0E5),
+                                  width: 1.0,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(0xFFE0E0E0), // Light grey color for enabled state
                                 ),
                               ),
                               suffixIcon: Icon(Icons.email_outlined),
@@ -120,10 +126,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF3A4A64),
-                                  width: 2.0,
+                                  color: Color(0xFFE0E0E0),
+                                  // width: 2.0,
                                 ),
                               ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(0xFFE0E0E0), // Light grey color for enabled state
+                                ),
+                              ),
+
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
@@ -185,7 +198,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         child: ElevatedButton(
                           onPressed: loginState.isLoading ? null : _onSignIn,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue, // Replace with your button color e.g. CommonColor.kbuttonColor,
+                            backgroundColor: CommonColor.kbuttonColor, // Replace with your button color e.g. CommonColor.kbuttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           child: loginState.isLoading
