@@ -233,7 +233,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                   builder: (context) => const RegisterScreen(),
                                 ),
                               );
-                            },
+                            },//
                             child: Text(
                               'Create Account',
                               style: TextStyle(color: CommonColor.kbuttonColor), // Replace with your button color if needed
