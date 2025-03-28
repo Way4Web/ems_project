@@ -165,29 +165,30 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                activeColor: CommonColor.kbuttonColor,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _rememberMe = value ?? false;
-                                  });
-                                },
-                              ),
-                              const Text('Remember Me'),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              // Forgot Password Logic
-                            },
-                            child: const Text(
+                          // Row(
+                          //   children: [
+                          //     // Checkbox(
+                          //     //   value: _rememberMe,
+                          //     //   activeColor: CommonColor.kbuttonColor,
+                          //     //   onChanged: (value) {
+                          //     //     setState(() {
+                          //     //       _rememberMe = value ?? false;
+                          //     //     });
+                          //     //   },
+                          //     // ),
+                          //     // const Text('Remember Me'),
+                          //   ],
+                          // ),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     // Forgot Password Logic
+                          //   },
+                            Container(),
+                             const Text(
                               'Forgot Password?',
                               style: TextStyle(color: Colors.red),
                             ),
-                          ),
+
                         ],
                       ),
                       const SizedBox(height: 16),
