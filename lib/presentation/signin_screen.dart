@@ -4,6 +4,8 @@ import 'package:ems_project/presentation/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'add_organisation.dart';
+
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
 
@@ -271,8 +273,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       // Retrieve the API service from the provider using Riverpod
       final loginApiService = ref.read(loginStateProvider.notifier);
 
-      // Call the loginUser method from your API service
-      await loginApiService.loginUser(email, password);
+      // Call the loginUser method and expect a bool result indicating success
+      final success = await loginApiService.loginUser(email, password);
+
+      if (success) {
+        // Navigate to the AddOrganisation screen if login is successful.
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AddOrganisation()),
+        );
+      } else {
+        // Handle login failure (show an error message, etc.)
+        debugPrint('Login failed.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed. Please try again.')),
+        );
+      }
 
       debugPrint('Signing in...');
     }
