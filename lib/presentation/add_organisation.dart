@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Infrastructure/organization_api.dart';
 import '../Infrastructure/registration_api.dart'; // If used for phone input
 
-
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
 Future<String?> getToken() async {
@@ -15,13 +14,13 @@ Future<String?> getToken() async {
 }
 
 final Future<String?> tokenGained = getToken();
+
 class AddOrganisation extends ConsumerStatefulWidget {
   const AddOrganisation({Key? key}) : super(key: key);
 
   @override
   ConsumerState<AddOrganisation> createState() => _AddOrganisationScreenState();
 }
-
 
 class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
   final _formKey = GlobalKey<FormState>();
@@ -41,6 +40,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
   // For password hint checks
   bool _hasCapitalLetter = false;
+
   // bool _hasLetterStart = false;
   bool _hasCapitalLetter1 = false;
   bool _hasMinLength = false;
@@ -62,7 +62,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
     });
   }
 
-
   // Check password rules in real time
   void _checkPasswordRules(String password) {
     setState(() {
@@ -75,6 +74,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
 
     // Using MediaQuery for responsiveness
     return Scaffold(
@@ -151,11 +151,14 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 14,
                           horizontal: 12,
-                        ),),
+                        ),
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your Organization Name';
-                        } else if (!RegExp(r'^[A-Za-z]').hasMatch(value.trim())) {
+                        } else if (!RegExp(
+                          r'^[A-Za-z]',
+                        ).hasMatch(value.trim())) {
                           return 'Organization Name must start with a letter';
                         }
                         return null;
@@ -165,7 +168,9 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     Row(
                       children: [
                         Icon(
-                          _startsWithLetter ? Icons.check_circle : Icons.check_circle,
+                          _startsWithLetter
+                              ? Icons.check_circle
+                              : Icons.check_circle,
                           color: _startsWithLetter ? Colors.green : Colors.red,
                           size: 16,
                         ),
@@ -174,11 +179,13 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                           'Must start with a letter',
                           style: TextStyle(
                             fontSize: 14,
-                            color: _startsWithLetter ? Colors.green : Colors.red,
+                            color:
+                                _startsWithLetter ? Colors.green : Colors.red,
                           ),
                         ),
                       ],
-                    ),                    const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 16),
 
                     // PASSWORD FIELD
                     _buildFieldLabel('Password'),
@@ -297,7 +304,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     //ad
                     // SIGN UP BUTTON with loading spinner
                     Padding(
-                      padding: const EdgeInsets.only(left: 100.0),
+                      padding: EdgeInsets.only(left:
+                      MediaQuery.of(context).size.width * 0.23
+                        // 100.0
+                      ),
                       child: Row(
                         children: [
                           SizedBox(
