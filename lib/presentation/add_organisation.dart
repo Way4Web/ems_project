@@ -165,7 +165,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     Row(
                       children: [
                         Icon(
-                          _startsWithLetter ? Icons.check_circle : Icons.cancel,
+                          _startsWithLetter ? Icons.check_circle : Icons.check_circle,
                           color: _startsWithLetter ? Colors.green : Colors.red,
                           size: 16,
                         ),
@@ -464,7 +464,7 @@ class _PasswordRequirement extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          isMet ? Icons.check_circle : Icons.cancel,
+          isMet ? Icons.check_circle : Icons.check_circle,
           color: isMet ? Colors.green : Colors.red,
           size: 16,
         ),

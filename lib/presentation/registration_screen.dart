@@ -547,7 +547,7 @@ class _PasswordRequirement extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          isMet ? Icons.check_circle : Icons.cancel,
+          isMet ? Icons.check_circle : Icons.check_circle,
           color: isMet ? Colors.green : Colors.red,
           size: 16,
         ),
