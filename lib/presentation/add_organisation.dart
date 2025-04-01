@@ -309,9 +309,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         // 100.0
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SizedBox(
-                            width: 100,
+                            width: MediaQuery.of(context).size.width * 0.23,
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -336,7 +337,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                           SizedBox(width: 10),
 
                           SizedBox(
-                            width: 150,
+                            width: MediaQuery.of(context).size.width * 0.36,
                             child: ElevatedButton(
                               onPressed: _onRegister,
                               style: ElevatedButton.styleFrom(
