@@ -1,5 +1,7 @@
 // main.dart
+import 'package:ems_project/presentation/add_organisation.dart';
 import 'package:ems_project/presentation/registration_screen.dart';
+import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +19,15 @@ class MyApp extends StatelessWidget {
       title: 'Register with Riverpod',
       debugShowCheckedModeBanner: false,
       color: Colors.white,
-      home: const SignInScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SignInScreen(),
+        '/second': (context) => SidebarScreen(),
+        '/addOrg': (context) => AddOrganisation(),
+        '/sideBarScreen': (context) => SidebarScreen(),
+      },
+
+      // home: const SignInScreen(),
     );
   }
 }

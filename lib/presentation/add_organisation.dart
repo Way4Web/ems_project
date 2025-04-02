@@ -315,12 +315,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                             width: MediaQuery.of(context).size.width * 0.23,
                             child: ElevatedButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SignInScreen(),
-                                  ),
-                                );
+                                Navigator.popAndPushNamed(context, '/sideBarScreen');
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xffF7F9FC),

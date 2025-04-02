@@ -1,6 +1,7 @@
 import 'package:ems_project/Infrastructure/login_api.dart';
 import 'package:ems_project/main.dart';
 import 'package:ems_project/presentation/registration_screen.dart';
+import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -280,7 +281,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         // Navigate to the AddOrganisation screen if login is successful.
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AddOrganisation()),
+          MaterialPageRoute(builder: (context) => SidebarScreen())
+              // AddOrganisation()),
         );
       } else {
         // Handle login failure (show an error message, etc.)
@@ -294,4 +296,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 }
+
+
 

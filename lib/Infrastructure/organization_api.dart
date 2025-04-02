@@ -50,7 +50,7 @@ class OrganizationApiService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       print('Registration successful: ${response.body}');
-      return OrganizationResponse(success: true, message: 'User Registered Successfully.');
+      return OrganizationResponse(success: true, message: 'Organization created Successfully.');
     } else if (response.statusCode == 400) {
       // Assuming the backend returns a message indicating user already exists
       print('Validation error: ${response.body}');
