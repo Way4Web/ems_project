@@ -78,7 +78,21 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
     // Using MediaQuery for responsiveness
     return Scaffold(
+      primary: true,
+
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        primary: true,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: Text(""),
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back, color: Colors.black), // Back icon
+        //   onPressed: () {
+        //     Navigator.of(context).pop(); // Go back to the previous screen
+        //   },
+        // ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -304,8 +318,8 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     //ad
                     // SIGN UP BUTTON with loading spinner
                     Padding(
-                      padding: EdgeInsets.only(left:
-                      MediaQuery.of(context).size.width * 0.23
+                      padding: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width * 0.23,
                         // 100.0
                       ),
                       child: Row(
@@ -315,7 +329,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                             width: MediaQuery.of(context).size.width * 0.23,
                             child: ElevatedButton(
                               onPressed: () {
-                                Navigator.popAndPushNamed(context, '/sideBarScreen');
+                                Navigator.popAndPushNamed(
+                                  context,
+                                  '/sideBarScreen',
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xffF7F9FC),

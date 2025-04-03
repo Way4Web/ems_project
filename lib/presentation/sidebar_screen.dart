@@ -44,7 +44,7 @@ class SidebarScreen extends StatelessWidget {
                   ListTile(
                     title: const Text('Add Organizations'),
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => AddOrganisation(),
