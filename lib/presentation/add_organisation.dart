@@ -1,9 +1,8 @@
-import 'package:ems_project/presentation/signin_screen.dart';
+import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Infrastructure/organization_api.dart';
-import '../Infrastructure/registration_api.dart'; // If used for phone input
 
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -78,300 +77,286 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
     // Using MediaQuery for responsiveness
     return Scaffold(
-      primary: true,
-
+      // primary: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        primary: true,
+        // primary: true,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         title: Text(""),
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back, color: Colors.black), // Back icon
-        //   onPressed: () {
-        //     Navigator.of(context).pop(); // Go back to the previous screen
-        //   },
-        // ),
+        toolbarHeight: size.height * 0.03
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    // HEADER
-                    const Text(
-                      'Organization Information',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Form(
+              key: _formKey,
+              child: Column(mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  // HEADER
+                  const Text(
+                    'Organization Information',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 24),
 
-                    // FIRST NAME FIELD
+                  // FIRST NAME FIELD
 
-                    // EMAIL FIELD
-                    _buildFieldLabel('Email'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _emailCtrl,
-                      decoration: _buildInputDecoration(
-                        'Enter Email Address',
-                        Icons.email_outlined,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your email';
-                        } else if (!RegExp(
-                          r'^[^@]+@[^@]+\.[^@]+',
-                        ).hasMatch(value.trim().toLowerCase())) {
-                          return 'Please enter a valid email id';
-                        }
-                        return null;
-                      },
+                  // EMAIL FIELD
+                  _buildFieldLabel('Email'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _emailCtrl,
+                    decoration: _buildInputDecoration(
+                      'Enter Email Address',
+                      Icons.email_outlined,
                     ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabel('Organization Name'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _orgNameCtrl,
-                      onChanged: _onOrgNameChanged,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                            // width: 2.0,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Color(
-                              0xFFE0E0E0,
-                            ), // Light grey color for enabled state
-                          ),
-                        ),
-
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                          horizontal: 12,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your email';
+                      } else if (!RegExp(
+                        r'^[^@]+@[^@]+\.[^@]+',
+                      ).hasMatch(value.trim().toLowerCase())) {
+                        return 'Please enter a valid email id';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFieldLabel('Organization Name'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _orgNameCtrl,
+                    onChanged: _onOrgNameChanged,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE0E0E0),
+                          // width: 2.0,
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your Organization Name';
-                        } else if (!RegExp(
-                          r'^[A-Za-z]',
-                        ).hasMatch(value.trim())) {
-                          return 'Organization Name must start with a letter';
-                        }
-                        return null;
-                      },
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Color(
+                            0xFFE0E0E0,
+                          ), // Light grey color for enabled state
+                        ),
+                      ),
+
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 12,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Row(
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your Organization Name';
+                      } else if (!RegExp(
+                        r'^[A-Za-z]',
+                      ).hasMatch(value.trim())) {
+                        return 'Organization Name must start with a letter';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        _startsWithLetter
+                            ? Icons.check_circle
+                            : Icons.check_circle,
+                        color: _startsWithLetter ? Colors.green : Colors.red,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Must start with a letter',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color:
+                              _startsWithLetter ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // PASSWORD FIELD
+                  _buildFieldLabel('Password'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _passwordCtrl,
+                    obscureText: _obscurePassword,
+                    onChanged: _checkPasswordRules,
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE0E0E0),
+                          // width: 2.0,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Color(
+                            0xFFE0E0E0,
+                          ), // Light grey color for enabled state
+                        ),
+                      ),
+
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 12,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a password';
+                      } else if (value.length < 12) {
+                        return 'Password must be at least 12 characters long';
+                      } else if (!RegExp(r'^[A-Z]').hasMatch(value)) {
+                        return 'Password must start with an uppercase letter';
+                      } else if (!RegExp(
+                        r'[!@#$%^&*(),.?":{}|<>]',
+                      ).hasMatch(value)) {
+                        return 'Password must contain at least one special character';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _PasswordRequirement(
+                        label: 'First letter capital',
+                        isMet: _hasCapitalLetter,
+                      ),
+                      _PasswordRequirement(
+                        label: 'Minimum 12 characters',
+                        isMet: _hasMinLength,
+                      ),
+                      _PasswordRequirement(
+                        label: 'At least one special character',
+                        isMet: _hasSpecialChar,
+                      ),
+                    ],
+                  ),
+
+                  // const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                  _buildFieldLabel('Role'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    initialValue: 'organization',
+                    readOnly: true,
+                    decoration: _buildInputDecoration(
+                      null,
+                      Icons.person_outline,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // PASSWORD REQUIREMENTS
+
+                  // CONFIRM PASSWORD FIELD
+
+                  // TERMS & PRIVACY
+                  const SizedBox(height: 16),
+                  //ad
+                  // SIGN UP BUTTON with loading spinner
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.23,
+                      // 100.0
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(
-                          _startsWithLetter
-                              ? Icons.check_circle
-                              : Icons.check_circle,
-                          color: _startsWithLetter ? Colors.green : Colors.red,
-                          size: 16,
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.23,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.popAndPushNamed(
+                                context,
+                                '/sideBarScreen',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ), // Rounded corners
+                              ),
+                              backgroundColor: const Color(0xffF7F9FC),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.black87),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Must start with a letter',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color:
-                                _startsWithLetter ? Colors.green : Colors.red,
+                        SizedBox(width: 10),
+
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.36,
+                          child: ElevatedButton(
+                            onPressed: _onRegister,
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ), // Rounded corners
+                              ),
+                              backgroundColor: const Color(0xff3366ff),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                            ),
+                            child: const Text(
+                              'Add Organization',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-                    // PASSWORD FIELD
-                    _buildFieldLabel('Password'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _passwordCtrl,
-                      obscureText: _obscurePassword,
-                      onChanged: _checkPasswordRules,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                            // width: 2.0,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Color(
-                              0xFFE0E0E0,
-                            ), // Light grey color for enabled state
-                          ),
-                        ),
-
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                          horizontal: 12,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        border: const OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a password';
-                        } else if (value.length < 12) {
-                          return 'Password must be at least 12 characters long';
-                        } else if (!RegExp(r'^[A-Z]').hasMatch(value)) {
-                          return 'Password must start with an uppercase letter';
-                        } else if (!RegExp(
-                          r'[!@#$%^&*(),.?":{}|<>]',
-                        ).hasMatch(value)) {
-                          return 'Password must contain at least one special character';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _PasswordRequirement(
-                          label: 'First letter capital',
-                          isMet: _hasCapitalLetter,
-                        ),
-                        _PasswordRequirement(
-                          label: 'Minimum 12 characters',
-                          isMet: _hasMinLength,
-                        ),
-                        _PasswordRequirement(
-                          label: 'At least one special character',
-                          isMet: _hasSpecialChar,
-                        ),
-                      ],
-                    ),
-
-                    // const SizedBox(height: 16),
-                    const SizedBox(height: 16),
-                    _buildFieldLabel('Role'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      dropdownColor: Colors.white,
-                      value: _selectedRole,
-                      decoration: _buildInputDecoration(
-                        null,
-                        Icons.person_outline,
-                      ),
-                      items:
-                          _roles.map((role) {
-                            return DropdownMenuItem(
-                              value: role,
-                              child: Text(
-                                role,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedRole = value ?? 'organization';
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // PASSWORD REQUIREMENTS
-
-                    // CONFIRM PASSWORD FIELD
-
-                    // TERMS & PRIVACY
-                    const SizedBox(height: 16),
-                    //ad
-                    // SIGN UP BUTTON with loading spinner
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: MediaQuery.of(context).size.width * 0.23,
-                        // 100.0
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.23,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.popAndPushNamed(
-                                  context,
-                                  '/sideBarScreen',
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xffF7F9FC),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.black87),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.36,
-                            child: ElevatedButton(
-                              onPressed: _onRegister,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xff3366ff),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                              ),
-                              child: const Text(
-                                'Add Organization',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ALREADY HAVE AN ACCOUNT
-                  ],
-                ),
+                  // ALREADY HAVE AN ACCOUNT
+                ],
               ),
             ),
           ),
@@ -454,7 +439,19 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
         // Remove the loading spinner
         Navigator.pop(context);
-
+        if (response.success) {
+          // If registration is successful, navigate to SidebarScreen.
+          if (!mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SidebarScreen()),
+          );
+        } else {
+          // If registration fails, show a SnackBar with the error message.
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text(response.message)),
+          // );
+        }
         // Inform the user based on the response
         ScaffoldMessenger.of(
           context,

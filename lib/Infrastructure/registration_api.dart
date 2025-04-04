@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:ems_project/presentation/sidebar_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,8 @@ class RegistrationResponse {
 
 class RegisterApiService {
   Future<RegistrationResponse> registerUser({
+    required BuildContext context,
+
     required String email,
     required String password,
     required String firstName,
@@ -39,6 +43,11 @@ class RegisterApiService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       print('Registration successful: ${response.body}');
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => SidebarScreen()),
+      // );
+
       return RegistrationResponse(success: true, message: 'User Registered Successfully.');
     } else if (response.statusCode == 400) {
       // Assuming the backend returns a message indicating user already exists

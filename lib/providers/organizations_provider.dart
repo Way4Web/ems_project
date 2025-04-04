@@ -20,7 +20,17 @@ class OrganizationsState {
 class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
   final GetApiManageOrganisation apiService;
   final EditApiManageOrganisation editApiService;
-  OrganizationsNotifier(this.apiService, this.editApiService) : super(OrganizationsState(isLoading: true));
+  final DeleteApiManageOrganisation deleteApiService;
+  // Optionally, if your API service for adding organizations is separate, you can add it here.
+  // For example:
+  // final AddApiManageOrganisation addApiService;
+
+  OrganizationsNotifier(
+      this.apiService,
+      this.editApiService,
+      this.deleteApiService,
+      // this.addApiService,
+      ) : super(OrganizationsState(isLoading: true));
 
   // Fetch organizations from the API
   Future<void> fetchOrganizations() async {
@@ -57,8 +67,27 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
   // Delete an organization
   Future<void> deleteOrganization(String id) async {
     try {
-      // await apiService.deleteOrganization(id); // Call the delete API
+      await deleteApiService.deleteOrganization(id); // Delete organization via API
       // Re-fetch the organizations after deletion
+      await fetchOrganizations();
+    } catch (e) {
+      state = OrganizationsState(error: e.toString());
+    }
+  }
+
+  // Add a new organization
+  Future<void> addOrganization({
+    required String name,
+    required String email,
+    required String role,
+  }) async {
+    try {
+      // Call the API to add the organization.
+      // If your add API is part of your GetApiManageOrganisation, you might do:
+      await apiService.fetchOrganizations();
+      // Otherwise, if you have a separate API service for adding, use that instead.
+
+      // Re-fetch organizations after a successful add.
       await fetchOrganizations();
     } catch (e) {
       state = OrganizationsState(error: e.toString());
@@ -67,5 +96,9 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
 }
 
 final organizationsProvider = StateNotifierProvider<OrganizationsNotifier, OrganizationsState>(
-      (ref) => OrganizationsNotifier(GetApiManageOrganisation(),EditApiManageOrganisation()),
+      (ref) => OrganizationsNotifier(
+    GetApiManageOrganisation(),
+    EditApiManageOrganisation(),
+    DeleteApiManageOrganisation(),
+  ),
 );

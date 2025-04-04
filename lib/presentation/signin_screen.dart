@@ -202,6 +202,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         child: ElevatedButton(
                           onPressed: loginState.isLoading ? null : _onSignIn,
                           style: ElevatedButton.styleFrom(
+                            shape:  RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8), // Rounded corners
+                            ),
                             backgroundColor: CommonColor.kbuttonColor, // Replace with your button color e.g. CommonColor.kbuttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),

@@ -11,7 +11,8 @@ class ManageOrganisationScreen extends ConsumerWidget {
     final organizationsState = ref.watch(organizationsProvider);
 
     // Fetch organizations only if they haven't been loaded yet
-    if (organizationsState.isLoading && organizationsState.organizations == null) {
+    if (organizationsState.isLoading &&
+        organizationsState.organizations == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(organizationsProvider.notifier).fetchOrganizations();
       });
@@ -34,7 +35,8 @@ class ManageOrganisationScreen extends ConsumerWidget {
     }
 
     // Show a message if no organizations were found
-    if (organizationsState.organizations == null || organizationsState.organizations!.isEmpty) {
+    if (organizationsState.organizations == null ||
+        organizationsState.organizations!.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text('Organizations')),
         body: Center(child: Text('No organizations found')),
@@ -48,9 +50,68 @@ class ManageOrganisationScreen extends ConsumerWidget {
       ref.read(organizationsProvider.notifier).selectOrganization(orgId);
     }
 
-    // Handle Delete organization
-    void _onDeleteOrganization(String orgId) {
-      ref.read(organizationsProvider.notifier).deleteOrganization(orgId);
+    // Handle Delete organization with confirmation dialog
+    Future<void> _onDeleteOrganization(String orgId) async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(backgroundColor: Colors.white,
+          title: Text('Confirm Delete'),
+          content:
+          Text('Are you sure you want to delete this organization?'),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed:  () => Navigator.of(context).pop(false),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Color(0xff3356DF),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+
+                    backgroundColor: Color(0xffD81939),
+                  ),
+                  child: Text('Delete',style: TextStyle(color: Colors.white),),
+                ),
+
+              ],
+            ),
+
+            // TextButton(
+            //   onPressed: () => Navigator.of(context).pop(false),
+            //   child: Text('Cancel'),
+            // ),
+            // ElevatedButton(
+            //   onPressed: () => Navigator.of(context).pop(true),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Color(0xffD81939),
+            //   ),
+            //   child: Text('Delete'),
+            // ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        ref.read(organizationsProvider.notifier).deleteOrganization(orgId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Organization deleted')),
+        );
+      }
     }
 
     return Scaffold(
@@ -58,6 +119,7 @@ class ManageOrganisationScreen extends ConsumerWidget {
         primary: true,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.03,
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -66,34 +128,41 @@ class ManageOrganisationScreen extends ConsumerWidget {
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Manage Organizations',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    'Manage Organization',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                   // "Add Organization" button in the top-right corner
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         backgroundColor: Color(0xff3356DF),
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width * 0.015),
                       ),
                       onPressed: () {
                         // TODO: Implement Add Organization logic
                       },
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(Icons.add_box_outlined, color: Colors.white),
                           const SizedBox(width: 8),
                           const Text(
-                            'Add',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
+                            'Add Organisation',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
@@ -110,7 +179,7 @@ class ManageOrganisationScreen extends ConsumerWidget {
                     email: org.email,
                     role: org.role,
                     onEdit: () async {
-                      _onOrganizationSelected(org.id); // Optionally select the organization
+                      _onOrganizationSelected(org.id);
                       // Show the edit dialog and wait for its result
                       final didUpdate = await showDialog<bool>(
                         context: context,
@@ -120,13 +189,15 @@ class ManageOrganisationScreen extends ConsumerWidget {
                           orgId: org.id,
                         ),
                       );
-                      // If update was successful, refresh the list (or update the provider state directly)
+                      // If update was successful, refresh the list
                       if (didUpdate == true) {
-                        ref.read(organizationsProvider.notifier).fetchOrganizations();
+                        ref
+                            .read(organizationsProvider.notifier)
+                            .fetchOrganizations();
                       }
                     },
-                    onDelete: () {
-                      _onDeleteOrganization(org.id); // Delete the organization by ID
+                    onDelete: () async {
+                      await _onDeleteOrganization(org.id);
                     },
                   );
                 }).toList(),
@@ -159,7 +230,7 @@ class _OrganizationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.of(context).size;
     return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: mediaSize.width * 0.9,
       child: Card(
         color: Colors.white,
         elevation: 2,
@@ -177,7 +248,6 @@ class _OrganizationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              // Display email using RichText for better control over formatting
               RichText(
                 text: TextSpan(
                   children: [
@@ -201,7 +271,6 @@ class _OrganizationCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: mediaSize.height * 0.03),
-              // Display role
               RichText(
                 text: TextSpan(
                   children: [
@@ -225,13 +294,15 @@ class _OrganizationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Edit / Delete buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
                     onPressed: onEdit,
                     style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       backgroundColor: Color(0xff3356DF),
                     ),
                     child: const Text(
@@ -243,6 +314,9 @@ class _OrganizationCard extends StatelessWidget {
                   ElevatedButton(
                     onPressed: onDelete,
                     style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       backgroundColor: Color(0xffD81939),
                     ),
                     child: const Text(

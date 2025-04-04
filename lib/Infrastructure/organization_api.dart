@@ -56,7 +56,7 @@ class OrganizationApiService {
       print('Validation error: ${response.body}');
       return OrganizationResponse(
         success: false,
-        message: 'User already registered.',
+        message: 'Organization already registered.',
       );
     } else {
       print('Registration failed: ${response.body}');
@@ -142,6 +142,47 @@ class EditApiManageOrganisation {
       // Handle error response
       final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
       throw Exception("Failed to update organization: $errorMessage");
+    }
+  }
+}
+
+
+
+class DeleteApiManageOrganisation {
+  final String apiUrl =
+      "http://192.168.29.189:5000/api/superadmin/deleteOrganization"; // Replace with your API URL
+
+  Future<void> deleteOrganization(String organizationId) async {
+    final token = await getToken(); // Fetch the token asynchronously
+
+    if (token == null) {
+      throw Exception("Token not found");
+    }
+
+    final url = Uri.parse('$apiUrl/$organizationId'); // API endpoint with organizationId
+
+    // Prepare the request body for the PUT request
+    final body = json.encode({});
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Add token for authorization
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      // Successful update
+      print("Organization Deleted successfully");
+      final responseBody = json.decode(response.body);
+      // If necessary, you can parse the updated organization from the response
+      print(responseBody);
+    } else {
+      // Handle error response
+      final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+      throw Exception("Failed to delete organization: $errorMessage");
     }
   }
 }

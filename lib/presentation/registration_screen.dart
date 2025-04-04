@@ -1,4 +1,5 @@
 import 'package:ems_project/Infrastructure/login_api.dart'; // Contains registerApiProvider and RegisterApiService
+import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -397,6 +398,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: ElevatedButton(
                         onPressed: _onSignUp,
                         style: ElevatedButton.styleFrom(
+                          shape:  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8), // Rounded corners
+                          ),
                           backgroundColor: const Color(0xff3366ff),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
@@ -509,11 +513,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           firstName: firstName,
           lastName: lastName,
           phone: phone,
-          role: role,
+          role: role, context: context,
         );
 
         // Remove the loading spinner
         Navigator.pop(context);
+        if (response.success) {
+          // If registration is successful, navigate to SidebarScreen.
+          if (!mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SidebarScreen()),
+          );
+        } else {
+          // If registration fails, show a SnackBar with the error message.
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message)),
+          );
+        }
 
         // Inform the user based on the response
         ScaffoldMessenger.of(
