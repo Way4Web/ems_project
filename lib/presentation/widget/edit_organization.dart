@@ -49,7 +49,7 @@ class _EditOrganizationDialogState extends State<EditOrganizationDialog> {
           key: _formKey,
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.23,
+            height: MediaQuery.of(context).size.height * 0.275,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,32 +85,44 @@ class _EditOrganizationDialogState extends State<EditOrganizationDialog> {
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Color(0xff53C2D0)),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Color(0xff53C2D0)),
+                foregroundColor: WidgetStateProperty.all(Colors.white),
+                minimumSize: WidgetStateProperty.all(Size(10, 40)), // Set the width and height
+
+              ),
+              onPressed: () {
+                // Cancel button returns false
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Cancel'),
             ),
-            onPressed: () {
-              // Cancel button returns false
-              Navigator.of(context).pop(false);
-            },
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Color(0xff3356DF)),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
+
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Color(0xff3356DF)),
+                foregroundColor: WidgetStateProperty.all(Colors.white),
+                minimumSize: WidgetStateProperty.all(Size(20, 40)), // Set the width and height
+
+              ),
+              onPressed: () {
+                if (_formKey.currentState?.validate() ?? false) {
+                  // If form is valid, update the organization
+                  String updatedName = _nameController.text;
+                  String updatedEmail = _emailController.text;
+                  _updateOrganization(context, widget.orgId, updatedName, updatedEmail);
+                }
+              },
+              child: Text('Save Changes'),
             ),
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                // If form is valid, update the organization
-                String updatedName = _nameController.text;
-                String updatedEmail = _emailController.text;
-                _updateOrganization(context, widget.orgId, updatedName, updatedEmail);
-              }
-            },
-            child: Text('Save Changes'),
-          ),
+
+          ],
+        )
         ],
       ),
     );
@@ -161,8 +173,3 @@ class _EditOrganizationDialogState extends State<EditOrganizationDialog> {
     }
   }
 }
-
-
-
-
-
