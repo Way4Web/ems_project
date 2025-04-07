@@ -8,13 +8,14 @@ import 'package:http/http.dart' as http;
 class LoginState {
   final bool isLoading;
   final String? message;
+  final bool isLoggedIn;
 
-  LoginState({required this.isLoading, this.message});
+  LoginState({required this.isLoading, this.message, required this.isLoggedIn});
 }
 
 // Define a state notifier to manage login state
 class LoginStateNotifier extends StateNotifier<LoginState> {
-  LoginStateNotifier(this.apiService) : super(LoginState(isLoading: false));
+  LoginStateNotifier(this.apiService) : super(LoginState(isLoading: false, isLoggedIn: false));
 
   final LoginApiService apiService;
 
@@ -22,31 +23,44 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   Future<bool> loginUser(String email, String password) async {
-    state = LoginState(isLoading: true);
+    state = LoginState(isLoading: true, isLoggedIn: false);
     final response = await apiService.loginUser(email, password);
     bool success;
 
     if (response['status'] == 'success') {
       // Extract the token from the response data.
-      // Adjust this key based on your API response structure.
       final Map<String, dynamic> data = response['data'];
       final String token = data['token'];
 
       // Store the token securely.
       await secureStorage.write(key: 'token', value: token);
 
-      // Optionally, store the user information if needed:
-      // await secureStorage.write(key: 'user', value: jsonEncode(data['user']));
-
-      state = LoginState(isLoading: false, message: 'Login successful');
+      state = LoginState(isLoading: false, message: 'Login successful', isLoggedIn: true);
       success = true;
     } else {
-      state = LoginState(isLoading: false, message: 'Invalid credentials');
+      state = LoginState(isLoading: false, message: 'Invalid credentials', isLoggedIn: false);
       success = false;
     }
     return success;
   }
+
+  // Method to check if user is already logged in
+  Future<void> checkIfLoggedIn() async {
+    final token = await secureStorage.read(key: 'token');
+    if (token != null) {
+      state = LoginState(isLoading: false, isLoggedIn: true);
+    } else {
+      state = LoginState(isLoading: false, isLoggedIn: false);
+    }
+  }
+
+  // Method to log out the user
+  Future<void> logoutUser() async {
+    await secureStorage.delete(key: 'token');
+    state = LoginState(isLoading: false, isLoggedIn: false);
+  }
 }
+
 // Define a provider for the login state notifier
 final apiProvider = Provider<LoginApiService>((ref) => LoginApiService());
 

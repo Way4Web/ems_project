@@ -1,10 +1,26 @@
 import 'package:ems_project/presentation/add_organisation.dart';
+import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'manage_organisation.dart';
 
 class SidebarScreen extends StatelessWidget {
-  const SidebarScreen({super.key});
+   SidebarScreen({super.key});
+
+  // Create an instance of FlutterSecureStorage
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
+  Future<void> _logout(BuildContext context) async {
+    // Delete the token from secure storage
+    await secureStorage.delete(key: 'token');
+    // Navigate to the SignInScreen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+          (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +30,6 @@ class SidebarScreen extends StatelessWidget {
         title: const Text('Drawer Example'),
         backgroundColor: Colors.white,
       ),
-
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -39,7 +54,6 @@ class SidebarScreen extends StatelessWidget {
                 leading: const Icon(Icons.dashboard_outlined),
                 title: const Text('Org. Management'),
                 backgroundColor: Colors.white,
-
                 children: [
                   ListTile(
                     title: const Text('Add Organizations'),
@@ -49,7 +63,6 @@ class SidebarScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => AddOrganisation(),
                         ),
-                        // AddOrganisation()),
                       );
                     },
                   ),
@@ -61,12 +74,17 @@ class SidebarScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => ManageOrganisationScreen(),
                         ),
-                        // AddOrganisation()),
                       );
                     },
                   ),
                 ],
               ),
+            ),
+            // Logout menu item
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () => _logout(context),
             ),
             // Add more items as needed
           ],
@@ -75,5 +93,3 @@ class SidebarScreen extends StatelessWidget {
     );
   }
 }
-
-

@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Infrastructure/organization_api.dart';
+import '../providers/organizations_provider.dart';
 
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
-Future<String?> getToken() async {
-  String? token = await secureStorage.read(key: 'token');
-  print('Stored token: $token');
-  return token;
-}
-
-final Future<String?> tokenGained = getToken();
+// Future<String?> getToken() async {
+//   String? token = await secureStorage.read(key: 'token');
+//   print('Stored token: $token');
+//   return token;
+// }
+//
+// final Future<String?> tokenGained = getToken();
 
 class AddOrganisation extends ConsumerStatefulWidget {
   const AddOrganisation({Key? key}) : super(key: key);
@@ -26,11 +27,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
   // Controllers for each field
   final TextEditingController _orgNameCtrl = TextEditingController();
-
-  // final TextEditingController _lastNameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
-
-  // final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   final TextEditingController _confirmPasswordCtrl = TextEditingController();
 
@@ -39,33 +36,21 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
   // For password hint checks
   bool _hasCapitalLetter = false;
-
-  // bool _hasLetterStart = false;
-  bool _hasCapitalLetter1 = false;
   bool _hasMinLength = false;
   bool _hasSpecialChar = false;
-
-  // Dummy roles list
-  final List<String> _roles = ['organization'];
-
-  // Toggle for showing/hiding password fields
+  bool _startsWithLetter = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  bool _startsWithLetter = false;
-
-  // This method checks if the input starts with a letter (A–Z or a–z)
   void _onOrgNameChanged(String value) {
     setState(() {
       _startsWithLetter = RegExp(r'^[A-Za-z]').hasMatch(value.trim());
     });
   }
 
-  // Check password rules in real time
   void _checkPasswordRules(String password) {
     setState(() {
       _hasCapitalLetter = password.contains(RegExp(r'[A-Z]'));
-      // _hasLetterStart = password.contains(RegExp(r'[A-Z]'));
       _hasMinLength = password.length >= 12;
       _hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
@@ -75,16 +60,12 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // Using MediaQuery for responsiveness
     return Scaffold(
-      // primary: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        // primary: true,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        title: Text(""),
-        toolbarHeight: size.height * 0.03
+        toolbarHeight: size.height * 0.03,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
@@ -93,11 +74,11 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
             constraints: const BoxConstraints(maxWidth: 500),
             child: Form(
               key: _formKey,
-              child: Column(mainAxisSize: MainAxisSize.min,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  // HEADER
                   const Text(
                     'Organization Information',
                     style: TextStyle(
@@ -106,10 +87,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // FIRST NAME FIELD
-
-                  // EMAIL FIELD
                   _buildFieldLabel('Email'),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -142,7 +119,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
                           color: Color(0xFFE0E0E0),
-                          // width: 2.0,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
@@ -150,10 +126,9 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         borderSide: BorderSide(
                           color: Color(
                             0xFFE0E0E0,
-                          ), // Light grey color for enabled state
+                          ),
                         ),
                       ),
-
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 14,
                         horizontal: 12,
@@ -174,9 +149,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                   Row(
                     children: [
                       Icon(
-                        _startsWithLetter
-                            ? Icons.check_circle
-                            : Icons.check_circle,
+                        _startsWithLetter ? Icons.check_circle : Icons.check_circle,
                         color: _startsWithLetter ? Colors.green : Colors.red,
                         size: 16,
                       ),
@@ -185,15 +158,12 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         'Must start with a letter',
                         style: TextStyle(
                           fontSize: 14,
-                          color:
-                              _startsWithLetter ? Colors.green : Colors.red,
+                          color: _startsWithLetter ? Colors.green : Colors.red,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // PASSWORD FIELD
                   _buildFieldLabel('Password'),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -205,7 +175,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
                           color: Color(0xFFE0E0E0),
-                          // width: 2.0,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
@@ -213,19 +182,16 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                         borderSide: BorderSide(
                           color: Color(
                             0xFFE0E0E0,
-                          ), // Light grey color for enabled state
+                          ),
                         ),
                       ),
-
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 14,
                         horizontal: 12,
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
                         ),
                         onPressed: () {
                           setState(() {
@@ -251,7 +217,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -269,8 +234,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                       ),
                     ],
                   ),
-
-                  // const SizedBox(height: 16),
                   const SizedBox(height: 16),
                   _buildFieldLabel('Role'),
                   const SizedBox(height: 8),
@@ -282,21 +245,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                       Icons.person_outline,
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // PASSWORD REQUIREMENTS
-
-                  // CONFIRM PASSWORD FIELD
-
-                  // TERMS & PRIVACY
-                  const SizedBox(height: 16),
-                  //ad
-                  // SIGN UP BUTTON with loading spinner
                   Padding(
                     padding: EdgeInsets.only(
                       left: MediaQuery.of(context).size.width * 0.23,
-                      // 100.0
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -312,14 +264,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  8,
-                                ), // Rounded corners
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               backgroundColor: const Color(0xffF7F9FC),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: const Text(
                               'Cancel',
@@ -327,22 +275,17 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 10),
-
+                        const SizedBox(width: 10),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.36,
                           child: ElevatedButton(
                             onPressed: _onRegister,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  8,
-                                ), // Rounded corners
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               backgroundColor: const Color(0xff3366ff),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: const Text(
                               'Add Organization',
@@ -354,8 +297,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // ALREADY HAVE AN ACCOUNT
                 ],
               ),
             ),
@@ -367,10 +308,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
   InputDecoration _buildInputDecoration(String? hint, IconData? suffixIcon) {
     return InputDecoration(
-      // hintText: hint,
       hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-      // suffixIcon:
-      // suffixIcon != null ? Icon(suffixIcon, color: Colors.grey) : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: Color(0xFFDCE0E5)),
@@ -382,10 +320,9 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-          color: Color(0xFFE0E0E0), // Light grey color for enabled state
+          color: Color(0xFFE0E0E0),
         ),
       ),
-
       contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
     );
   }
@@ -405,19 +342,9 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
     final email = _emailCtrl.text.trim().toLowerCase();
     final password = _passwordCtrl.text.trim();
     final firstName = _orgNameCtrl.text.trim();
-    // final lastName = _lastNameCtrl.text.trim();
-    // final phone = _phoneCtrl.text.trim();
     final role = _selectedRole.toLowerCase();
 
     if (_formKey.currentState?.validate() ?? false) {
-      // if (!_agreeToTerms) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Please agree to Terms & Privacy.')),
-      //   );
-      //   return;
-      // }
-
-      // Show a loading spinner
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -425,39 +352,24 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
       );
 
       try {
-        // Retrieve the registration API service from the provider.
-        final registrationApiService = ref.read(organizationApiProvider);
+        final organizationsNotifier = ref.read(organizationsProvider.notifier);
 
-        // Call the registerUser method and wait for the response.
-        final response = await registrationApiService.organizationUser(
+        await organizationsNotifier.addOrganization(
+          name: firstName,
           email: email,
           password: password,
-          name: firstName,
-          // role: role,
-          // token: tokenGained,
         );
 
-        // Remove the loading spinner
         Navigator.pop(context);
-        if (response.success) {
-          // If registration is successful, navigate to SidebarScreen.
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SidebarScreen()),
-          );
-        } else {
-          // If registration fails, show a SnackBar with the error message.
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text(response.message)),
-          // );
-        }
-        // Inform the user based on the response
-        ScaffoldMessenger.of(
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
           context,
-        ).showSnackBar(SnackBar(content: Text(response.message)));
+          MaterialPageRoute(builder: (context) => SidebarScreen()),
+        );
+
       } catch (e) {
-        // Remove the loading spinner in case of error
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An error occurred: ${e.toString()}')),

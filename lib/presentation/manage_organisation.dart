@@ -2,6 +2,7 @@ import 'package:ems_project/presentation/widget/edit_organization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/organizations_provider.dart';
+import 'add_organisation.dart'; // Import the AddOrganisation screen
 
 class ManageOrganisationScreen extends ConsumerWidget {
   ManageOrganisationScreen({Key? key}) : super(key: key);
@@ -54,16 +55,16 @@ class ManageOrganisationScreen extends ConsumerWidget {
     Future<void> _onDeleteOrganization(String orgId) async {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(backgroundColor: Colors.white,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
           title: Text('Confirm Delete'),
-          content:
-          Text('Are you sure you want to delete this organization?'),
+          content: Text('Are you sure you want to delete this organization?'),
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed:  () => Navigator.of(context).pop(false),
+                  onPressed: () => Navigator.of(context).pop(false),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -82,26 +83,15 @@ class ManageOrganisationScreen extends ConsumerWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-
                     backgroundColor: Color(0xffD81939),
                   ),
-                  child: Text('Delete',style: TextStyle(color: Colors.white),),
+                  child: Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-
               ],
             ),
-
-            // TextButton(
-            //   onPressed: () => Navigator.of(context).pop(false),
-            //   child: Text('Cancel'),
-            // ),
-            // ElevatedButton(
-            //   onPressed: () => Navigator.of(context).pop(true),
-            //   style: ElevatedButton.styleFrom(
-            //     backgroundColor: Color(0xffD81939),
-            //   ),
-            //   child: Text('Delete'),
-            // ),
           ],
         ),
       );
@@ -150,7 +140,13 @@ class ManageOrganisationScreen extends ConsumerWidget {
                             left: MediaQuery.of(context).size.width * 0.015),
                       ),
                       onPressed: () {
-                        // TODO: Implement Add Organization logic
+                        // Navigate to AddOrganisation screen and refresh the list after adding
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AddOrganisation()),
+                        ).then((_) {
+                          ref.read(organizationsProvider.notifier).fetchOrganizations();
+                        });
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -191,9 +187,7 @@ class ManageOrganisationScreen extends ConsumerWidget {
                       );
                       // If update was successful, refresh the list
                       if (didUpdate == true) {
-                        ref
-                            .read(organizationsProvider.notifier)
-                            .fetchOrganizations();
+                        ref.read(organizationsProvider.notifier).fetchOrganizations();
                       }
                     },
                     onDelete: () async {

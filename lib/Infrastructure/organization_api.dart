@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider for the registration API service
 final organizationApiProvider = Provider<OrganizationApiService>(
-  (ref) => OrganizationApiService(),
+      (ref) => OrganizationApiService(),
 );
 
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -16,6 +16,8 @@ Future<String?> getToken() async {
   print('Stored token: $token');
   return token;
 }
+
+
 
 /// A simple response model for registration
 class OrganizationResponse {
@@ -81,7 +83,6 @@ class GetApiManageOrganisation {
 
     final response = await http.get(
       Uri.parse(apiUrl),
-      // print(token);
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -97,12 +98,9 @@ class GetApiManageOrganisation {
   }
 }
 
-
-
 class EditApiManageOrganisation {
   final String apiUrl =
       "http://192.168.29.189:5000/api/superadmin/updateOrganization"; // Replace with your API URL
-
 
   Future<void> updateOrganization(String organizationId, String name, String email) async {
     final token = await getToken(); // Fetch the token asynchronously
@@ -115,12 +113,8 @@ class EditApiManageOrganisation {
 
     // Prepare the request body for the PUT request
     final body = json.encode({
-      // 'id': organizationId,
       'email': email,
       'name': name,
-      // 'role': 'organization', // Assuming 'role' remains unchanged for now
-      // 'organizationId': organizationId,
-      // 'organizationName': name, // Assuming 'organizationName' is the same as 'name'
     });
 
     final response = await http.put(
@@ -146,8 +140,6 @@ class EditApiManageOrganisation {
   }
 }
 
-
-
 class DeleteApiManageOrganisation {
   final String apiUrl =
       "http://192.168.29.189:5000/api/superadmin/deleteOrganization"; // Replace with your API URL
@@ -161,7 +153,7 @@ class DeleteApiManageOrganisation {
 
     final url = Uri.parse('$apiUrl/$organizationId'); // API endpoint with organizationId
 
-    // Prepare the request body for the PUT request
+    // Prepare the request body for the DELETE request
     final body = json.encode({});
 
     final response = await http.delete(
@@ -174,8 +166,8 @@ class DeleteApiManageOrganisation {
     );
 
     if (response.statusCode == 200) {
-      // Successful update
-      print("Organization Deleted successfully");
+      // Successful deletion
+      print("Organization deleted successfully");
       final responseBody = json.decode(response.body);
       // If necessary, you can parse the updated organization from the response
       print(responseBody);
@@ -183,6 +175,53 @@ class DeleteApiManageOrganisation {
       // Handle error response
       final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
       throw Exception("Failed to delete organization: $errorMessage");
+    }
+  }
+}
+
+class AddApiManageOrganisation {
+  final String apiUrl =
+      "http://192.168.29.189:5000/api/superadmin/createOrganization"; // Replace with your API URL
+
+  Future<void> addOrganization(String name, String email, String password) async {
+    final token = await getToken(); // Fetch the token asynchronously
+
+    if (token == null) {
+      throw Exception("Token not found");
+    }
+
+    final url = Uri.parse(apiUrl); // API endpoint for adding organization
+
+    // Prepare the request body for the POST request
+    final body = json.encode({
+      'email': email,
+      'name': name,
+      // 'role': role,
+      // 'email': "kl@gmail.com",
+      // 'name': "KL",
+      'password': password,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': '$token', // Add token for authorization
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      // Successful addition
+      print("Organization added successfully");
+      final responseBody = json.decode(response.body);
+      // If necessary, you can parse the added organization from the response
+      print(responseBody);
+    } else {
+      // Handle error response
+      final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+      print('Server responded with error: ${response.body}');
+      throw Exception("Failed to add organization: $errorMessage");
     }
   }
 }
