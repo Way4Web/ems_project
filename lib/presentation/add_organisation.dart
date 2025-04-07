@@ -1,3 +1,4 @@
+import 'package:ems_project/presentation/manage_organisation.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -357,7 +358,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
         await organizationsNotifier.addOrganization(
           name: firstName,
           email: email,
-          password: password,
+          password: password, context: context,
         );
 
         Navigator.pop(context);
@@ -366,7 +367,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SidebarScreen()),
+          MaterialPageRoute(builder: (context) => ManageOrganisationScreen()),
         );
 
       } catch (e) {

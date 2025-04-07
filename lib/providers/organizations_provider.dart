@@ -1,4 +1,5 @@
 import 'package:ems_project/Infrastructure/organization_api.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ems_project/Domain/manage_organisation_model.dart';
 
@@ -87,9 +88,10 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
     required String name,
     required String email,
     required String password,
+    required BuildContext context
   }) async {
     try {
-      await addApiService.addOrganization(name, email, password); // Add organization via API
+      await addApiService.addOrganization(name, email, password,context); // Add organization via API
       // Re-fetch organizations after a successful add.
       await fetchOrganizations();
     } catch (e) {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/manage_organisation_model.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -181,9 +182,11 @@ class DeleteApiManageOrganisation {
 
 class AddApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/createOrganization"; // Replace with your API URL
+      "http://192.168.29.189:5000/api/superadmin/createOrganization";
 
-  Future<void> addOrganization(String name, String email, String password) async {
+  // BuildContext get context => null; // Replace with your API URL
+
+  Future<void> addOrganization(String name, String email, String password,BuildContext context) async {
     final token = await getToken(); // Fetch the token asynchronously
 
     if (token == null) {
@@ -218,10 +221,13 @@ class AddApiManageOrganisation {
       // If necessary, you can parse the added organization from the response
       print(responseBody);
     } else {
-      // Handle error response
-      final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
-      print('Server responded with error: ${response.body}');
-      throw Exception("Failed to add organization: $errorMessage");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Organization already exists.')),
+      );      // Handle error response
+      // final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+      // print('Server responded with error: ${response.body}');
+      // throw Exception("Failed to add organization: $errorMessage");
     }
   }
 }

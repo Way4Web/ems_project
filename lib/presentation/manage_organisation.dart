@@ -55,52 +55,55 @@ class ManageOrganisationScreen extends ConsumerWidget {
     Future<void> _onDeleteOrganization(String orgId) async {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this organization?'),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+        builder:
+            (context) => AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text('Confirm Delete'),
+              content: Text(
+                'Are you sure you want to delete this organization?',
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: Color(0xff3356DF),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
                     ),
-                    backgroundColor: Color(0xff3356DF),
-                  ),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: Color(0xffD81939),
+                      ),
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                    backgroundColor: Color(0xffD81939),
-                  ),
-                  child: Text(
-                    'Delete',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
       );
 
       if (confirmed == true) {
         ref.read(organizationsProvider.notifier).deleteOrganization(orgId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Organization deleted')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Organization deleted')));
       }
     }
 
@@ -109,7 +112,7 @@ class ManageOrganisationScreen extends ConsumerWidget {
         primary: true,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.03,
+        // toolbarHeight: MediaQuery.of(context).size.height * 0.04,
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -136,29 +139,31 @@ class ManageOrganisationScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         backgroundColor: Color(0xff3356DF),
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.of(context).size.width * 0.015),
+                        // padding: EdgeInsets.only(
+                        //   left: MediaQuery.of(context).size.width * 0.015,
+                        // ),
                       ),
                       onPressed: () {
                         // Navigate to AddOrganisation screen and refresh the list after adding
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => AddOrganisation()),
+                          MaterialPageRoute(
+                            builder: (context) => AddOrganisation(),
+                          ),
                         ).then((_) {
-                          ref.read(organizationsProvider.notifier).fetchOrganizations();
+                          ref
+                              .read(organizationsProvider.notifier)
+                              .fetchOrganizations();
                         });
                       },
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Icon(Icons.add_box_outlined, color: Colors.white),
-                          const SizedBox(width: 8),
+                          // const SizedBox(width: 8),
                           const Text(
                             'Add Organisation',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 10,fontWeight: FontWeight.w900),
                           ),
                         ],
                       ),
@@ -169,32 +174,36 @@ class ManageOrganisationScreen extends ConsumerWidget {
               Wrap(
                 spacing: 16, // horizontal spacing
                 runSpacing: 16, // vertical spacing
-                children: organizations.map((org) {
-                  return _OrganizationCard(
-                    name: org.name,
-                    email: org.email,
-                    role: org.role,
-                    onEdit: () async {
-                      _onOrganizationSelected(org.id);
-                      // Show the edit dialog and wait for its result
-                      final didUpdate = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => EditOrganizationDialog(
-                          orgName: org.name,
-                          orgEmail: org.email,
-                          orgId: org.id,
-                        ),
+                children:
+                    organizations.map((org) {
+                      return _OrganizationCard(
+                        name: org.name,
+                        email: org.email,
+                        role: org.role,
+                        onEdit: () async {
+                          _onOrganizationSelected(org.id);
+                          // Show the edit dialog and wait for its result
+                          final didUpdate = await showDialog<bool>(
+                            context: context,
+                            builder:
+                                (context) => EditOrganizationDialog(
+                                  orgName: org.name,
+                                  orgEmail: org.email,
+                                  orgId: org.id,
+                                ),
+                          );
+                          // If update was successful, refresh the list
+                          if (didUpdate == true) {
+                            ref
+                                .read(organizationsProvider.notifier)
+                                .fetchOrganizations();
+                          }
+                        },
+                        onDelete: () async {
+                          await _onDeleteOrganization(org.id);
+                        },
                       );
-                      // If update was successful, refresh the list
-                      if (didUpdate == true) {
-                        ref.read(organizationsProvider.notifier).fetchOrganizations();
-                      }
-                    },
-                    onDelete: () async {
-                      await _onDeleteOrganization(org.id);
-                    },
-                  );
-                }).toList(),
+                    }).toList(),
               ),
             ],
           ),
