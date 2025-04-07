@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
-        )
+        ),
       ),
       color: Colors.white,
       initialRoute: '/',
@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/second': (context) => SidebarScreen(),
         '/addOrg': (context) => AddOrganisation(),
         '/sideBarScreen': (context) => SidebarScreen(),
+        '/signIn': (context) => SignInScreen(),
       },
     );
   }
@@ -65,7 +66,7 @@ class _StartupScreenState extends ConsumerState<StartupScreen> {
       Navigator.pushReplacementNamed(context, '/sideBarScreen');
     } else {
       // Navigate to SignInScreen if no token is found
-      Navigator.pushReplacementNamed(context, '/');
+      Navigator.pushReplacementNamed(context, '/signIn');
     }
   }
 
