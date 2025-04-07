@@ -1,4 +1,5 @@
 import 'package:ems_project/presentation/widget/edit_organization.dart';
+import 'package:ems_project/presentation/widget/responsive_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/organizations_provider.dart';
@@ -119,58 +120,60 @@ class ManageOrganisationScreen extends ConsumerWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    'Manage Organization',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                  // "Add Organization" button in the top-right corner
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        backgroundColor: Color(0xff3356DF),
-                        // padding: EdgeInsets.only(
-                        //   left: MediaQuery.of(context).size.width * 0.015,
-                        // ),
-                      ),
-                      onPressed: () {
-                        // Navigate to AddOrganisation screen and refresh the list after adding
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddOrganisation(),
-                          ),
-                        ).then((_) {
-                          ref
-                              .read(organizationsProvider.notifier)
-                              .fetchOrganizations();
-                        });
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Icon(Icons.add_box_outlined, color: Colors.white),
-                          // const SizedBox(width: 8),
-                          const Text(
-                            'Add Organisation',
-                            style: TextStyle(color: Colors.white, fontSize: 10,fontWeight: FontWeight.w900),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              ResponsiveHeader(),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     Text(
+              //       'Manage Organization',
+              //       style: const TextStyle(
+              //         fontSize: 18,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //     ),
+              //     SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+              //     // "Add Organization" button in the top-right corner
+              //     Expanded(
+              //       child: ElevatedButton(
+              //         style: ElevatedButton.styleFrom(
+              //           shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(8),
+              //           ),
+              //           backgroundColor: Color(0xff3356DF),
+              //           // padding: EdgeInsets.only(
+              //           //   left: MediaQuery.of(context).size.width * 0.015,
+              //           // ),
+              //         ),
+              //         onPressed: () {
+              //           // Navigate to AddOrganisation screen and refresh the list after adding
+              //           Navigator.pushReplacement(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => AddOrganisation(),
+              //             ),
+              //           ).then((_) {
+              //             ref
+              //                 .read(organizationsProvider.notifier)
+              //                 .fetchOrganizations();
+              //           });
+              //         },
+              //         child: Row(
+              //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //           children: [
+              //             Icon(Icons.add_box_outlined, color: Colors.white),
+              //             // const SizedBox(width: 8),
+              //             const Text(
+              //               'Add Organisation',
+              //               style: TextStyle(color: Colors.white, fontSize: 10,fontWeight: FontWeight.w900),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
               Wrap(
                 spacing: 16, // horizontal spacing
                 runSpacing: 16, // vertical spacing
