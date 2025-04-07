@@ -66,7 +66,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        toolbarHeight: size.height * 0.03,
+        // toolbarHeight: size.height * 0.03,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
