@@ -101,9 +101,11 @@ class GetApiManageOrganisation {
 
 class EditApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/updateOrganization"; // Replace with your API URL
+      "http://192.168.29.189:5000/api/superadmin/updateOrganization";
 
-  Future<void> updateOrganization(String organizationId, String name, String email) async {
+  // BuildContext get context => null; // Replace with your API URL
+
+  Future<void> updateOrganization(String organizationId, String name, String email,BuildContext context) async {
     final token = await getToken(); // Fetch the token asynchronously
 
     if (token == null) {
@@ -136,16 +138,21 @@ class EditApiManageOrganisation {
     } else {
       // Handle error response
       final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
-      throw Exception("Failed to update organization: $errorMessage");
+      // throw Exception("Failed to update organization: $errorMessage");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update organization: $errorMessage')),
+      );      // Handle error response
+
     }
   }
 }
 
 class DeleteApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/deleteOrganization"; // Replace with your API URL
+      "http://192.168.29.189:5000/api/superadmin/deleteOrganization";
 
-  Future<void> deleteOrganization(String organizationId) async {
+
+  Future<void> deleteOrganization(String organizationId,BuildContext context) async {
     final token = await getToken(); // Fetch the token asynchronously
 
     if (token == null) {
@@ -172,10 +179,18 @@ class DeleteApiManageOrganisation {
       final responseBody = json.decode(response.body);
       // If necessary, you can parse the updated organization from the response
       print(responseBody);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${responseBody['message']}')),
+      );      // Handle error response
+
     } else {
       // Handle error response
       final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
-      throw Exception("Failed to delete organization: $errorMessage");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$errorMessage.')),
+      );      // Handle error response
+
+      // throw Exception("Failed to delete organization: $errorMessage");
     }
   }
 }

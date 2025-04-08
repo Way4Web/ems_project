@@ -45,6 +45,9 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
       this.addApiService,
       ) : super(OrganizationsState(isLoading: true));
 
+
+
+
   // Fetch organizations from the API
   Future<void> fetchOrganizations() async {
     try {
@@ -62,9 +65,9 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
   }
 
   // Update an organization's details
-  Future<void> updateOrganization(String id, String name, String email) async {
+  Future<void> updateOrganization(String id, String name, String email,BuildContext context) async {
     try {
-      await editApiService.updateOrganization(id, name, email); // Update organization via API
+      await editApiService.updateOrganization(id, name, email,context); // Update organization via API
       // Re-fetch the organizations after the update
       await fetchOrganizations();
     } catch (e) {
@@ -73,9 +76,9 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
   }
 
   // Delete an organization
-  Future<void> deleteOrganization(String id) async {
+  Future<void> deleteOrganization(String id,BuildContext context) async {
     try {
-      await deleteApiService.deleteOrganization(id); // Delete organization via API
+      await deleteApiService.deleteOrganization(id,context); // Delete organization via API
       // Re-fetch the organizations after deletion
       await fetchOrganizations();
     } catch (e) {

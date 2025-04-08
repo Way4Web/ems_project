@@ -1,10 +1,21 @@
+import 'package:ems_project/presentation/add_organisation.dart';
+import 'package:ems_project/providers/organizations_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ResponsiveHeader extends StatelessWidget {
+class ResponsiveHeader extends ConsumerWidget {
   const ResponsiveHeader({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
+    final organizationsState = ref.watch(organizationsProvider);
+    if (organizationsState.isLoading &&
+        organizationsState.organizations == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(organizationsProvider.notifier).fetchOrganizations();
+      });
+    }
+
     // Always use a Row layout
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -26,6 +37,17 @@ class ResponsiveHeader extends StatelessWidget {
           ),
           onPressed: () {
             // TODO: Add your onPressed logic
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddOrganisation(),
+                        ),
+                      ).then((_) {
+                        ref
+                            .read(organizationsProvider.notifier)
+                            .fetchOrganizations();
+                      });
+
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,

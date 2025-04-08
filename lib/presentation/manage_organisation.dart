@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ems_project/presentation/widget/edit_organization.dart';
 import 'package:ems_project/presentation/widget/responsive_header.dart';
 import 'package:flutter/material.dart';
@@ -101,10 +103,23 @@ class ManageOrganisationScreen extends ConsumerWidget {
       );
 
       if (confirmed == true) {
-        ref.read(organizationsProvider.notifier).deleteOrganization(orgId);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Organization deleted')));
+        try {
+          print('Failed to delete organization: $e');
+
+          await ref
+              .read(organizationsProvider.notifier)
+              .deleteOrganization(orgId, context);
+          // ScaffoldMessenger.of(
+          //   context,
+          // ).showSnackBar(SnackBar(content: Text('Organization deleted')));
+        } catch (e) {
+          // Handle the exception if needed, e.g., show an error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cannot delete organization with associated users'),
+            ),
+          );
+        }
       }
     }
 
@@ -118,7 +133,7 @@ class ManageOrganisationScreen extends ConsumerWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

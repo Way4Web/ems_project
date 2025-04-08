@@ -83,7 +83,7 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
                   const Text(
                     'Organization Information',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

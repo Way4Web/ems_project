@@ -160,7 +160,7 @@ class _EditOrganizationDialogState extends State<EditOrganizationDialog> {
   void _updateOrganization(BuildContext context, String orgId, String name, String email) async {
     try {
       final apiService = EditApiManageOrganisation(); // Ensure this is your correct API service
-      await apiService.updateOrganization(orgId, name, email); // Call your API
+      await apiService.updateOrganization(orgId, name, email,context); // Call your API
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Organization updated successfully')),
       );
