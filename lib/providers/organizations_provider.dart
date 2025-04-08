@@ -45,14 +45,11 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
       this.addApiService,
       ) : super(OrganizationsState(isLoading: true));
 
-
-
-
   // Fetch organizations from the API
-  Future<void> fetchOrganizations({int page = 1, int limit = 10}) async {
+  Future<void> fetchOrganizations() async {
     try {
       state = state.copyWith(isLoading: true);
-      final organizations = await apiService.fetchOrganizations(page: page, limit: limit);
+      final organizations = await apiService.fetchOrganizations();
       state = state.copyWith(organizations: organizations, isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
@@ -110,3 +107,4 @@ final organizationsProvider = StateNotifierProvider<OrganizationsNotifier, Organ
     AddApiManageOrganisation(),
   ),
 );
+

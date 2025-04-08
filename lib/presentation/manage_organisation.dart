@@ -27,14 +27,13 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
   }
 
   void _fetchOrganizations() {
-    ref.read(organizationsProvider.notifier).fetchOrganizations(page: _currentPage, limit: _itemsPerPage);
+    ref.read(organizationsProvider.notifier).fetchOrganizations();
   }
 
   void _onNextPage() {
     setState(() {
       _currentPage++;
     });
-    _fetchOrganizations();
   }
 
   void _onPreviousPage() {
@@ -42,7 +41,6 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
       setState(() {
         _currentPage--;
       });
-      _fetchOrganizations();
     }
   }
 
@@ -71,7 +69,9 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
       );
     }
 
-    final organizations = organizationsState.organizations!;
+    final allOrganizations = organizationsState.organizations!;
+    final totalPages = (allOrganizations.length / _itemsPerPage).ceil();
+    final organizations = allOrganizations.skip((_currentPage - 1) * _itemsPerPage).take(_itemsPerPage).toList();
 
     void _onOrganizationSelected(String orgId) {
       ref.read(organizationsProvider.notifier).selectOrganization(orgId);
@@ -124,13 +124,13 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
       if (confirmed == true) {
         try {
           await ref.read(organizationsProvider.notifier).deleteOrganization(orgId, context);
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text('Organization deleted')),
-          // );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Organization deleted')),
+          );
         } catch (e) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text('Cannot delete organization with associated users')),
-          // );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cannot delete organization with associated users')),
+          );
         }
       }
     }
@@ -183,12 +183,12 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: _onPreviousPage,
+                    onPressed: _currentPage > 1 ? _onPreviousPage : null,
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      backgroundColor: Color(0xff3356DF),
+                      backgroundColor: _currentPage > 1 ? Color(0xff3356DF) : Colors.grey,
                     ),
                     child: const Text(
                       'Previous',
@@ -196,12 +196,12 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: _onNextPage,
+                    onPressed: _currentPage < totalPages ? _onNextPage : null,
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      backgroundColor: Color(0xff3356DF),
+                      backgroundColor: _currentPage < totalPages ? Color(0xff3356DF) : Colors.grey,
                     ),
                     child: const Text(
                       'Next',
