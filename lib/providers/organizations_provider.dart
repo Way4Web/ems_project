@@ -49,16 +49,15 @@ class OrganizationsNotifier extends StateNotifier<OrganizationsState> {
 
 
   // Fetch organizations from the API
-  Future<void> fetchOrganizations() async {
+  Future<void> fetchOrganizations({int page = 1, int limit = 10}) async {
     try {
       state = state.copyWith(isLoading: true);
-      final organizations = await apiService.fetchOrganizations();
+      final organizations = await apiService.fetchOrganizations(page: page, limit: limit);
       state = state.copyWith(organizations: organizations, isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
-
   // Set the selected organization ID
   void selectOrganization(String id) {
     state = state.copyWith(selectedId: id);

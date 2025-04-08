@@ -8,14 +8,6 @@ import '../providers/organizations_provider.dart';
 
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
-// Future<String?> getToken() async {
-//   String? token = await secureStorage.read(key: 'token');
-//   print('Stored token: $token');
-//   return token;
-// }
-//
-// final Future<String?> tokenGained = getToken();
-
 class AddOrganisation extends ConsumerStatefulWidget {
   const AddOrganisation({Key? key}) : super(key: key);
 
@@ -33,7 +25,6 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
   final TextEditingController _confirmPasswordCtrl = TextEditingController();
 
   String _selectedRole = 'organization';
-  bool _agreeToTerms = false;
 
   // For password hint checks
   bool _hasCapitalLetter = false;

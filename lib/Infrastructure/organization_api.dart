@@ -75,7 +75,7 @@ class GetApiManageOrganisation {
   final String apiUrl =
       "http://192.168.29.189:5000/api/superadmin/getOrganizations"; // Replace with your API URL
 
-  Future<List<GetOrganizationModel>> fetchOrganizations() async {
+  Future<List<GetOrganizationModel>> fetchOrganizations({int page = 1, int limit = 10}) async {
     final token = await getToken();
 
     if (token == null) {
@@ -83,7 +83,7 @@ class GetApiManageOrganisation {
     }
 
     final response = await http.get(
-      Uri.parse(apiUrl),
+      Uri.parse('$apiUrl?page=$page&limit=$limit'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -97,7 +97,9 @@ class GetApiManageOrganisation {
       throw Exception("Failed to load organizations");
     }
   }
-}
+
+  }
+
 
 class EditApiManageOrganisation {
   final String apiUrl =
