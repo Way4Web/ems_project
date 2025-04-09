@@ -1,5 +1,5 @@
+import 'package:ems_project/Services/organization_api.dart';
 import 'package:flutter/material.dart';
-import 'package:ems_project/Infrastructure/organization_api.dart'; // Ensure your API service is correctly imported
 
 class EditOrganizationDialog extends StatefulWidget {
   final String orgName;

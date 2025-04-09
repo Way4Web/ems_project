@@ -341,3 +341,4 @@ class _OrganizationCard extends StatelessWidget {
     );
   }
 }
+

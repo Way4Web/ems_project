@@ -2,19 +2,21 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 // Define your login state
 class LoginState {
   final bool isLoading;
   final String? message;
   final bool isLoggedIn;
+  final String? role; // Add role field
 
-  LoginState({required this.isLoading, this.message, required this.isLoggedIn});
+  LoginState({required this.isLoading, this.message, required this.isLoggedIn,this.role});
 }
 
 // Define a state notifier to manage login state
 class LoginStateNotifier extends StateNotifier<LoginState> {
-  LoginStateNotifier(this.apiService) : super(LoginState(isLoading: false, isLoggedIn: false));
+  LoginStateNotifier(this.apiService) : super(LoginState(isLoading: false, isLoggedIn: false,));
 
   final LoginApiService apiService;
 
@@ -33,8 +35,11 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
 
       // Store the token securely.
       await secureStorage.write(key: 'token', value: token);
+      // jwtDecoder(token);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      String role = decodedToken['role'];
 
-      state = LoginState(isLoading: false, message: 'Login successful', isLoggedIn: true);
+      state = LoginState(isLoading: false, message: 'Login successful', isLoggedIn: true,role: role);
       success = true;
     } else {
       state = LoginState(isLoading: false, message: 'Invalid credentials', isLoggedIn: false);
@@ -47,7 +52,10 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
   Future<void> checkIfLoggedIn() async {
     final token = await secureStorage.read(key: 'token');
     if (token != null) {
-      state = LoginState(isLoading: false, isLoggedIn: true);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      String role = decodedToken['role'];
+
+      state = LoginState(isLoading: false, isLoggedIn: true,role: role);
     } else {
       state = LoginState(isLoading: false, isLoggedIn: false);
     }
@@ -84,4 +92,8 @@ class LoginApiService {
     }
   }
 }
+
+
+
+
 

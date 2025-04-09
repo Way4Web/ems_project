@@ -1,13 +1,16 @@
+import 'package:ems_project/Services/login_api.dart';
 import 'package:ems_project/presentation/add_organisation.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'all_students.dart';
 import 'manage_organisation.dart';
 
-class SidebarScreen extends StatelessWidget {
+class SidebarScreen extends ConsumerWidget  {
    SidebarScreen({super.key});
 
+   // final String? role;
   // Create an instance of FlutterSecureStorage
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -22,8 +25,11 @@ class SidebarScreen extends StatelessWidget {
     );
   }
 
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
+    final loginState = ref.watch(loginStateProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -46,6 +52,7 @@ class SidebarScreen extends StatelessWidget {
               ),
             ),
             // Menu items
+            loginState.role == 'superadmin'?
             Theme(
               data: Theme.of(
                 context,
@@ -79,7 +86,42 @@ class SidebarScreen extends StatelessWidget {
                   ),
                 ],
               ),
+            ):
+            Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                leading: const Icon(Icons.school_outlined),
+                title: const Text('Students'),
+                backgroundColor: Colors.white,
+                children: [
+                  ListTile(
+                    title: const Text('All Students'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StudentScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  // ListTile(
+                  //   title: const Text('Manage Organizations'),
+                  //   onTap: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => ManageOrganisationScreen(),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                ],
+              ),
             ),
+
             // Logout menu item
             ListTile(
               leading: const Icon(Icons.logout),

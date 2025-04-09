@@ -1,11 +1,10 @@
-import 'package:ems_project/Infrastructure/login_api.dart'; // Contains registerApiProvider and RegisterApiService
+import 'package:ems_project/Services/registration_api.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_field/country_picker_dialog.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import '../Infrastructure/registration_api.dart'; // If used for phone input
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);

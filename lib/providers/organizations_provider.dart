@@ -1,4 +1,4 @@
-import 'package:ems_project/Infrastructure/organization_api.dart';
+import 'package:ems_project/Services/organization_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ems_project/Domain/manage_organisation_model.dart';
