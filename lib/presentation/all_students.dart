@@ -45,7 +45,26 @@ class _StudentScreenState extends ConsumerState<AllStudentScreen> {
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFDCE0E5),
+                      ),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFDCE0E5),
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Color(
+                          0xFFE0E0E0,
+                        ), // Light grey color for enabled state
+                      ),
+                    ),
+
                   ),
                   onChanged: (query) {
                     ref.read(studentProvider.notifier).searchStudents(query);

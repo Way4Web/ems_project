@@ -98,8 +98,12 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+                            if (value == null || value.trim().isEmpty) {
                               return 'Please enter your email';
+                            } else if (!RegExp(
+                              r'^[^@]+@[^@]+\.[^@]+',
+                            ).hasMatch(value.trim().toLowerCase())) {
+                              return 'Please enter a valid email id';
                             }
                             return null;
                           },
@@ -174,7 +178,7 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Admin Name',
+                          'Student Name',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -211,7 +215,7 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return 'Please enter your name';
                             }
                             return null;
                           },
@@ -317,42 +321,30 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
 
 
                     onPressed: () async {
-                      final admin = _adminCtrl.text.trim();
-                      final email = _emailCtrl.text.trim();
-                      final password = _passwordCtrl.text.trim();
-                      // final organizationId = organizationIdController.text.trim();
-
-                      if (admin.isEmpty || email.isEmpty || password.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("All fields are required.")),
-                        );
+                      // Check if the form is valid
+                      if (!_formKey.currentState!.validate()) {
+                        // If the form is invalid, return early
                         return;
                       }
 
-                      final success = await ref.read(
-                          addStudentProvider.notifier).createStudent(
+                      final admin = _adminCtrl.text.trim();
+                      final email = _emailCtrl.text.trim();
+                      final password = _passwordCtrl.text.trim();
+
+                      final success = await ref.read(addStudentProvider.notifier).createStudent(
                           email, password, admin, context);
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(
-                              "Student added successfully!")),
+                          SnackBar(content: Text("Student added successfully!")),
                         );
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => AllStudentScreen()),
-                        // ); // Replace with AllStudentsScreen
                         Navigator.pop(context);
-
-                        // Navigator.pop(context); // Navigate back to the previous screen
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(
-                              "Failed to add student. Please try again later.")),
+                          SnackBar(content: Text("Failed to add student. Please try again later.")),
                         );
                       }
                     },
-
                   ),
 
                 ],
