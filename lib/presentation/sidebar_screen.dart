@@ -102,7 +102,7 @@ class SidebarScreen extends ConsumerWidget  {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StudentScreen(),
+                          builder: (context) => AllStudentScreen(),
                         ),
                       );
                     },

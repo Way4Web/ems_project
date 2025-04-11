@@ -5,11 +5,8 @@ import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'add_organisation.dart';
-
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
-
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
@@ -20,9 +17,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
   late String role;
-  // get role => null;
 
   @override
   Widget build(BuildContext context) {

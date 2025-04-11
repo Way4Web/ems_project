@@ -1,7 +1,7 @@
-import 'package:ems_project/presentation/add_organisation.dart';
 import 'package:ems_project/providers/organizations_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'add_students.dart';
 
 class StudentResponsiveHeader extends ConsumerWidget {
   const StudentResponsiveHeader({Key? key}) : super(key: key);
@@ -37,10 +37,10 @@ class StudentResponsiveHeader extends ConsumerWidget {
           ),
           onPressed: () {
             // TODO: Add your onPressed logic
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddOrganisation(),
+                builder: (context) => AddStudents(),
               ),
             ).then((_) {
               ref

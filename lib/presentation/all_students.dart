@@ -4,12 +4,12 @@ import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StudentScreen extends ConsumerStatefulWidget {
+class AllStudentScreen extends ConsumerStatefulWidget {
   @override
   _StudentScreenState createState() => _StudentScreenState();
 }
 
-class _StudentScreenState extends ConsumerState<StudentScreen> {
+class _StudentScreenState extends ConsumerState<AllStudentScreen> {
   @override
   void initState() {
     // TODO: implement initState
