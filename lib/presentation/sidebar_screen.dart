@@ -38,100 +38,95 @@ class SidebarScreen extends ConsumerWidget  {
       ),
       drawer: Drawer(
         backgroundColor: Colors.white,
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between top and bottom items
           children: [
-            // Optional header for your drawer
-            DrawerHeader(
-              child: Container(
-                decoration: BoxDecoration(color: Colors.white),
-                child: const Text(
-                  'EMS Project',
-                  style: TextStyle(color: Colors.black, fontSize: 24),
-                ),
-              ),
-            ),
-            // Menu items
-            loginState.role == 'superadmin'?
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                leading: const Icon(Icons.dashboard_outlined),
-                title: const Text('Org. Management'),
-                backgroundColor: Colors.white,
+            // Top Section: Menu Items
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
                 children: [
-                  ListTile(
-                    title: const Text('Add Organizations'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddOrganisation(),
-                        ),
-                      );
-                    },
+                  // Optional header for your drawer
+                  DrawerHeader(
+                    child: Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: const Text(
+                        'EMS Project',
+                        style: TextStyle(color: Colors.black, fontSize: 24),
+                      ),
+                    ),
                   ),
-                  ListTile(
-                    title: const Text('Manage Organizations'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManageOrganisationScreen(),
+                  // Menu items
+                  loginState.role == 'superadmin'
+                      ? Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: const Icon(Icons.dashboard_outlined),
+                      title: const Text('Org. Management'),
+                      backgroundColor: Colors.white,
+                      children: [
+                        ListTile(
+                          title: const Text('Add Organizations'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddOrganisation(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                        ListTile(
+                          title: const Text('Manage Organizations'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ManageOrganisationScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                      : Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: const Icon(Icons.school_outlined),
+                      title: const Text('Students'),
+                      backgroundColor: Colors.white,
+                      children: [
+                        ListTile(
+                          title: const Text('All Students'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AllStudentScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ):
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                leading: const Icon(Icons.school_outlined),
-                title: const Text('Students'),
-                backgroundColor: Colors.white,
-                children: [
-                  ListTile(
-                    title: const Text('All Students'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AllStudentScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  // ListTile(
-                  //   title: const Text('Manage Organizations'),
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (context) => ManageOrganisationScreen(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                ],
-              ),
             ),
-
-            // Logout menu item
+            // Bottom Section: Logout
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () => _logout(context),
             ),
-            // Add more items as needed
           ],
         ),
-      ),
+      )
     );
   }
 }
