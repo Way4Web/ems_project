@@ -8,7 +8,7 @@ class AddStudentApiService {
 
   // BuildContext get context => null;
 
-  Future<bool> createStudent({
+  Future<bool> createParent({
     required String name,
     required String email,
     required String password,

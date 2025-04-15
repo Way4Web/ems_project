@@ -1,34 +1,35 @@
+import 'package:ems_project/Domain/parent_model.dart';
+import 'package:ems_project/Services/parent_api_service.dart';
 import 'package:ems_project/Services/student_api_service.dart';
-import 'package:ems_project/presentation/widget/custom_dialog.dart';
+import 'package:ems_project/presentation/widget/edit_parent.dart';
 import 'package:ems_project/presentation/widget/edit_student.dart';
-import 'package:ems_project/presentation/widget/students_responsive_header.dart';
+import 'package:ems_project/presentation/widget/parents_responsive_header.dart';
+import 'package:ems_project/providers/parent_provider.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AllStudentScreen extends ConsumerStatefulWidget {
+class AllParentsScreen extends ConsumerStatefulWidget {
   @override
-  _StudentScreenState createState() => _StudentScreenState();
+  _ParentScreenState createState() => _ParentScreenState();
 }
 
-class _StudentScreenState extends ConsumerState<AllStudentScreen> {
+class _ParentScreenState extends ConsumerState<AllParentsScreen> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Ensure ref is used within the lifecycle methods
-      ref.read(studentProvider.notifier).fetchStudents();
+      ref.read(parentProvider.notifier).fetchParents();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Correctly use ref within the build method
-    final studentState = ref.watch(studentProvider);
+    final parentState = ref.watch(parentProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Students"),
+        title: Text("Parents"),
         primary: true,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -37,7 +38,7 @@ class _StudentScreenState extends ConsumerState<AllStudentScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: StudentResponsiveHeader(),
+            child: ParentResponsiveHeader(),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -58,43 +59,50 @@ class _StudentScreenState extends ConsumerState<AllStudentScreen> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: Color(
-                      0xFFE0E0E0,
-                    ), // Light grey color for enabled state
-                  ),
+                  borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                 ),
               ),
               onChanged: (query) {
-                ref.read(studentProvider.notifier).searchStudents(query);
+                ref.read(parentProvider.notifier).searchParents(query);
               },
             ),
           ),
           Expanded(
             child:
-                studentState.isLoading
+                parentState.isLoading
                     ? Center(child: CircularProgressIndicator())
-                    : studentState.error != null
-                    ? Center(child: Text("Error: ${studentState.error}"))
-                    : ListView.builder(
-                      itemCount: studentState.filteredStudents.length,
+                    : parentState.error != null
+                    ? Center(child: Text("Error: ${parentState.error}"))
+                    : parentState.filteredParents != null &&
+                        parentState.filteredParents!.isNotEmpty
+                    ? ListView.builder(
+                      itemCount: parentState.filteredParents!.length,
                       itemBuilder: (context, index) {
-                        final student = studentState.filteredStudents[index];
+                        final parent = parentState.filteredParents![index];
+
+                        // Safely handle students
+                        final hasStudents =
+                            parent.students != null &&
+                            parent.students!.isNotEmpty;
+                        final studentName =
+                            hasStudents ? parent.students!.first.name : '';
+
                         return Wrap(
                           spacing: 16,
                           runSpacing: 16,
                           alignment: WrapAlignment.center,
                           children: [
-                            _StudentCard(
-                              email: student.email,
-                              name: student.name,
-                              organization: studentState.organization,
-                              studentId: student.id,
+                            _ParentCard(
+                              studentName: studentName,
+                              email: parent.email,
+                              name: parent.name,
+                              parentId: parent.id,
                             ),
                           ],
                         );
                       },
-                    ),
+                    )
+                    : Center(child: Text("No parents available.")),
           ),
         ],
       ),
@@ -102,18 +110,18 @@ class _StudentScreenState extends ConsumerState<AllStudentScreen> {
   }
 }
 
-class _StudentCard extends ConsumerWidget {
+class _ParentCard extends ConsumerWidget {
   final String name;
+  final String studentName;
   final String email;
-  final String organization;
-  final String studentId;
+  final String parentId;
 
-  const _StudentCard({
+  const _ParentCard({
     Key? key,
     required this.name,
+    required this.studentName,
     required this.email,
-    required this.organization,
-    required this.studentId,
+    required this.parentId,
   }) : super(key: key);
 
   @override
@@ -143,9 +151,9 @@ class _StudentCard extends ConsumerWidget {
                   GestureDetector(
                     child: Icon(Icons.more_vert, color: Colors.black54),
                     onTap:
-                        () => _showStudentActionsDialog(
+                        () => _showParentActionsDialog(
                           context,
-                          studentId,
+                          parentId,
                           ref,
                           name,
                           email,
@@ -177,49 +185,11 @@ class _StudentCard extends ConsumerWidget {
                 ),
               ),
               SizedBox(height: mediaSize.height * 0.02),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Organization: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                    TextSpan(
-                      text: organization,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: mediaSize.height * 0.02),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Role: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                    TextSpan(
-                      text: "student",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+              Text(
+                studentName,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -230,15 +200,14 @@ class _StudentCard extends ConsumerWidget {
   }
 }
 
-// Function to show the dialog
-void _showStudentActionsDialog(
+void _showParentActionsDialog(
   BuildContext context,
-  String studentId,
+  String parentId,
   WidgetRef ref,
   String name,
   String email,
 ) {
-  final DeleteStudentApiService apiService = DeleteStudentApiService();
+  final DeleteParentApiService apiService = DeleteParentApiService();
 
   showDialog(
     context: context,
@@ -250,59 +219,40 @@ void _showStudentActionsDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             _DialogOption(
-              icon: Icons.remove_red_eye,
-              label: 'View Student',
-              onTap: () {
-                print('View Student selected');
-                Navigator.of(context).pop();
-              },
-            ),
-            _DialogOption(
               icon: Icons.edit,
               label: 'Edit',
               onTap: () {
-                print('Edit selected');
                 Navigator.of(context).pop();
 
                 showDialog(
                   context: context,
                   builder:
-                      (context) => EditStudentDialog(
-                        studentName: name,
-                        studentEmail: email,
-                        studentId: studentId,
+                      (context) => EditParentDialog(
+                        parentName: name,
+                        parentEmail: email,
+                        parentId: parentId,
                       ),
                 ).then((result) {
                   if (result == true) {
-                    // Refresh the student list or take other actions
-                    ref.read(studentProvider.notifier).fetchStudents();
+                    ref.read(parentProvider.notifier).fetchParents();
                   }
                 });
-                // Navigator.of(context).pop();
-              },
-            ),
-            _DialogOption(
-              icon: Icons.arrow_upward,
-              label: 'Promote Student',
-              onTap: () {
-                print('Promote Student selected');
-                Navigator.of(context).pop();
               },
             ),
             _DialogOption(
               icon: Icons.delete,
               label: 'Delete',
               onTap: () async {
-                final success = await apiService.deleteStudent(studentId);
+                final success = await apiService.deleteParent(parentId);
 
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Student deleted successfully!")),
+                    SnackBar(content: Text("Parent deleted successfully!")),
                   );
-                  ref.read(studentProvider.notifier).fetchStudents();
+                  ref.read(parentProvider.notifier).fetchParents();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete student.")),
+                    SnackBar(content: Text("Failed to delete parent.")),
                   );
                 }
                 Navigator.of(context).pop();
@@ -315,7 +265,6 @@ void _showStudentActionsDialog(
   );
 }
 
-// Custom widget for each dialog option
 class _DialogOption extends StatelessWidget {
   final IconData icon;
   final String label;

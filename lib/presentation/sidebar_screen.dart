@@ -4,6 +4,7 @@ import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'all_parents.dart';
 import 'all_students.dart';
 import 'manage_organisation.dart';
 
@@ -108,6 +109,29 @@ class SidebarScreen extends ConsumerWidget  {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AllStudentScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: const Icon(Icons.people_outline),
+                      title: const Text('Parents'),
+                      backgroundColor: Colors.white,
+                      children: [
+                        ListTile(
+                          title: const Text('All Parents'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AllParentsScreen(),
                               ),
                             );
                           },
