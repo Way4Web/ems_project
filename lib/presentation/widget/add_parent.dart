@@ -1,5 +1,9 @@
+import 'package:ems_project/Domain/parent_model.dart';
+import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/presentation/widget/select_student_dropdown.dart';
 import 'package:ems_project/providers/add_parent_provider.dart';
 import 'package:ems_project/providers/add_student_provider.dart';
+import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +20,13 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
   final TextEditingController _adminCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
+  StudentModel? _selectedStudent;
 
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(studentProvider.notifier).fetchStudents());
+  }
 
   @override
   void dispose() {
@@ -26,7 +36,6 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
     _passwordCtrl.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -277,10 +286,25 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
                   ],
                 ),
               ),
-              SizedBox(height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.05),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+               child: SelectStudentDropdown(
+                  onStudentSelected: (StudentModel? student) {
+                    setState(() {
+                      _selectedStudent = student;
+                    });
+                    if (student != null) {
+                      print('Selected Student: ${student.name} (ID: ${student.id})');
+                      final studentId = student.id;
+                    } else {
+                      print('No student selected');
+                    }
+                  },
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -289,11 +313,12 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(
-                          Color(0xff53C2D0)),
+                        Color(0xff53C2D0),
+                      ),
                       foregroundColor: WidgetStateProperty.all(Colors.white),
                       minimumSize: WidgetStateProperty.all(
-                          Size(20, 50)), // Set the width and height
-
+                        Size(20, 50),
+                      ), // Set the width and height
                     ),
                     onPressed: () {
                       // Cancel button returns false
@@ -305,33 +330,37 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
                     },
                     child: Text('Cancel'),
                   ),
-                  SizedBox(width: 8,),
+                  SizedBox(width: 8),
 
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(
-                          Color(0xff3356DF)),
+                        Color(0xff3356DF),
+                      ),
                       foregroundColor: WidgetStateProperty.all(Colors.white),
                       minimumSize: WidgetStateProperty.all(
-                          Size(20, 50)), // Set the width and height
-
+                        Size(20, 50),
+                      ), // Set the width and height
                     ),
                     child: Text('Add Parent'),
-
 
                     onPressed: () async {
                       // Check if the form is valid
                       if (!_formKey.currentState!.validate()) {
+                        if(_selectedStudent == null){
                         // If the form is invalid, return early
                         return;
-                      }
+                      }}
 
                       final admin = _adminCtrl.text.trim();
                       final email = _emailCtrl.text.trim();
                       final password = _passwordCtrl.text.trim();
+                      final studentId = _selectedStudent?.id;
+                      print('Adding Parent: , Email: $email, Student: ${_selectedStudent!.name}');
 
-                      final success = await ref.read(addParentProvider.notifier).createParent(
-                          email, password, admin,admin, context);
+                      final success = await ref
+                          .read(addParentProvider.notifier)
+                          .createParent(email, password, admin, studentId!, context);
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -340,15 +369,17 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Failed to add parent. Please try again later.")),
+                          SnackBar(
+                            content: Text(
+                              "Failed to add parent. Please try again later.",
+                            ),
+                          ),
                         );
                       }
                     },
                   ),
-
                 ],
-              )
-
+              ),
             ],
           ),
         ),
@@ -356,4 +387,3 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
     );
   }
 }
-
