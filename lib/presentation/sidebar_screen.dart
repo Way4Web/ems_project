@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'all_parents.dart';
 import 'all_students.dart';
+import 'all_teachers.dart';
 import 'manage_organisation.dart';
 
 class SidebarScreen extends ConsumerWidget  {
@@ -121,7 +122,7 @@ class SidebarScreen extends ConsumerWidget  {
                       context,
                     ).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
-                      leading: const Icon(Icons.people_outline),
+                      leading: const Icon(Icons.manage_accounts_outlined),
                       title: const Text('Parents'),
                       backgroundColor: Colors.white,
                       children: [
@@ -132,6 +133,29 @@ class SidebarScreen extends ConsumerWidget  {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AllParentsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: const Icon(Icons.people_outline),
+                      title: const Text('Teachers'),
+                      backgroundColor: Colors.white,
+                      children: [
+                        ListTile(
+                          title: const Text('All Teachers'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AllTeachersScreen(),
                               ),
                             );
                           },
