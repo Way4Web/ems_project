@@ -1,4 +1,6 @@
+import 'package:ems_project/presentation/widget/add_teacher.dart';
 import 'package:ems_project/providers/organizations_provider.dart';
+import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'add_parent.dart';
@@ -41,12 +43,12 @@ class TeacherResponsiveHeader extends ConsumerWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddParents(),
+                builder: (context) => AddTeachers(),
               ),
             ).then((_) {
               ref
-                  .read(organizationsProvider.notifier)
-                  .fetchOrganizations();
+                  .read(teacherProvider.notifier)
+                  .fetchTeachers();
             });
 
           },

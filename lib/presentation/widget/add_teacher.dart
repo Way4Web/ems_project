@@ -1,8 +1,6 @@
-import 'package:ems_project/Domain/parent_model.dart';
 import 'package:ems_project/Domain/student_model.dart';
-import 'package:ems_project/presentation/widget/select_student_dropdown.dart';
 import 'package:ems_project/providers/add_parent_provider.dart';
-import 'package:ems_project/providers/add_student_provider.dart';
+import 'package:ems_project/providers/add_teacher_provider.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +18,8 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
   final TextEditingController _adminCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
-  StudentModel? _selectedStudent;
+  // StudentModel? _selectedStudent;
+  TeacherModel? _selectedTeacher;
 
   @override
   void initState() {
@@ -52,7 +51,7 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
             children: [
               // WELCOME MESSAGE
               const Text(
-                'Parent Information',
+                'Teachers Information',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
@@ -186,7 +185,7 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Parent Name',
+                          'Teacher Name',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -246,7 +245,7 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                         TextFormField(
                           // controller: _adminCtrl,
                           decoration: InputDecoration(
-                            hintText: "parent",
+                            hintText: "Teacher",
                             enabled: false,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -271,13 +270,6 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                             ),
                             // suffixIcon: Icon(Icons.email_outlined),
                           ),
-                          // keyboardType: TextInputType.emailAddress,
-                          // validator: (value) {
-                          //   if (value == null || value.isEmpty) {
-                          //     return 'Please enter your email';
-                          //   }
-                          //   return null;
-                          // },
                         ),
                       ],
                     ),
@@ -288,23 +280,6 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
-              Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: SelectStudentDropdown(
-                  onStudentSelected: (StudentModel? student) {
-                    setState(() {
-                      _selectedStudent = student;
-                    });
-                    if (student != null) {
-                      print('Selected Student: ${student.name} (ID: ${student.id})');
-                      final studentId = student.id;
-                    } else {
-                      print('No student selected');
-                    }
-                  },
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -342,12 +317,12 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                         Size(20, 50),
                       ), // Set the width and height
                     ),
-                    child: Text('Add Parent'),
+                    child: Text('Add Teacher'),
 
                     onPressed: () async {
                       // Check if the form is valid
                       if (!_formKey.currentState!.validate()) {
-                        if(_selectedStudent == null){
+                        if(_selectedTeacher == null){
                           // If the form is invalid, return early
                           return;
                         }}
@@ -355,23 +330,23 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                       final admin = _adminCtrl.text.trim();
                       final email = _emailCtrl.text.trim();
                       final password = _passwordCtrl.text.trim();
-                      final studentId = _selectedStudent?.id;
-                      print('Adding Parent: , Email: $email, Student: ${_selectedStudent!.name}');
+                      // final teacherId = _selectedTeacher?.id;
+                      // print('Adding teacher:);
 
                       final success = await ref
-                          .read(addParentProvider.notifier)
-                          .createParent(email, password, admin, studentId!, context);
+                          .read(addTeachersProvider.notifier)
+                          .createTeacher(email, password, admin, context);
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Parent added successfully!")),
+                          SnackBar(content: Text("Teacher added successfully!")),
                         );
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Failed to add parent. Please try again later.",
+                              "Failed to add Teacher. Please try again later.",
                             ),
                           ),
                         );

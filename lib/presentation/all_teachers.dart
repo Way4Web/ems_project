@@ -1,3 +1,5 @@
+import 'package:ems_project/Services/teachers_api_service.dart';
+import 'package:ems_project/presentation/widget/edit_teacher.dart';
 import 'package:ems_project/presentation/widget/teacher_responsive_header.dart';
 import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:flutter/material.dart';
@@ -62,31 +64,32 @@ class _TeachersScreenState extends ConsumerState<AllTeachersScreen> {
             ),
           ),
           Expanded(
-            child: teacherState.isLoading
-                ? Center(child: CircularProgressIndicator())
-                : teacherState.error != null
-                ? Center(child: Text("Error: ${teacherState.error}"))
-                : teacherState.filteredTeachers.isNotEmpty
-                ? ListView.builder(
-              itemCount: teacherState.filteredTeachers.length,
-              itemBuilder: (context, index) {
-                final teacher = teacherState.filteredTeachers[index];
+            child:
+                teacherState.isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : teacherState.error != null
+                    ? Center(child: Text("Error: ${teacherState.error}"))
+                    : teacherState.filteredTeachers.isNotEmpty
+                    ? ListView.builder(
+                      itemCount: teacherState.filteredTeachers.length,
+                      itemBuilder: (context, index) {
+                        final teacher = teacherState.filteredTeachers[index];
 
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    _TeacherCard(
-                      email: teacher.email,
-                      name: teacher.name,
-                      teacherId: teacher.id,
-                    ),
-                  ],
-                );
-              },
-            )
-                : Center(child: Text("No teachers available.")),
+                        return Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            _TeacherCard(
+                              email: teacher.email,
+                              name: teacher.name,
+                              teacherId: teacher.id,
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                    : Center(child: Text("No teachers available.")),
           ),
         ],
       ),
@@ -132,13 +135,14 @@ class _TeacherCard extends ConsumerWidget {
                   ),
                   GestureDetector(
                     child: Icon(Icons.more_vert, color: Colors.black54),
-                    onTap: () => _showTeacherActionsDialog(
-                      context,
-                      teacherId,
-                      ref,
-                      name,
-                      email,
-                    ),
+                    onTap:
+                        () => _showTeacherActionsDialog(
+                          context,
+                          teacherId,
+                          ref,
+                          name,
+                          email,
+                        ),
                   ),
                 ],
               ),
@@ -188,7 +192,6 @@ class _TeacherCard extends ConsumerWidget {
                   ],
                 ),
               ),
-
             ],
           ),
         ),
@@ -198,12 +201,14 @@ class _TeacherCard extends ConsumerWidget {
 }
 
 void _showTeacherActionsDialog(
-    BuildContext context,
-    String teacherId,
-    WidgetRef ref,
-    String name,
-    String email,
-    ) {
+  BuildContext context,
+  String teacherId,
+  WidgetRef ref,
+  String name,
+  String email,
+) {
+  final DeleteTeacherApiService apiService = DeleteTeacherApiService();
+
   showDialog(
     context: context,
     builder: (context) {
@@ -219,14 +224,38 @@ void _showTeacherActionsDialog(
               onTap: () {
                 Navigator.of(context).pop();
                 // Handle editing logic here
+                showDialog(
+                  context: context,
+                  builder:
+                      (context) => EditTeacherDialog(
+                        teacherName: name,
+                        teacherEmail: email,
+                        teacherId: teacherId,
+                      ),
+                ).then((result) {
+                  if (result == true) {
+                    // Refresh the student list or take other actions
+                    ref.read(teacherProvider.notifier).fetchTeachers();
+                  }
+                });
               },
             ),
             _DialogOption(
               icon: Icons.delete,
               label: 'Delete',
               onTap: () async {
-                // Handle deletion logic here
-                ref.read(teacherProvider.notifier).fetchTeachers();
+                final success = await apiService.deleteTeacher(teacherId);
+
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Teacher deleted successfully!")),
+                  );
+                  ref.read(teacherProvider.notifier).fetchTeachers();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to delete teacher.")),
+                  );
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -251,6 +280,13 @@ class _DialogOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
+
     return ListTile(leading: Icon(icon), title: Text(label), onTap: onTap);
   }
 }
+
+
+
+

@@ -1,5 +1,7 @@
 import 'package:ems_project/Services/create_student_service.dart';
+import 'package:ems_project/Services/teachers_api_service.dart';
 import 'package:ems_project/providers/student_provider.dart';
+import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,12 +22,13 @@ class AddTeacherState {
 }
 
 
-class AddStudentNotifier extends StateNotifier<AddTeacherState> {
-  final AddStudentApiService apiService;
-  final Ref ref;
-  AddStudentNotifier(this.apiService, this.ref) : super(AddTeacherState());
+class AddTeacherNotifier extends StateNotifier<AddTeacherState> {
+  final AddTeacherApiService apiService;
 
-  Future<bool> createStudent(
+  final Ref ref;
+  AddTeacherNotifier(this.apiService, this.ref) : super(AddTeacherState());
+
+  Future<bool> createTeacher(
       String email,
       String password,
       String name,
@@ -33,7 +36,7 @@ class AddStudentNotifier extends StateNotifier<AddTeacherState> {
       ) async {
     state = state.copyWith(isLoading: true);
     try {
-      final success = await apiService.createParent(
+      final success = await apiService.createTeacher(
         name: name,
         email: email,
         password: password,
@@ -41,7 +44,7 @@ class AddStudentNotifier extends StateNotifier<AddTeacherState> {
       );
 
       if (success) {
-        await ref.read(studentProvider.notifier).fetchStudents();
+        await ref.read(teacherProvider.notifier).fetchTeachers();
         state = state.copyWith(isLoading: false);
 
         // Navigator.pop(context);
@@ -50,7 +53,7 @@ class AddStudentNotifier extends StateNotifier<AddTeacherState> {
       else {
         state = state.copyWith(
           isLoading: false,
-          error: "Failed to create student.",
+          error: "Failed to create teacher.",
         );
         return false;
       }
@@ -62,9 +65,9 @@ class AddStudentNotifier extends StateNotifier<AddTeacherState> {
   }
 }
 
-final addStudentProvider =
-StateNotifierProvider<AddStudentNotifier, AddTeacherState>((ref) {
-  final apiService = AddStudentApiService();
-  return AddStudentNotifier(apiService,ref);
+final addTeachersProvider =
+StateNotifierProvider<AddTeacherNotifier, AddTeacherState>((ref) {
+  final apiService = AddTeacherApiService();
+  return AddTeacherNotifier(apiService,ref);
 });
 
