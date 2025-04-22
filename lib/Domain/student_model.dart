@@ -69,3 +69,53 @@ class GetTeachersResponse {
     );
   }
 }
+
+
+
+class DonorModel {
+  final String id;
+  final String email;
+  final String name;
+  final List<String> organizations;
+  final List<dynamic> donations;
+
+  DonorModel({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.organizations,
+    required this.donations,
+  });
+
+  factory DonorModel.fromJson(Map<String, dynamic> json) {
+    return DonorModel(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      name: json['name'] as String,
+      organizations: List<String>.from(json['organizations']),
+      donations: json['donations'] as List<dynamic>,
+    );
+  }
+}
+
+class GetDonorsResponse {
+  final String organizationId;
+  final String organizationName;
+  final List<DonorModel> donors;
+
+  GetDonorsResponse({
+    required this.organizationId,
+    required this.organizationName,
+    required this.donors,
+  });
+
+  factory GetDonorsResponse.fromJson(Map<String, dynamic> json) {
+    return GetDonorsResponse(
+      organizationId: json['organizationId'] as String,
+      organizationName: json['organizationName'] as String,
+      donors: (json['donors'] as List)
+          .map((donor) => DonorModel.fromJson(donor))
+          .toList(),
+    );
+  }
+}

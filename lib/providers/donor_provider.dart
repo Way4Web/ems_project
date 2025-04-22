@@ -1,69 +1,70 @@
 import 'dart:async';
 import 'package:ems_project/Domain/student_model.dart';
-import 'package:ems_project/Services/teachers_api_service.dart';
+import 'package:ems_project/Services/donor_api_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final teacherProvider = StateNotifierProvider<TeacherNotifier, TeacherState>((ref) {
-  return TeacherNotifier(TeacherService(baseUrl: 'http://192.168.29.189:5000/api/admin'));
+final donorProvider = StateNotifierProvider<DonorNotifier, DonorState>((ref) {
+  return DonorNotifier(DonorApiService(baseUrl: 'http://192.168.29.189:5000/api/admin'));
 });
 
 @immutable
-class TeacherState {
-  final List<TeacherModel> teachers;
+class DonorState {
+  final List<DonorModel> donors;
   final bool isLoading;
   final String? error;
   final String organization;
-  final List<TeacherModel> filteredTeachers;
+  final List<DonorModel> filteredDonors;
 
-  const TeacherState({
+  const DonorState({
     required this.organization,
-    required this.teachers,
+    required this.donors,
     required this.isLoading,
-    required this.filteredTeachers,
+    required this.filteredDonors,
     this.error,
   });
 
-  TeacherState copyWith({
-    List<TeacherModel>? teachers,
+  DonorState copyWith({
+    List<DonorModel>? donors,
     bool? isLoading,
     String? error,
     String? organization,
-    List<TeacherModel>? filteredTeachers,
+    List<DonorModel>? filteredDonors,
   }) {
-    return TeacherState(
-      teachers: teachers ?? this.teachers,
+    return DonorState(
+      donors: donors ?? this.donors,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       organization: organization ?? this.organization,
-      filteredTeachers: filteredTeachers ?? this.filteredTeachers,
+      filteredDonors: filteredDonors ?? this.filteredDonors,
     );
   }
 }
 
-class TeacherNotifier extends StateNotifier<TeacherState> {
-  final TeacherService apiService;
+class DonorNotifier extends StateNotifier<DonorState> {
+  final DonorApiService apiService;
   Timer? _debounce;
 
-  TeacherNotifier(this.apiService)
-      : super(const TeacherState(
-    teachers: [],
+  DonorNotifier(this.apiService)
+      : super(const DonorState(
+    donors: [],
     isLoading: false,
     organization: '',
-    filteredTeachers: [],
+    filteredDonors: [],
   ));
 
-  Future<void> fetchTeachers() async {
+  Future<void> fetchDonors() async {
     // Set loading state
     state = state.copyWith(isLoading: true, error: null);
     try {
       // Fetch data from the API
-      final teachers = await apiService.fetchAllTeachers(); // This returns List<TeacherModel>
+      final donors = await apiService.fetchAllDonors(); // This returns List<TeacherModel>
 
       // Update state with fetched data
       state = state.copyWith(
-        teachers: teachers, // Use the list directly
-        filteredTeachers: teachers, // Initialize filtered list with all teachers
+        donors: donors, // Use the list directly
+        filteredDonors: donors, // Initialize filtered list with all teachers
         organization: "Your Organization Name", // Replace with actual organization name if needed
         isLoading: false,
       );
@@ -71,19 +72,19 @@ class TeacherNotifier extends StateNotifier<TeacherState> {
       // Handle errors and update state
       state = state.copyWith(error: e.toString(), isLoading: false);
     }
-  }  void searchTeachers(String query) {
+  }  void searchDonors(String query) {
     // Debounce to avoid frequent state updates
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      final filtered = state.teachers.where((teacher) {
-        final nameLower = teacher.name.toLowerCase();
-        final emailLower = teacher.email.toLowerCase();
+      final filtered = state.donors.where((donor) {
+        final nameLower = donor.name.toLowerCase();
+        final emailLower = donor.email.toLowerCase();
         final searchLower = query.toLowerCase();
 
         return nameLower.contains(searchLower) || emailLower.contains(searchLower);
       }).toList();
 
-      state = state.copyWith(filteredTeachers: filtered);
+      state = state.copyWith(filteredDonors: filtered);
     });
   }
 
