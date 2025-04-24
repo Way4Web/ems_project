@@ -119,3 +119,60 @@ class GetDonorsResponse {
     );
   }
 }
+
+
+
+class SingleStudent {
+   String id;
+   String email;
+   String name;
+   String role;
+   String status;
+   String createdAt;
+   String updatedAt;
+   Organization organization;
+
+  SingleStudent({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.role,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.organization,
+  });
+
+  factory SingleStudent.fromJson(Map<String, dynamic> json) {
+    return SingleStudent(
+      id: json['_id'],
+      email: json['email'],
+      name: json['name'],
+      role: json['role'],
+      status: json['status'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      organization: Organization.fromJson(json['organization']),
+    );
+  }
+}
+
+class Organization {
+  final String id;
+  final String email;
+  final String name;
+
+  Organization({
+    required this.id,
+    required this.email,
+    required this.name,
+  });
+
+  factory Organization.fromJson(Map<String, dynamic> json) {
+    return Organization(
+      id: json['_id'],
+      email: json['email'],
+      name: json['name'],
+    );
+  }
+}

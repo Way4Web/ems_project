@@ -68,12 +68,6 @@ class StudentApiService {
   }
 }
 
-
-
-
-
-
-
 class DeleteStudentApiService {
   final String baseUrl = "http://192.168.29.189:5000/api/admin";
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -96,7 +90,8 @@ class DeleteStudentApiService {
         print("Student deleted successfully.");
         return true;
       } else {
-        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        final errorMessage =
+            json.decode(response.body)['message'] ?? 'Unknown error';
         print("Failed to delete student: $errorMessage");
         return false;
       }
@@ -107,27 +102,29 @@ class DeleteStudentApiService {
   }
 }
 
-
 class EditApiStudentDetails {
-  final String apiUrl =
-      "http://192.168.29.189:5000/api/admin/updateStudent";
+  final String apiUrl = "http://192.168.29.189:5000/api/admin/updateStudent";
 
   // BuildContext get context => null; // Replace with your API URL
 
-  Future<void> updateStudentDetails(String studentId, String name, String email,BuildContext context) async {
+  Future<void> updateStudentDetails(
+    String studentId,
+    String name,
+    String email,
+    BuildContext context,
+  ) async {
     final token = await getToken(); // Fetch the token asynchronously
 
     if (token == null) {
       throw Exception("Token not found");
     }
 
-    final url = Uri.parse('$apiUrl/$studentId'); // API endpoint with organizationId
+    final url = Uri.parse(
+      '$apiUrl/$studentId',
+    ); // API endpoint with organizationId
 
     // Prepare the request body for the PUT request
-    final body = json.encode({
-      'email': email,
-      'name': name,
-    });
+    final body = json.encode({'email': email, 'name': name});
 
     final response = await http.put(
       url,
@@ -146,12 +143,12 @@ class EditApiStudentDetails {
       print(responseBody);
     } else {
       // Handle error response
-      final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+      final errorMessage =
+          json.decode(response.body)['message'] ?? 'Unknown error';
       // throw Exception("Failed to update organization: $errorMessage");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update: $errorMessage')),
-      );      // Handle error response
-
+      ); // Handle error response
     }
   }
 }

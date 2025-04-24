@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/Services/single_student_service.dart';
 import 'package:ems_project/Services/student_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final studentProvider = StateNotifierProvider<StudentNotifier, StudentState>((
     ref,
@@ -116,3 +118,22 @@ class StudentNotifier extends StateNotifier<StudentState> {
     );
   }
 }
+
+
+
+final studentApiServiceProvider = Provider<SingleStudentService>((ref) {
+  return SingleStudentService();
+});
+
+final singleStudentProvider = FutureProvider<SingleStudent>((ref) async {
+  final apiService = ref.watch(studentApiServiceProvider);
+
+  final student = await apiService.getSingleStudent();
+  print("Fetched Student: ${student.name}");
+  return student;
+
+});
+
+
+
+
