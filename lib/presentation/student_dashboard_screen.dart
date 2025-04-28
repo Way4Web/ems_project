@@ -1,8 +1,11 @@
 import 'package:ems_project/presentation/widget/profile_card.dart';
+import 'package:ems_project/presentation/widget/todays_class_widget.dart';
+import 'package:ems_project/providers/student_dashboard_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import '../providers/student_provider.dart';
+import '../../providers/student_provider.dart';
 
 class StudentDashboardScreen extends ConsumerWidget {
   final String name;
@@ -24,7 +27,11 @@ class StudentDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Fetch student data
     final student = ref.watch(singleStudentProvider);
+
+    // Fetch today's class data
+    final todaysClass = ref.watch(todaysClassProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,6 +46,7 @@ class StudentDashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                // Student profile card
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ProfileCard(
@@ -51,13 +59,66 @@ class StudentDashboardScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Additional sections can go here
+
+                // Today's class section
+                todaysClass.when(
+                  data: (classData) {
+                    if (classData == null) {
+                      return const Text(
+                        "No class scheduled for today.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      );
+                    }
+
+                    // Parse and format date & time
+                    final formattedDate = DateFormat("yyyy-MM-dd")
+                        .format(DateTime.parse(classData.startTime));
+                    final startTime = DateFormat("hh:mm a")
+                        .format(DateTime.parse(classData.startTime));
+                    final endTime = DateFormat("hh:mm a")
+                        .format(DateTime.parse(classData.endTime));
+
+                    return TodaysClassCard(
+                      date: formattedDate,
+                      className: classData.title,
+                      timeRange: "$startTime - $endTime",
+                      leading: Image.asset(
+                        'assets/class.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.book,
+                            size: 40,
+                            color: Colors.grey,
+                          );
+                        },
+                      ),
+                      onJoin: () {
+                        // Handle join action
+                        debugPrint("Join Class Clicked: ${classData.zoomLink}");
+                      },
+                    );
+                  },
+                  loading: () =>
+                  const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) => Center(
+                    child: Text(
+                      'Error loading today\'s class: $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        error: (error, stackTrace) => Center(
+          child: Text(
+            'Error loading student data: $error',
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
       ),
     );
   }

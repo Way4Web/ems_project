@@ -9,6 +9,8 @@ class SingleStudentService {
   final String apiUrlStudent =
       "http://192.168.29.189:5000/api/admin/updateStudent";
 
+
+
   // FlutterSecureStorage instance to fetch the token
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
@@ -62,7 +64,8 @@ class SingleStudentService {
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmVkNzA0NDY1YjkwZTBhY2FkMjFmOCIsInJvbGUiOiJhZG1pbiIsIm9yZ2FuaXphdGlvbiI6IjY3YmVkNTIwNDY1YjkwZTBhY2FkMjFmMiIsImlhdCI6MTc0NDE3ODc0OX0.LSKdFxhyZdRJFSVxEXZNNySj2pIss7qMQsApwigrDAU'
+        // 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmVkNzA0NDY1YjkwZTBhY2FkMjFmOCIsInJvbGUiOiJhZG1pbiIsIm9yZ2FuaXphdGlvbiI6IjY3YmVkNTIwNDY1YjkwZTBhY2FkMjFmMiIsImlhdCI6MTc0NDE3ODc0OX0.LSKdFxhyZdRJFSVxEXZNNySj2pIss7qMQsApwigrDAU'
+        'Authorization': 'Bearer $token', // Add token for authorization
       },
       body: body,
     );
@@ -91,3 +94,8 @@ class SingleStudentService {
     }
   }
 }
+
+
+
+
+

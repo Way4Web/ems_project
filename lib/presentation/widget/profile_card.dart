@@ -26,7 +26,7 @@ class ProfileCard extends StatelessWidget {
     final imageSize = (width * 0.18).clamp(50.0, 80.0);
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      // margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1F2C),
