@@ -4,7 +4,7 @@ import 'package:ems_project/providers/student_dashboard_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/student_provider.dart';
 
 class StudentDashboardScreen extends ConsumerWidget {
@@ -95,7 +95,13 @@ class StudentDashboardScreen extends ConsumerWidget {
                       ),
                       onJoin: () {
                         // Handle join action
-                        debugPrint("Join Class Clicked: ${classData.zoomLink}");
+                        // joinZoomMeeting(classData.zoomLink);
+                        joinZoomMeeting(context,"https://us04web.zoom.us/j/74046500363?pwd=zr843rHndu7cLeHuT2T8aKzbiZLTAc.1");
+                        // final String zoomLink = "https://flutter.dev".trim();
+                        //
+                        // joinZoomMeeting(zoomLink);
+
+                        // debugPrint("Join Class Clicked: ${classData.zoomLink}");
                       },
                     );
                   },
@@ -121,5 +127,42 @@ class StudentDashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+
+
+
+void joinZoomMeeting(BuildContext context, String zoomLink) async {
+  final Uri zoomUri = Uri.parse(zoomLink);
+
+  // Show the loading spinner
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent closing the dialog by tapping outside
+    builder: (BuildContext context) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    },
+  );
+
+  try {
+    if (await canLaunchUrl(zoomUri)) {
+      await launchUrl(
+        zoomUri,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      debugPrint("Could not launch Zoom link: $zoomLink");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Could not launch Zoom link: $zoomLink"),
+        ),
+      );
+    }
+  } finally {
+    // Hide the loading spinner after the operation is complete
+    Navigator.of(context).pop();
   }
 }

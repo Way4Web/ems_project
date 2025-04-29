@@ -103,7 +103,7 @@ class DeleteStudentApiService {
 }
 
 class EditApiStudentDetails {
-  final String apiUrl = "http://192.168.29.189:5000/api/admin/updateStudent";
+  final String apiUrl = "http://192.168.29.190:5000/api/admin/updateStudent";
 
   // BuildContext get context => null; // Replace with your API URL
 

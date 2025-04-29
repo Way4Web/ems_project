@@ -5,9 +5,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class SingleStudentService {
-  final String _baseUrl = 'http://192.168.29.189:5000/api/student';
+  final String _baseUrl = 'http://192.168.29.190:5000/api/student';
   final String apiUrlStudent =
-      "http://192.168.29.189:5000/api/admin/updateStudent";
+      "http://192.168.29.190:5000/api/admin/updateStudent";
 
 
 

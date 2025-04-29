@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AddStudentApiService {
-  final String baseUrl = "http://192.168.29.189:5000/api";
+  final String baseUrl = "http://192.168.29.190:5000/api";
 
   // BuildContext get context => null;
 

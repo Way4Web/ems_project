@@ -10,7 +10,7 @@ class ClassSessionRepository {
     // Replace with your actual API endpoint
     // final url = 'http://192.168.29.189:5000/api/student/classes';
     final url = Uri.parse(
-      'http://192.168.29.189:5000/api/student/classes',
+      'http://192.168.29.190:5000/api/student/classes',
     );
     final token = await secureStorage.read(key: "token");
 
@@ -34,6 +34,7 @@ class ClassSessionRepository {
       return classSessions.map((session) => ClassSession.fromJson(session)).toList();
     } else {
       throw Exception('Failed to load class sessions');
+
     }
   }
 }
