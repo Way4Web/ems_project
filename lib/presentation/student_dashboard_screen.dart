@@ -1,3 +1,5 @@
+import 'package:ems_project/Services/student_dashboard_service.dart';
+import 'package:ems_project/presentation/widget/homework_card.dart';
 import 'package:ems_project/presentation/widget/profile_card.dart';
 import 'package:ems_project/presentation/widget/todays_class_widget.dart';
 import 'package:ems_project/providers/student_dashboard_provider.dart';
@@ -32,6 +34,7 @@ class StudentDashboardScreen extends ConsumerWidget {
 
     // Fetch today's class data
     final todaysClass = ref.watch(todaysClassProvider);
+    final assignmentsAsync = ref.watch(assignmentsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -71,12 +74,15 @@ class StudentDashboardScreen extends ConsumerWidget {
                     }
 
                     // Parse and format date & time
-                    final formattedDate = DateFormat("yyyy-MM-dd")
-                        .format(DateTime.parse(classData.startTime));
-                    final startTime = DateFormat("hh:mm a")
-                        .format(DateTime.parse(classData.startTime));
-                    final endTime = DateFormat("hh:mm a")
-                        .format(DateTime.parse(classData.endTime));
+                    final formattedDate = DateFormat(
+                      "yyyy-MM-dd",
+                    ).format(DateTime.parse(classData.startTime));
+                    final startTime = DateFormat(
+                      "hh:mm a",
+                    ).format(DateTime.parse(classData.startTime));
+                    final endTime = DateFormat(
+                      "hh:mm a",
+                    ).format(DateTime.parse(classData.endTime));
 
                     return TodaysClassCard(
                       date: formattedDate,
@@ -96,7 +102,10 @@ class StudentDashboardScreen extends ConsumerWidget {
                       onJoin: () {
                         // Handle join action
                         // joinZoomMeeting(classData.zoomLink);
-                        joinZoomMeeting(context,"https://us04web.zoom.us/j/74046500363?pwd=zr843rHndu7cLeHuT2T8aKzbiZLTAc.1");
+                        joinZoomMeeting(
+                          context,
+                          "https://us04web.zoom.us/j/74046500363?pwd=zr843rHndu7cLeHuT2T8aKzbiZLTAc.1",
+                        );
                         // final String zoomLink = "https://flutter.dev".trim();
                         //
                         // joinZoomMeeting(zoomLink);
@@ -105,33 +114,77 @@ class StudentDashboardScreen extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) => Center(
-                    child: Text(
-                      'Error loading today\'s class: $error',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  loading:
+                      () => const Center(child: CircularProgressIndicator()),
+                  error:
+                      (error, stackTrace) => Center(
+                        child: Text(
+                          'Error loading today\'s class: $error',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                ),
+
+                /// In your Column children:
+                assignmentsAsync.when(
+                  data: (list) {
+                    if (list.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          'No home works assigned.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      );
+                    }
+                    // Render your HomeWorksWidget (responsive UI from before)
+                    return HomeWorksWidget(
+                      items:
+                          list
+                              .map(
+                                (a) => HomeWorkData(
+                                  tag: a.title,
+                                  title: a.description,
+                                  teacherName: a.teacherName,
+                                  dueDate: a.dueDate,
+                                  progress: a.submitted ? 1.0 : 0.0,
+                                  thumbnailUrl: null,
+                                ),
+                              )
+                              .toList(),
+                      onFilterTap: () {
+                        // open filter dialog
+                      },
+                    );
+                  },
+                  loading:
+                      () => const Center(child: CircularProgressIndicator()),
+                  // loading spinner :contentReference[oaicite:6]{index=6}
+                  error:
+                      (err, _) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          'Error loading home works: $err',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
                 ),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(
-            'Error loading student data: $error',
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
+        error:
+            (error, stackTrace) => Center(
+              child: Text(
+                'Error loading student data: $error',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
       ),
     );
   }
 }
-
-
-
 
 void joinZoomMeeting(BuildContext context, String zoomLink) async {
   final Uri zoomUri = Uri.parse(zoomLink);
@@ -141,24 +194,17 @@ void joinZoomMeeting(BuildContext context, String zoomLink) async {
     context: context,
     barrierDismissible: false, // Prevent closing the dialog by tapping outside
     builder: (BuildContext context) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
+      return Center(child: CircularProgressIndicator());
     },
   );
 
   try {
     if (await canLaunchUrl(zoomUri)) {
-      await launchUrl(
-        zoomUri,
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(zoomUri, mode: LaunchMode.externalApplication);
     } else {
       debugPrint("Could not launch Zoom link: $zoomLink");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Could not launch Zoom link: $zoomLink"),
-        ),
+        SnackBar(content: Text("Could not launch Zoom link: $zoomLink")),
       );
     }
   } finally {

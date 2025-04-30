@@ -24,3 +24,8 @@ final todaysClassProvider = FutureProvider<ClassSession?>((ref) async {
   // Return the first class for today, or null if none exist
   return todaysClass.isNotEmpty ? todaysClass.first : null;
 });
+
+
+
+
+
