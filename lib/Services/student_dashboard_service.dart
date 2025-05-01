@@ -12,7 +12,7 @@ class ClassSessionRepository {
     // Replace with your actual API endpoint
     // final url = 'http://192.168.29.189:5000/api/student/classes';
     final url = Uri.parse(
-      'http://192.168.29.190:5000/api/student/classes',
+      'http://192.168.29.189:5000/api/student/classes',
     );
     final token = await secureStorage.read(key: "token");
 
@@ -46,7 +46,7 @@ class ClassSessionRepository {
 
 /// Fetches assignments from your API endpoint
 final assignmentsProvider = FutureProvider<List<Assignment>>((ref) async {
-  final uri = Uri.parse('http://192.168.29.190:5000/api/student/getAssignments');
+  final uri = Uri.parse('http://192.168.29.189:5000/api/student/getAssignments');
   // final response = await http.get(uri);                             // GET request :contentReference[oaicite:4]{index=4}
   final token = await secureStorage.read(key: "token");
 
@@ -72,3 +72,4 @@ final assignmentsProvider = FutureProvider<List<Assignment>>((ref) async {
       .map((e) => Assignment.fromJson(e as Map<String, dynamic>))
       .toList();
 });
+

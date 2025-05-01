@@ -1,12 +1,14 @@
 import 'package:ems_project/Services/student_dashboard_service.dart';
+import 'package:ems_project/presentation/widget/attendance_ui.dart';
 import 'package:ems_project/presentation/widget/homework_card.dart';
 import 'package:ems_project/presentation/widget/profile_card.dart';
 import 'package:ems_project/presentation/widget/todays_class_widget.dart';
-import 'package:ems_project/providers/student_dashboard_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ems_project/providers/attendance_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../providers/student_dashboard_provider.dart';
 import '../../providers/student_provider.dart';
 
 class StudentDashboardScreen extends ConsumerWidget {
@@ -29,186 +31,153 @@ class StudentDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch student data
-    final student = ref.watch(singleStudentProvider);
+    // 1) Fetch student data
+    final studentAsync = ref.watch(singleStudentProvider);
 
-    // Fetch today's class data
-    final todaysClass = ref.watch(todaysClassProvider);
+    // 2) Today's class
+    final todaysClassAsync = ref.watch(todaysClassProvider);
+
+    // 3) Assignments (home works)
     final assignmentsAsync = ref.watch(assignmentsProvider);
+
+    // 4) Attendance
+    final attendanceAsync = ref.watch(attendanceProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Student Profile"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        surfaceTintColor: Colors.white,
         elevation: 1,
       ),
-      body: student.when(
-        data: (studentData) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                // Student profile card
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: ProfileCard(
-                    name: studentData.name,
-                    organization: studentData.organization.name,
-                    status: studentData.status,
-                    quarterLabel: '1st Quarterly',
-                    resultLabel: 'Pass',
-                    onEdit: onEdit,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Today's class section
-                todaysClass.when(
-                  data: (classData) {
-                    if (classData == null) {
-                      return const Text(
-                        "No class scheduled for today.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      );
-                    }
-
-                    // Parse and format date & time
-                    final formattedDate = DateFormat(
-                      "yyyy-MM-dd",
-                    ).format(DateTime.parse(classData.startTime));
-                    final startTime = DateFormat(
-                      "hh:mm a",
-                    ).format(DateTime.parse(classData.startTime));
-                    final endTime = DateFormat(
-                      "hh:mm a",
-                    ).format(DateTime.parse(classData.endTime));
-
-                    return TodaysClassCard(
-                      date: formattedDate,
-                      className: classData.title,
-                      timeRange: "$startTime - $endTime",
-                      leading: Image.asset(
-                        'assets/class.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.book,
-                            size: 40,
-                            color: Colors.grey,
-                          );
-                        },
-                      ),
-                      onJoin: () {
-                        // Handle join action
-                        // joinZoomMeeting(classData.zoomLink);
-                        joinZoomMeeting(
-                          context,
-                          "https://us04web.zoom.us/j/74046500363?pwd=zr843rHndu7cLeHuT2T8aKzbiZLTAc.1",
-                        );
-                        // final String zoomLink = "https://flutter.dev".trim();
-                        //
-                        // joinZoomMeeting(zoomLink);
-
-                        // debugPrint("Join Class Clicked: ${classData.zoomLink}");
-                      },
-                    );
-                  },
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
-                  error:
-                      (error, stackTrace) => Center(
-                        child: Text(
-                          'Error loading today\'s class: $error',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                ),
-
-                /// In your Column children:
-                assignmentsAsync.when(
-                  data: (list) {
-                    if (list.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          'No home works assigned.',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      );
-                    }
-                    // Render your HomeWorksWidget (responsive UI from before)
-                    return HomeWorksWidget(
-                      items:
-                          list
-                              .map(
-                                (a) => HomeWorkData(
-                                  tag: a.title,
-                                  title: a.description,
-                                  teacherName: a.teacherName,
-                                  dueDate: a.dueDate,
-                                  progress: a.submitted ? 1.0 : 0.0,
-                                  thumbnailUrl: null,
-                                ),
-                              )
-                              .toList(),
-                      onFilterTap: () {
-                        // open filter dialog
-                      },
-                    );
-                  },
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
-                  // loading spinner :contentReference[oaicite:6]{index=6}
-                  error:
-                      (err, _) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          'Error loading home works: $err',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                ),
-              ],
-            ),
-          );
-        },
+      body: studentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (error, stackTrace) => Center(
-              child: Text(
-                'Error loading student data: $error',
-                style: const TextStyle(color: Colors.red),
+        error: (err, _) => Center(child: Text('Error: $err')),
+        data: (student) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // — Profile
+              ProfileCard(
+                name: student.name,
+                organization: student.organization.name,
+                status: student.status,
+                quarterLabel: '1st Quarterly',
+                resultLabel: 'Pass',
+                onEdit: onEdit,
               ),
-            ),
+              const SizedBox(height: 16),
+
+              // — Today’s Class
+              todaysClassAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Text('Class error: $err',
+                    style: const TextStyle(color: Colors.red)),
+                data: (cls) {
+                  if (cls == null) {
+                    return const Text("No class scheduled for today.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey));
+                  }
+                  final date = DateFormat('yyyy-MM-dd')
+                      .format(DateTime.parse(cls.startTime));
+                  final start = DateFormat('hh:mm a')
+                      .format(DateTime.parse(cls.startTime));
+                  final end = DateFormat('hh:mm a')
+                      .format(DateTime.parse(cls.endTime));
+
+                  return TodaysClassCard(
+                    date: date,
+                    className: cls.title,
+                    timeRange: '$start - $end',
+                    leading: Image.asset(
+                      'assets/class.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.book, size: 40, color: Colors.grey),
+                    ),
+                    onJoin: () => joinZoomMeeting(context, cls.zoomLink),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // — Home Works
+              assignmentsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text('Error loading home works: $err',
+                      style: const TextStyle(color: Colors.red)),
+                ),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Text('No home works assigned.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    );
+                  }
+                  return HomeWorksWidget(
+                    items: list
+                        .map((a) => HomeWorkData(
+                      tag: a.title,
+                      title: a.description,
+                      teacherName: a.teacherName,
+                      dueDate: a.dueDate,
+                      progress: a.submitted ? 1.0 : 0.0,
+                      thumbnailUrl: null,
+                    ))
+                        .toList(),
+                    onFilterTap: () {
+                      // TODO: open subject filter
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // — Attendance
+              attendanceAsync.when(
+                data: (att) => AttendanceCard(
+                  totalDays: att.totalDays,
+                  present: att.present,
+                  absent: att.absent,
+                  late: att.late,
+                  halfDay: att.halfDay,
+                  selectedTimeframe: ref.read(timeframeProvider),
+                  onTimeframeChanged: (tf) => ref.read(timeframeProvider.notifier).state = tf!,
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e,_) => Text('Error loading attendance: $e'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
+/// Opens the Zoom link in an external application and shows a spinner.
 void joinZoomMeeting(BuildContext context, String zoomLink) async {
-  final Uri zoomUri = Uri.parse(zoomLink);
-
-  // Show the loading spinner
+  final uri = Uri.parse(zoomLink);
   showDialog(
     context: context,
-    barrierDismissible: false, // Prevent closing the dialog by tapping outside
-    builder: (BuildContext context) {
-      return Center(child: CircularProgressIndicator());
-    },
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
   );
 
   try {
-    if (await canLaunchUrl(zoomUri)) {
-      await launchUrl(zoomUri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      debugPrint("Could not launch Zoom link: $zoomLink");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Could not launch Zoom link: $zoomLink")),
       );
     }
   } finally {
-    // Hide the loading spinner after the operation is complete
     Navigator.of(context).pop();
   }
 }
