@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../providers/student_dashboard_provider.dart';
 import '../../providers/student_provider.dart';
 
@@ -31,16 +32,10 @@ class StudentDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1) Fetch student data
+    // Providers
     final studentAsync = ref.watch(singleStudentProvider);
-
-    // 2) Today's class
     final todaysClassAsync = ref.watch(todaysClassProvider);
-
-    // 3) Assignments (home works)
     final assignmentsAsync = ref.watch(assignmentsProvider);
-
-    // 4) Attendance
     final attendanceAsync = ref.watch(attendanceProvider);
 
     return Scaffold(
@@ -54,107 +49,216 @@ class StudentDashboardScreen extends ConsumerWidget {
       body: studentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
-        data: (student) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // — Profile
-              ProfileCard(
-                name: student.name,
-                organization: student.organization.name,
-                status: student.status,
-                quarterLabel: '1st Quarterly',
-                resultLabel: 'Pass',
-                onEdit: onEdit,
-              ),
-              const SizedBox(height: 16),
+        data:
+            (student) => SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ─── Profile Card ───────────────────────────────────────────
+                  ProfileCard(
+                    name: student.name,
+                    organization: student.organization.name,
+                    status: student.status,
+                    quarterLabel: '1st Quarterly',
+                    resultLabel: 'Pass',
+                    onEdit: onEdit,
+                  ),
+                  const SizedBox(height: 16),
 
-              // — Today’s Class
-              todaysClassAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Text('Class error: $err',
-                    style: const TextStyle(color: Colors.red)),
-                data: (cls) {
-                  if (cls == null) {
-                    return const Text("No class scheduled for today.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey));
-                  }
-                  final date = DateFormat('yyyy-MM-dd')
-                      .format(DateTime.parse(cls.startTime));
-                  final start = DateFormat('hh:mm a')
-                      .format(DateTime.parse(cls.startTime));
-                  final end = DateFormat('hh:mm a')
-                      .format(DateTime.parse(cls.endTime));
+                  // ─── Today’s Class ───────────────────────────────────────────
+                  todaysClassAsync.when(
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (err, _) => Text(
+                          'Class error: $err',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                    data: (cls) {
+                      if (cls == null) {
+                        return const Text(
+                          "No class scheduled for today.",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        );
+                      }
+                      final date = DateFormat(
+                        'yyyy-MM-dd',
+                      ).format(DateTime.parse(cls.startTime));
+                      final start = DateFormat(
+                        'hh:mm a',
+                      ).format(DateTime.parse(cls.startTime));
+                      final end = DateFormat(
+                        'hh:mm a',
+                      ).format(DateTime.parse(cls.endTime));
 
-                  return TodaysClassCard(
-                    date: date,
-                    className: cls.title,
-                    timeRange: '$start - $end',
-                    leading: Image.asset(
-                      'assets/class.png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.book, size: 40, color: Colors.grey),
-                    ),
-                    onJoin: () => joinZoomMeeting(context, cls.zoomLink),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // — Home Works
-              assignmentsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text('Error loading home works: $err',
-                      style: const TextStyle(color: Colors.red)),
-                ),
-                data: (list) {
-                  if (list.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Text('No home works assigned.',
-                          style: TextStyle(fontSize: 16, color: Colors.grey)),
-                    );
-                  }
-                  return HomeWorksWidget(
-                    items: list
-                        .map((a) => HomeWorkData(
-                      tag: a.title,
-                      title: a.description,
-                      teacherName: a.teacherName,
-                      dueDate: a.dueDate,
-                      progress: a.submitted ? 1.0 : 0.0,
-                      thumbnailUrl: null,
-                    ))
-                        .toList(),
-                    onFilterTap: () {
-                      // TODO: open subject filter
+                      return TodaysClassCard(
+                        date: date,
+                        className: cls.title,
+                        timeRange: '$start - $end',
+                        leading: Image.asset(
+                          'assets/class.png',
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => const Icon(
+                                Icons.book,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                        ),
+                        onJoin: () => joinZoomMeeting(context, cls.zoomLink),
+                      );
                     },
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-              // — Attendance
-              attendanceAsync.when(
-                data: (att) => AttendanceCard(
-                  totalDays: att.totalDays,
-                  present: att.present,
-                  absent: att.absent,
-                  late: att.late,
-                  halfDay: att.halfDay,
-                  selectedTimeframe: ref.read(timeframeProvider),
-                  onTimeframeChanged: (tf) => ref.read(timeframeProvider.notifier).state = tf!,
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e,_) => Text('Error loading attendance: $e'),
+                  // ─── Home Works ─────────────────────────────────────────────
+                  assignmentsAsync.when(
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (err, _) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Text(
+                            'Error loading home works: $err',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                    data: (list) {
+                      if (list.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Text(
+                            'No home works assigned.',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        );
+                      }
+                      return HomeWorksWidget(
+                        items:
+                            list
+                                .map(
+                                  (a) => HomeWorkData(
+                                    tag: a.title,
+                                    title: a.description,
+                                    teacherName: a.teacherName,
+                                    dueDate: a.dueDate,
+                                    progress: a.submitted ? 1.0 : 0.0,
+                                    thumbnailUrl: null,
+                                  ),
+                                )
+                                .toList(),
+                        onFilterTap: () {
+                          // TODO: open subject filter
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ─── Attendance ─────────────────────────────────────────────
+                  attendanceAsync.when(
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (err, _) => Text(
+                          'Error loading attendance: $err',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                    data:
+                        (att) => AttendanceCard(
+                          totalDays: att.totalDays,
+                          present: att.present,
+                          absent: att.absent,
+                          late: att.late,
+                          halfDay: att.halfDay,
+                          selectedTimeframe: ref.read(timeframeProvider),
+                          onTimeframeChanged:
+                              (tf) =>
+                                  ref.read(timeframeProvider.notifier).state =
+                                      tf!,
+                        ),
+                  ),
+
+                  // ─── Schedules Card ─────────────────────────────────────────
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Header row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Schedules',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                // TODO: Navigate to full schedules screen
+                              },
+                              child: const Text(
+                                'View All',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Calendar
+                        TableCalendar(
+                          firstDay: DateTime(2020, 1, 1),
+                          lastDay: DateTime(2030, 12, 31),
+                          focusedDay: DateTime.now(),
+                          daysOfWeekHeight:
+                              MediaQuery.of(context).size.height * 0.035,
+                          calendarFormat: CalendarFormat.month,
+                          headerStyle: const HeaderStyle(
+                            formatButtonVisible: false,
+                            titleCentered: true,
+                            leftChevronVisible: true,
+                            rightChevronVisible: true,
+                          ),
+                          daysOfWeekStyle: const DaysOfWeekStyle(
+                            weekdayStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onDaySelected: (selectedDay, focusedDay) {
+                            // TODO: handle day tap
+                          },
+                          selectedDayPredicate: (day) {
+                            return isSameDay(day, DateTime.now());
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
       ),
     );
   }
