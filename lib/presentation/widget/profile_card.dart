@@ -141,23 +141,23 @@ class ProfileCard extends StatelessWidget {
               ),
 
               // edit button
-              ElevatedButton(
-                onPressed: onEdit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4A90E2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 20,
-                  ),
-                ),
-                child: const Text(
-                  'Edit Profile',
-                  style: TextStyle(fontSize: 14,color: Colors.white),
-                ),
-              ),
+              // ElevatedButton(
+              //   onPressed: onEdit,
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: const Color(0xFF4A90E2),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //     padding: const EdgeInsets.symmetric(
+              //       vertical: 12,
+              //       horizontal: 20,
+              //     ),
+              //   ),
+              //   child: const Text(
+              //     'Edit Profile',
+              //     style: TextStyle(fontSize: 14,color: Colors.white),
+              //   ),
+              // ),
             ],
           ),
         ],

@@ -2,6 +2,9 @@ import 'package:ems_project/Services/login_api.dart';
 import 'package:ems_project/main.dart';
 import 'package:ems_project/presentation/registration_screen.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
+import 'package:ems_project/presentation/student_dashboard_screen.dart';
+import 'package:ems_project/presentation/widget/edit_single_student.dart';
+import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,7 +87,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Color(0xFFE0E0E0), // Light grey color for enabled state
+                                  color: Color(
+                                    0xFFE0E0E0,
+                                  ), // Light grey color for enabled state
                                 ),
                               ),
                               suffixIcon: Icon(Icons.email_outlined),
@@ -134,7 +139,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Color(0xFFE0E0E0), // Light grey color for enabled state
+                                  color: Color(
+                                    0xFFE0E0E0,
+                                  ), // Light grey color for enabled state
                                 ),
                               ),
 
@@ -166,12 +173,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                            Container(),
-                             const Text(
-                              'Forgot Password?',
-                              style: TextStyle(color: Colors.red),
-                            ),
-
+                          Container(),
+                          const Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -182,20 +188,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         child: ElevatedButton(
                           onPressed: loginState.isLoading ? null : _onSignIn,
                           style: ElevatedButton.styleFrom(
-                            shape:  RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Rounded corners
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                8,
+                              ), // Rounded corners
                             ),
-                            backgroundColor: CommonColor.kbuttonColor, // Replace with your button color e.g. CommonColor.kbuttonColor,
+                            backgroundColor: CommonColor.kbuttonColor,
+                            // Replace with your button color e.g. CommonColor.kbuttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: loginState.isLoading
-                              ? CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                              : const Text(
-                            'Sign In',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child:
+                              loginState.isLoading
+                                  ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Sign In',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -220,11 +232,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                   builder: (context) => const RegisterScreen(),
                                 ),
                               );
-                            },//
+                            }, //
                             child: Text(
                               'Create Account',
-                              style: TextStyle(color: CommonColor.kbuttonColor), // Replace with your button color if needed
-                            ),//
+                              style: TextStyle(
+                                color: CommonColor.kbuttonColor,
+                              ), // Replace with your button color if needed
+                            ), //
                           ),
                         ],
                       ),
@@ -259,14 +273,32 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       // Call the loginUser method and expect a bool result indicating success
       final success = await loginApiService.loginUser(email, password);
+      final loginState = ref.watch(loginStateProvider);
 
       if (success) {
         // Navigate to the AddOrganisation screen if login is successful.
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SidebarScreen())
-              // AddOrganisation()),
-        );
+        if (loginState.role == 'student') {
+          final student = await ref.read(singleStudentProvider.future);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentDashboardScreen(
+                name: student.name,
+                organization: student.organization.name,
+                status: student.status,
+                email: student.email,
+                id: student.id, onEdit: () {  },
+              ),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SidebarScreen()),
+            // AddOrganisation()),
+          );
+        }
       } else {
         // Handle login failure (show an error message, etc.)
         debugPrint('Login failed.');
@@ -279,6 +311,3 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 }
-
-
-
