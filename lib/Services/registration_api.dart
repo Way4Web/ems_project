@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_project/main.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +30,7 @@ class RegisterApiService {
     required String role,
   }) async {
     final response = await http.post(
-      Uri.parse('http://192.168.29.189:5000/api/auth/register'),
+      Uri.parse('${CommonClass.urlCommon}api/auth/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,

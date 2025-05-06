@@ -47,6 +47,23 @@ class StudentDashboardScreen extends ConsumerWidget {
     );
   }
 
+  // Refresh logic
+  Future<void> _refreshData(WidgetRef ref) async {
+    // Re-fetch all data by invalidating providers
+    ref.invalidate(singleStudentProvider);
+    ref.invalidate(todaysClassProvider);
+    ref.invalidate(assignmentsProvider);
+    ref.invalidate(attendanceProvider);
+
+    // Wait for all data to reload
+    await Future.wait([
+      ref.read(singleStudentProvider.future),
+      ref.read(todaysClassProvider.future),
+      ref.read(assignmentsProvider.future),
+      ref.read(attendanceProvider.future),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final studentAsync = ref.watch(singleStudentProvider);
@@ -63,274 +80,236 @@ class StudentDashboardScreen extends ConsumerWidget {
         elevation: 1,
       ),
       drawer: Drawer(
-        backgroundColor: Colors.white, // Set drawer background color
-        surfaceTintColor: Colors.transparent, // Remove tint overlay
-        child: Column(
-          children: <Widget>[
-            // Add other drawer items here
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  // Other ListTile items
-                  ListTile(
-                    // leading: const Icon(Icons.settings),
-                    title: const Text(''),
-                    onTap: () {
-                      // Handle settings tap
-                      Navigator.pop(context);
-                    },
-                  ),
-                  // Add more items as needed
-                ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity, // Makes the card take the full width
+                color: Colors.blue, // Background color of the card
+                padding: const EdgeInsets.all(16), // Adds padding inside the card
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Profile Picture
+                    const CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.person, size: 50, color: Colors.blue),
+                    ),
+                    const SizedBox(height: 10),
+          
+                    // Name
+                    Text(
+                      name, // Replace with the student's name
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+          
+                    // Organization
+                    Text(
+                      organization, // Replace with the student's organization
+                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Divider(), // Optional: Adds a separator line
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () {
-                // Handle logout
-                Navigator.pop(context); // Close the drawer
-                // Add your logout logic here
-              },
-            ),
-          ],
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.home),
+                      title: const Text("Dashboard"),
+                      onTap: () {
+                        Navigator.pop(context); // Close the drawer
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.settings),
+                      title: const Text("Settings"),
+                      onTap: () {
+                        // Handle settings tap
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text("Logout"),
+                      onTap: () async {
+                        Navigator.pop(context); // Close the drawer
+                        await _logout(context); // Call the logout method
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: studentAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: \$err')),
-        data:
-            (student) => SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Profile Card
-                  ProfileCard(
-                    name: student.name,
-                    organization: student.organization.name,
-                    status: student.status,
-                    quarterLabel: '1st Quarterly',
-                    resultLabel: 'Pass',
-                    onEdit: onEdit,
-                  ),
-                  const SizedBox(height: 16),
+      body: RefreshIndicator(
+        onRefresh: () => _refreshData(ref), // Add refresh functionality
+        child: studentAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text('Error: $err')),
+          data:
+              (student) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                // Enable pull-to-refresh
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Profile Card
+                    ProfileCard(
+                      name: student.name,
+                      organization: student.organization.name,
+                      status: student.status,
+                      quarterLabel: '1st Quarterly',
+                      resultLabel: 'Pass',
+                      onEdit: onEdit,
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Today's Class
-                  todaysClassAsync.when(
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (err, _) => Text(
-                          'Class error: \$err',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                    data: (cls) {
-                      if (cls == null) {
-                        return const Text(
-                          'No class scheduled for today.',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        );
-                      }
-                      final date = DateFormat(
-                        'yyyy-MM-dd',
-                      ).format(DateTime.parse(cls.startTime));
-                      final start = DateFormat(
-                        'hh:mm a',
-                      ).format(DateTime.parse(cls.startTime));
-                      final end = DateFormat(
-                        'hh:mm a',
-                      ).format(DateTime.parse(cls.endTime));
-
-                      return TodaysClassCard(
-                        date: date,
-                        className: cls.title,
-                        timeRange: '$start - $end',
-                        leading: Image.asset(
-                          'assets/class.png',
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (_, __, ___) => const Icon(
-                                Icons.book,
-                                size: 40,
-                                color: Colors.grey,
-                              ),
-                        ),
-                        onJoin: () => joinZoomMeeting(context, cls.zoomLink),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Home Works
-                  assignmentsAsync.when(
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (err, _) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Text(
-                            'Error loading home works: \$err',
+                    // Today's Class
+                    todaysClassAsync.when(
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (err, _) => Text(
+                            'Class error: $err',
                             style: const TextStyle(color: Colors.red),
                           ),
-                        ),
-                    data: (list) {
-                      if (list.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Text(
-                            'No home works assigned.',
+                      data: (cls) {
+                        if (cls == null) {
+                          return const Text(
+                            'No class scheduled for today.',
                             style: TextStyle(fontSize: 16, color: Colors.grey),
+                          );
+                        }
+                        final date = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(DateTime.parse(cls.startTime));
+                        final start = DateFormat(
+                          'hh:mm a',
+                        ).format(DateTime.parse(cls.startTime));
+                        final end = DateFormat(
+                          'hh:mm a',
+                        ).format(DateTime.parse(cls.endTime));
+
+                        return TodaysClassCard(
+                          date: date,
+                          className: cls.title,
+                          timeRange: '$start - $end',
+                          leading: Image.asset(
+                            'assets/class.png',
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => const Icon(
+                                  Icons.book,
+                                  size: 40,
+                                  color: Colors.grey,
+                                ),
                           ),
+                          onJoin: () => joinZoomMeeting(context, cls.zoomLink),
                         );
-                      }
-                      return HomeWorksWidget(
-                        items:
-                            list
-                                .map(
-                                  (a) => HomeWorkData(
-                                    tag: a.title,
-                                    title: a.description,
-                                    teacherName: a.teacherName,
-                                    dueDate: a.dueDate,
-                                    progress: a.submitted ? 1.0 : 0.0,
-                                    thumbnailUrl: null,
-                                  ),
-                                )
-                                .toList(),
-                        onFilterTap: () {
-                          // TODO: open subject filter
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Attendance
-                  attendanceAsync.when(
-                    loading:
-                        () => Container(
-                          margin: const EdgeInsets.symmetric(vertical: 32),
-                          padding: const EdgeInsets.all(32),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                    error:
-                        (err, _) => Text(
-                          'Error loading attendance: \$err',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                    data:
-                        (att) => AttendanceCard(
-                          totalDays: att.totalDays,
-                          present: att.present,
-                          absent: att.absent,
-                          late: att.late,
-                          halfDay: att.halfDay,
-                          selectedTimeframe: ref.read(timeframeProvider),
-                          onTimeframeChanged:
-                              (tf) =>
-                                  ref.read(timeframeProvider.notifier).state =
-                                      tf!,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Schedules Card
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
+                      },
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              'Schedules',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'View All',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TableCalendar(
-                          firstDay: DateTime(2020, 1, 1),
-                          lastDay: DateTime(2030, 12, 31),
-                          focusedDay: DateTime.now(),
-                          calendarFormat: CalendarFormat.month,
-                          availableGestures: AvailableGestures.horizontalSwipe,
-                          daysOfWeekHeight:
-                              MediaQuery.of(context).size.height * 0.035,
-                          headerStyle: const HeaderStyle(
-                            formatButtonVisible: false,
-                            titleCentered: true,
-                            leftChevronVisible: true,
-                            rightChevronVisible: true,
-                          ),
-                          daysOfWeekStyle: const DaysOfWeekStyle(
-                            weekdayStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
+                    const SizedBox(height: 16),
+
+                    // Home Works
+                    assignmentsAsync.when(
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (err, _) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'Error loading home works: $err',
+                              style: const TextStyle(color: Colors.red),
                             ),
                           ),
-                          onDaySelected: (selectedDay, focusedDay) {
-                            // TODO: handle day tap
+                      data: (list) {
+                        if (list.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'No home works assigned.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        }
+                        return HomeWorksWidget(
+                          items:
+                              list
+                                  .map(
+                                    (a) => HomeWorkData(
+                                      tag: a.title,
+                                      title: a.description,
+                                      teacherName: a.teacherName,
+                                      dueDate: a.dueDate,
+                                      progress: a.submitted ? 1.0 : 0.0,
+                                      thumbnailUrl: null,
+                                    ),
+                                  )
+                                  .toList(),
+                          onFilterTap: () {
+                            // TODO: open subject filter
                           },
-                          selectedDayPredicate:
-                              (day) => isSameDay(day, DateTime.now()),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
+                    const SizedBox(height: 16),
 
-                  // Performance Chart
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Performance Overview',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const FilterablePerformanceChart(),
-                  const SizedBox(height: 16),
-                ],
+                    // Attendance
+                    attendanceAsync.when(
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (err, _) => Text(
+                            'Error loading attendance: $err',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                      data:
+                          (att) => AttendanceCard(
+                            totalDays: att.totalDays,
+                            present: att.present,
+                            absent: att.absent,
+                            late: att.late,
+                            halfDay: att.halfDay,
+                            selectedTimeframe: ref.read(timeframeProvider),
+                            onTimeframeChanged:
+                                (tf) =>
+                                    ref.read(timeframeProvider.notifier).state =
+                                        tf!,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Performance Chart
+                    const Text(
+                      'Performance Overview',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const FilterablePerformanceChart(),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
-            ),
+        ),
       ),
     );
   }
@@ -345,12 +324,13 @@ void joinZoomMeeting(BuildContext context, String zoomLink) async {
     builder: (_) => const Center(child: CircularProgressIndicator()),
   );
   try {
-    if (await canLaunchUrl(uri))
+    if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    else
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Could not launch Zoom link: \$zoomLink")),
+        SnackBar(content: Text("Could not launch Zoom link: $zoomLink")),
       );
+    }
   } finally {
     Navigator.of(context).pop();
   }
