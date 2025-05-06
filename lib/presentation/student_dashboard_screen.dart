@@ -121,8 +121,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                   padding: EdgeInsets.zero,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.home),
-                      title: const Text("Dashboard"),
+                      leading: const Icon(Icons.person_outline),
+                      title: const Text("My Profile"),
                       onTap: () {
                         Navigator.pop(context); // Close the drawer
                       },
