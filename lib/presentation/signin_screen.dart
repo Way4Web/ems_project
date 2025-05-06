@@ -193,7 +193,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 8,
                               ), // Rounded corners
                             ),
-                            backgroundColor: CommonColor.kbuttonColor,
+                            backgroundColor: CommonClass.kbuttonColor,
                             // Replace with your button color e.g. CommonColor.kbuttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -215,7 +215,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         Center(
                           child: Text(
                             loginState.message!,
-                            style: TextStyle(color: CommonColor.kbuttonColor),
+                            style: TextStyle(color: CommonClass.kbuttonColor),
                           ),
                         ),
 
@@ -236,7 +236,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             child: Text(
                               'Create Account',
                               style: TextStyle(
-                                color: CommonColor.kbuttonColor,
+                                color: CommonClass.kbuttonColor,
                               ), // Replace with your button color if needed
                             ), //
                           ),

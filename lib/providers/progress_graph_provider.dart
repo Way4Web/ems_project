@@ -1,4 +1,5 @@
 import 'package:ems_project/Domain/progress_graph_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +10,7 @@ final secureStorage = FlutterSecureStorage();
 
 // Progress provider to fetch data from the API
 final progressProvider = FutureProvider<Progress>((ref) async {
-  const apiUrl = "http://192.168.29.189:5000/api/student/getProgress";
+  final apiUrl = "${CommonClass.urlCommon}api/student/getProgress";
 
   // Retrieve the token from secure storage
   final token = await secureStorage.read(key: "token");

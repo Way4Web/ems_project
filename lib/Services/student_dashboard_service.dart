@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/assignment_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +13,7 @@ class ClassSessionRepository {
     // Replace with your actual API endpoint
     // final url = 'http://192.168.29.189:5000/api/student/classes';
     final url = Uri.parse(
-      'http://192.168.29.189:5000/api/student/classes',
+      '${CommonClass.urlCommon}api/student/classes',
     );
     final token = await secureStorage.read(key: "token");
 
@@ -46,7 +47,7 @@ class ClassSessionRepository {
 
 /// Fetches assignments from your API endpoint
 final assignmentsProvider = FutureProvider<List<Assignment>>((ref) async {
-  final uri = Uri.parse('http://192.168.29.189:5000/api/student/getAssignments');
+  final uri = Uri.parse('${CommonClass.urlCommon}api/student/getAssignments');
   // final response = await http.get(uri);                             // GET request :contentReference[oaicite:4]{index=4}
   final token = await secureStorage.read(key: "token");
 

@@ -41,9 +41,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class CommonColor {
+class CommonClass {
   static final kbuttonColor = Color(0xff3366FF);
   static final kGreyColor = Color(0xFF3A4A64);
+  static final urlCommon = "http://192.168.29.190:5000/";
+
 }
 
 class StartupScreen extends ConsumerStatefulWidget {
@@ -80,3 +82,6 @@ class _StartupScreenState extends ConsumerState<StartupScreen> {
     );
   }
 }
+
+
+

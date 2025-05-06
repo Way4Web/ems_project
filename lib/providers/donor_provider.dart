@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:ems_project/Domain/student_model.dart';
 import 'package:ems_project/Services/donor_api_service.dart';
+import 'package:ems_project/main.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final donorProvider = StateNotifierProvider<DonorNotifier, DonorState>((ref) {
-  return DonorNotifier(DonorApiService(baseUrl: 'http://192.168.29.189:5000/api/admin'));
+  return DonorNotifier(DonorApiService(baseUrl: '${CommonClass.urlCommon}api/admin'));
 });
 
 @immutable

@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class SingleStudentService {
-  final String _baseUrl = 'http://192.168.29.189:5000/api/student';
-  final String apiUrlStudent =
-      "http://192.168.29.189:5000/api/admin/updateStudent";
-
-
+  final String _baseUrl = '${CommonClass.urlCommon}api/student';
+  final String apiUrlStudent = '${CommonClass.urlCommon}api/admin/updateStudent';
 
   // FlutterSecureStorage instance to fetch the token
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -65,7 +63,8 @@ class SingleStudentService {
       headers: {
         'Content-Type': 'application/json',
         // 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmVkNzA0NDY1YjkwZTBhY2FkMjFmOCIsInJvbGUiOiJhZG1pbiIsIm9yZ2FuaXphdGlvbiI6IjY3YmVkNTIwNDY1YjkwZTBhY2FkMjFmMiIsImlhdCI6MTc0NDE3ODc0OX0.LSKdFxhyZdRJFSVxEXZNNySj2pIss7qMQsApwigrDAU'
-        'Authorization': 'Bearer $token', // Add token for authorization
+        'Authorization': 'Bearer $token',
+        // Add token for authorization
       },
       body: body,
     );
@@ -94,8 +93,3 @@ class SingleStudentService {
     }
   }
 }
-
-
-
-
-

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http show delete, get, post, put;
@@ -179,7 +180,7 @@ class EditApiDonorDetails {
 
 
 class DeleteDonorApiService {
-  final String baseUrl = "http://192.168.29.189:5000/api/admin";
+  final String baseUrl = "${CommonClass.urlCommon}api/admin";
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   Future<bool> deleteDonors(String donorId) async {

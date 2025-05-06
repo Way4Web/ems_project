@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,7 @@ class StudentApiResponse {
 
 class StudentApiService {
   // API endpoint
-  final String apiUrl = "http://192.168.29.189:5000/api/admin/getAllStudents";
+  final String apiUrl = "${CommonClass.urlCommon}api/admin/getAllStudents";
 
   // Secure storage instance for token storage
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -69,7 +70,7 @@ class StudentApiService {
 }
 
 class DeleteStudentApiService {
-  final String baseUrl = "http://192.168.29.189:5000/api/admin";
+  final String baseUrl = "${CommonClass.urlCommon}api/admin";
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   Future<bool> deleteStudent(String studentId) async {
@@ -103,7 +104,7 @@ class DeleteStudentApiService {
 }
 
 class EditApiStudentDetails {
-  final String apiUrl = "http://192.168.29.190:5000/api/admin/updateStudent";
+  final String apiUrl = "${CommonClass.urlCommon}api/admin/updateStudent";
 
   // BuildContext get context => null; // Replace with your API URL
 

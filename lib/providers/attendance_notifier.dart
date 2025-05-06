@@ -1,3 +1,4 @@
+import 'package:ems_project/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +45,7 @@ final attendanceProvider = FutureProvider<Attendance>((ref) async {
 
   // Construct the API URL dynamically based on the selected timeframe
   final url = Uri.parse(
-    'http://192.168.29.189:5000/api/student/attendance?timeframe=$timeframe',
+    '${CommonClass.urlCommon}api/student/attendance?timeframe=$timeframe',
   );
 
   // Read the token from secure storage

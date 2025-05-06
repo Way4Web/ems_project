@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_project/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -79,7 +80,7 @@ final loginStateProvider = StateNotifierProvider<LoginStateNotifier, LoginState>
 class LoginApiService {
   Future<Map<String, dynamic>> loginUser(String email, String password) async {
     final response = await http.post(
-      Uri.parse('http://192.168.29.189:5000/api/auth/login'),
+      Uri.parse('${CommonClass.urlCommon}api/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/parent_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'organization_api.dart';
 
 class ParentApiService {
-  final String apiUrl = "http://192.168.29.189:5000/api/admin/getParents";
+  final String apiUrl = "${CommonClass.urlCommon}api/admin/getParents";
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -50,7 +51,7 @@ class ParentApiService {
 
 class EditApiParentDetails {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/admin/updateParent";
+      "${CommonClass.urlCommon}api/admin/updateParent";
 
   // BuildContext get context => null; // Replace with your API URL
 
@@ -99,7 +100,7 @@ class EditApiParentDetails {
 
 
 class DeleteParentApiService {
-  final String baseUrl = "http://192.168.29.189:5000/api/admin";
+  final String baseUrl = "${CommonClass.urlCommon}api/admin";
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   Future<bool> deleteParent(String parentId) async {
@@ -135,7 +136,7 @@ class DeleteParentApiService {
 
 
 class AddParentApiService {
-  final String baseUrl = "http://192.168.29.189:5000/api";
+  final String baseUrl = "${CommonClass.urlCommon}api";
 
   // BuildContext get context => null;
 

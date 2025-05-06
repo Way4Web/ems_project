@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:ems_project/Domain/student_model.dart';
 import 'package:ems_project/Services/teachers_api_service.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final teacherProvider = StateNotifierProvider<TeacherNotifier, TeacherState>((ref) {
-  return TeacherNotifier(TeacherService(baseUrl: 'http://192.168.29.189:5000/api/admin'));
+  return TeacherNotifier(TeacherService(baseUrl: '${CommonClass.urlCommon}api/admin'));
 });
 
 @immutable

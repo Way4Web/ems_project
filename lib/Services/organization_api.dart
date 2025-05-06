@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/manage_organisation_model.dart';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -40,7 +41,7 @@ class OrganizationApiService {
     }
 
     final response = await http.post(
-      Uri.parse('http://192.168.29.189:5000/api/superadmin/createOrganization'),
+      Uri.parse('${CommonClass.urlCommon}api/superadmin/createOrganization'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -73,7 +74,7 @@ class OrganizationApiService {
 
 class GetApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/getOrganizations"; // Replace with your API URL
+      "${CommonClass.urlCommon}api/superadmin/getOrganizations"; // Replace with your API URL
 
   Future<List<GetOrganizationModel>> fetchOrganizations({int page = 1, int limit = 10}) async {
     final token = await getToken();
@@ -103,7 +104,7 @@ class GetApiManageOrganisation {
 
 class EditApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/updateOrganization";
+      "${CommonClass.urlCommon}api/superadmin/updateOrganization";
 
   // BuildContext get context => null; // Replace with your API URL
 
@@ -151,7 +152,7 @@ class EditApiManageOrganisation {
 
 class DeleteApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/deleteOrganization";
+      "${CommonClass.urlCommon}api/superadmin/deleteOrganization";
 
 
   Future<void> deleteOrganization(String organizationId,BuildContext context) async {
@@ -199,7 +200,7 @@ class DeleteApiManageOrganisation {
 
 class AddApiManageOrganisation {
   final String apiUrl =
-      "http://192.168.29.189:5000/api/superadmin/createOrganization";
+      "${CommonClass.urlCommon}api/superadmin/createOrganization";
 
   // BuildContext get context => null; // Replace with your API URL
 
