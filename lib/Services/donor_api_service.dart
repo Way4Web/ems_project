@@ -62,7 +62,7 @@ class DonorApiService {
 
 
 class AddDonorApiService {
-  final String baseUrl = "http://192.168.29.190:5000/api";
+  // final String baseUrl = "http://192.168.29.225:5000/api";
 
   // BuildContext get context => null;
 
@@ -72,7 +72,7 @@ class AddDonorApiService {
     required String password,
     required BuildContext context,
   }) async {
-    final url = Uri.parse("$baseUrl/admin/createDonor");
+    final url = Uri.parse("${CommonClass.urlCommon}/admin/createDonor");
 
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -131,7 +131,7 @@ class AddDonorApiService {
 
 class EditApiDonorDetails {
   final String apiUrl =
-      "http://192.168.29.190:5000/api/admin/updateDonor";
+      "http://192.168.29.255:5000/api/admin/updateDonor";
 
   // BuildContext get context => null; // Replace with your API URL
 

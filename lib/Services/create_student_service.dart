@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AddStudentApiService {
-  final String baseUrl = "http://192.168.29.190:5000/api";
+  // final String baseUrl = "http://192.168.29.225:5000/api";
+  // final String baseUrl = urlCommon;
 
   // BuildContext get context => null;
 
@@ -14,7 +16,7 @@ class AddStudentApiService {
     required String password,
     required BuildContext context,
   }) async {
-    final url = Uri.parse("$baseUrl/admin/createStudent");
+    final url = Uri.parse("${CommonClass.urlCommon}/admin/createStudent");
 
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
