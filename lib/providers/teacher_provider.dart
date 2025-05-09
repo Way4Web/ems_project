@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:ems_project/Domain/student_model.dart';
+import 'package:ems_project/Services/single_teacher_api.dart';
 import 'package:ems_project/Services/teachers_api_service.dart';
 import 'package:ems_project/main.dart';
 import 'package:flutter/material.dart';
@@ -95,3 +96,18 @@ class TeacherNotifier extends StateNotifier<TeacherState> {
     super.dispose();
   }
 }
+
+
+
+
+
+// Provider for TeacherApiService
+final teacherApiServiceProvider = Provider<TeacherApiService>((ref) {
+  return TeacherApiService();
+});
+
+// FutureProvider to fetch single teacher data
+final singleTeacherProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final teacherApiService = ref.read(teacherApiServiceProvider);
+  return await teacherApiService.getSingleTeacher();
+});

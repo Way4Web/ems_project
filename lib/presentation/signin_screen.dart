@@ -3,6 +3,7 @@ import 'package:ems_project/main.dart';
 import 'package:ems_project/presentation/registration_screen.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/student_dashboard_screen.dart';
+import 'package:ems_project/presentation/teacher_dashboard_screen.dart';
 import 'package:ems_project/presentation/widget/edit_single_student.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
@@ -292,7 +293,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
             ),
           );
-        } else {
+        }
+        if (loginState.role == 'teacher') {
+          // final student = await ref.read(singleStudentProvider.future);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeacherDashboardScreen()
+            ),
+          );
+        }
+        else {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => SidebarScreen()),
