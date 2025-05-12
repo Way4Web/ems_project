@@ -1,5 +1,6 @@
 import 'package:ems_project/presentation/widget/create_class_session.dart';
 import 'package:ems_project/presentation/widget/profile_card.dart';
+import 'package:ems_project/presentation/widget/upcoming_event_widget.dart';
 import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -191,6 +192,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                           )
                         ],
                       ),
+                      UpcomingEventsWidget()
                     ],
                   );
                 },
