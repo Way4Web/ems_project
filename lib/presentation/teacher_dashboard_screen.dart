@@ -26,13 +26,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
             children: [
               teacherAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error:
-                    (err, stack) => Center(
-                      child: Text(
-                        'Error: $err',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
+                error: (err, stack) => Center(
+                  child: Text(
+                    'Error: $err',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
                 data: (teacherData) {
                   final String teacherName = teacherData['name'] ?? 'Teacher';
 
@@ -82,9 +81,6 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         organization: teacherData['organizationName'],
                         quarterLabel: "",
                         resultLabel: "Active",
-                        // status: teacherData['status'],
-                        // email: teacherData['email'],
-                        // id: teacherData['id'],
                         onEdit: () {},
                       ),
 
@@ -113,18 +109,18 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) {
-                                        return CreateClassSession();
+                                        return  CreateClassSession();
                                       },
                                     ),
                                   );
                                 },
                                 style: ButtonStyle(
-                                  backgroundColor: WidgetStateProperty.all(
+                                  backgroundColor: MaterialStateProperty.all(
                                     Colors.blue,
                                   ),
                                 ),
                                 child: Row(
-                                  children: [
+                                  children: const [
                                     Icon(
                                       Icons.add_box_outlined,
                                       color: Colors.white,
@@ -154,45 +150,49 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            child: TableCalendar(
-                              firstDay: DateTime.utc(2020, 1, 1),
-                              lastDay: DateTime.utc(2030, 12, 31),
-                              focusedDay: DateTime.now(),
-                              calendarFormat: CalendarFormat.month,
-                              daysOfWeekHeight: 30, // Adjusted height for day names
-                              headerStyle: HeaderStyle(
-                                formatButtonVisible: false,
-                                titleCentered: true,
-                                leftChevronIcon: const Icon(
-                                  Icons.chevron_left,
-                                  color: Colors.black,
+                            child: SizedBox(
+                              height: 400, // Set a fixed height for the calendar
+                              child: TableCalendar(
+                                firstDay: DateTime.utc(2020, 1, 1),
+                                lastDay: DateTime.utc(2030, 12, 31),
+                                focusedDay: DateTime.now(),
+                                calendarFormat: CalendarFormat.month,
+                                daysOfWeekHeight: 30,
+                                headerStyle: HeaderStyle(
+                                  formatButtonVisible: false,
+                                  titleCentered: true,
+                                  leftChevronIcon: const Icon(
+                                    Icons.chevron_left,
+                                    color: Colors.black,
+                                  ),
+                                  rightChevronIcon: const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                                rightChevronIcon: const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              calendarStyle: CalendarStyle(
-                                todayDecoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                                selectedDecoration: BoxDecoration(
-                                  color: Colors.blue.shade700,
-                                  shape: BoxShape.circle,
-                                ),
-                                selectedTextStyle: const TextStyle(
-                                  color: Colors.white,
-                                ),
-                                weekendTextStyle: const TextStyle(
-                                  color: Colors.red,
+                                calendarStyle: CalendarStyle(
+                                  todayDecoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  selectedDecoration: BoxDecoration(
+                                    color: Colors.blue.shade700,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  selectedTextStyle: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  weekendTextStyle: const TextStyle(
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
-                      UpcomingEventsWidget()
+                      const SizedBox(height: 20),
+                      UpcomingEventsWidget(),
                     ],
                   );
                 },
