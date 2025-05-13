@@ -131,8 +131,8 @@ class EventCard extends StatelessWidget {
                     onPressed: () {
                       // Implement the mark attendance logic
                       AttendanceService.markAttendance(
-                        "6823133caed25c3a4902b7cb", // sessionId
-                        "67bef0fdc8782eceea002da8", // studentId
+                        event['id'], // sessionId
+                        event['students'][0], // studentId
                         true, // attended
                       );
                     },
