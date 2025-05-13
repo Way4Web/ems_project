@@ -130,6 +130,11 @@ class EventCard extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       // Implement the mark attendance logic
+                      AttendanceService.markAttendance(
+                        "6823133caed25c3a4902b7cb", // sessionId
+                        "67bef0fdc8782eceea002da8", // studentId
+                        true, // attended
+                      );
                     },
                     child: const Text(
                       'Mark Attendance',

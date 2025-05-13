@@ -26,12 +26,13 @@ class TeacherDashboardScreen extends ConsumerWidget {
             children: [
               teacherAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(
-                  child: Text(
-                    'Error: $err',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
+                error:
+                    (err, stack) => Center(
+                      child: Text(
+                        'Error: $err',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
                 data: (teacherData) {
                   final String teacherName = teacherData['name'] ?? 'Teacher';
 
@@ -109,7 +110,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) {
-                                        return  CreateClassSession();
+                                        return CreateClassSession();
                                       },
                                     ),
                                   );
@@ -151,7 +152,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               ],
                             ),
                             child: SizedBox(
-                              height: 400, // Set a fixed height for the calendar
+                              height: 400,
+                              // Set a fixed height for the calendar
                               child: TableCalendar(
                                 firstDay: DateTime.utc(2020, 1, 1),
                                 lastDay: DateTime.utc(2030, 12, 31),

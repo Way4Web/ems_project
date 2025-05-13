@@ -25,7 +25,8 @@ class GetClassSessionService {
         Uri.parse(_baseUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Add Bearer token for authorization
+          'Authorization': 'Bearer $token',
+          // Add Bearer token for authorization
         },
       );
 
@@ -42,7 +43,53 @@ class GetClassSessionService {
   }
 
   // Define a Riverpod provider to fetch class sessions
-  static final getClassSessionsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  static final getClassSessionsProvider = FutureProvider<Map<String, dynamic>>((
+    ref,
+  ) async {
     return GetClassSessionService.fetchClassSessions();
   });
+}
+
+
+class AttendanceService {
+  static const String _baseUrl =
+      "http://192.168.1.6:5000/api/teacher/markAttendance/";
+
+  static Future<void> markAttendance(
+    String sessionId,
+    String studentId,
+    bool attended,
+  ) async {
+    final String url = "$_baseUrl$sessionId/attend";
+
+    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
+    // Retrieve the token from secure storage
+    final token = await secureStorage.read(key: "token");
+
+    if (token == null) {
+      throw Exception("Token not found. Please log in again.");
+    }
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Replace with your token
+        },
+        body: jsonEncode({'studentId': studentId, 'attended': attended}),
+      );
+
+      if (response.statusCode == 200) {
+        print("Attendance marked successfully.");
+      } else {
+        print(
+          "Failed to mark attendance: ${response.statusCode} - ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Error making PUT request: $e");
+    }
+  }
 }
