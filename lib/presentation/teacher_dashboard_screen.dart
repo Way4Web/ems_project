@@ -1,3 +1,5 @@
+import 'package:ems_project/Services/get_best_peromer.dart';
+import 'package:ems_project/presentation/widget/best_perfomer_indicator.dart';
 import 'package:ems_project/presentation/widget/create_class_session.dart';
 import 'package:ems_project/presentation/widget/profile_card.dart';
 import 'package:ems_project/presentation/widget/upcoming_event_widget.dart';
@@ -28,11 +30,11 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error:
                     (err, stack) => Center(
-                      child: Text(
-                        'Error: $err',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
+                  child: Text(
+                    'Error: $err',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
                 data: (teacherData) {
                   final String teacherName = teacherData['name'] ?? 'Teacher';
 
@@ -195,6 +197,10 @@ class TeacherDashboardScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 20),
                       UpcomingEventsWidget(),
+                      const SizedBox(height: 20),
+
+                      // Assignment List Widget
+                      AssignmentListWidget(assignmentsFuture: fetchAssignments()),
                     ],
                   );
                 },
