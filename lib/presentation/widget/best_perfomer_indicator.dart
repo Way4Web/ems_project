@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AssignmentListWidget extends StatelessWidget {
-  final Future<List<BestPerfomerIndicator>> assignmentsFuture;
+  final Future<List<BestPerformerIndicator>> assignmentsFuture;
 
   AssignmentListWidget({required this.assignmentsFuture});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<BestPerfomerIndicator>>(
+    return FutureBuilder<List<BestPerformerIndicator>>(
       future: assignmentsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -23,10 +23,7 @@ class AssignmentListWidget extends StatelessWidget {
             children: [
               const Text(
                 'Best Performers',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               ListView.builder(
@@ -37,21 +34,23 @@ class AssignmentListWidget extends StatelessWidget {
                   final assignment = assignments[index];
 
                   // Safely retrieve the grade (assumes there's at least one submission)
-                  final submission = assignment.submissions.isNotEmpty
-                      ? assignment.submissions[0] // Using first submission
-                      : null;
+                  final submission =
+                      assignment.submissions!.isNotEmpty
+                          ? assignment.submissions![0] // Using first submission
+                          : null;
 
                   double progress = 0.0;
-                  if (submission != null) {
-                    progress = submission.grade / 100; // Convert grade to a percentage
+                  if (submission != null && submission.grade != null) {
+                    progress = submission.grade! / 100;
                   }
 
-                  return Card(color: Colors.white,
+                  return Card(
+                    color: Colors.white,
                     surfaceTintColor: Colors.white,
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      title: Text(assignment.title),
-                      subtitle: Text(assignment.description),
+                      title: Text(assignment.title!),
+                      subtitle: Text(assignment.description!),
                       trailing: SizedBox(
                         width: 200,
                         child: Column(
@@ -65,12 +64,18 @@ class AssignmentListWidget extends StatelessWidget {
                                 progress == 1.0
                                     ? Colors.green
                                     : (progress >= 0.8
-                                    ? Colors.yellow
-                                    : Colors.blue),
+                                        ? Colors.yellow
+                                        : Colors.blue),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text('${(progress * 100).toInt()}%',style: TextStyle(fontWeight: FontWeight.w700,fontSize: 14),),
+                            Text(
+                              '${(progress * 100).toInt()}%',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -89,62 +94,61 @@ class AssignmentListWidget extends StatelessWidget {
   }
 }
 
-class BestPerfomerIndicator {
-  final String id;
-  final String title;
-  final String description;
-  final String dueDate;
-  final String videoLink;
-  final String teacher;
-  final List<String> students;
-  final List<Submission> submissions;
+class BestPerformerIndicator {
+  final String? id;
+  final String? title;
+  final String? description;
+  final String? dueDate;
+  final String? videoLink;
+  final String? teacher;
+  final List<String>? students;
+  final List<Submission>? submissions;
 
-  BestPerfomerIndicator({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.dueDate,
-    required this.videoLink,
-    required this.teacher,
-    required this.students,
-    required this.submissions,
+  BestPerformerIndicator({
+    this.id,
+    this.title,
+    this.description,
+    this.dueDate,
+    this.videoLink,
+    this.teacher,
+    this.students,
+    this.submissions,
   });
 
-  factory BestPerfomerIndicator.fromJson(Map<String, dynamic> json) {
-    return BestPerfomerIndicator(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      dueDate: json['dueDate'],
-      videoLink: json['videoLink'],
-      teacher: json['teacher'],
-      students: List<String>.from(json['students'] ?? []),
-      submissions: (json['submissions'] as List<dynamic>? ?? [])
-          .map((e) => Submission.fromJson(e))
-          .toList(),
+  factory BestPerformerIndicator.fromJson(Map<String, dynamic> json) {
+    return BestPerformerIndicator(
+      id: json['id'] as String?,
+      title: json['title'] as String?,
+      description: json['description'] as String?,
+      dueDate: json['dueDate'] as String?,
+      videoLink: json['videoLink'] as String?,
+      teacher: json['teacher'] as String?,
+      students:
+          (json['students'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
+      submissions:
+          (json['submissions'] as List<dynamic>?)
+              ?.map((e) => Submission.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 }
 
 class Submission {
-  final String student;
-  final String content;
-  final int grade;
-  final String submittedAt;
+  final String? student;
+  final String? content;
+  final int? grade;
+  final String? submittedAt;
 
-  Submission({
-    required this.student,
-    required this.content,
-    required this.grade,
-    required this.submittedAt,
-  });
+  Submission({this.student, this.content, this.grade, this.submittedAt});
 
   factory Submission.fromJson(Map<String, dynamic> json) {
     return Submission(
-      student: json['student'],
-      content: json['content'],
-      grade: json['grade'],
-      submittedAt: json['submittedAt'],
+      student: json['student'] as String?,
+      content: json['content'] as String?,
+      grade: json['grade'] as int?,
+      submittedAt: json['submittedAt'] as String?,
     );
   }
 }

@@ -1,13 +1,11 @@
 import 'dart:convert';
+import 'dart:io'; // For handling SocketException
 import 'package:ems_project/main.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ClassSessionService {
-  // static const String baseUrl = "http://192.168.1.6:5000/api/teacher/createClassSession";
-
-  // Create a class session
+  /// Create a new class session
   static Future<Map<String, dynamic>> createClassSession({
     required String title,
     required List<String> students,
@@ -24,9 +22,21 @@ class ClassSessionService {
       throw Exception("Token not found. Please log in again.");
     }
 
+    final String url = 'http://192.168.1.6:5000/api/teacher/createClassSession';
+
     try {
+      print("Creating class session...");
+      print("Request URL: $url");
+      print("Request Body: ${jsonEncode({
+        "title": title,
+        "students": students,
+        "zoomLink": zoomLink,
+        "startTime": startTime,
+        "endTime": endTime,
+      })}");
+
       final response = await http.post(
-        Uri.parse('${CommonClass.urlCommon}api/teacher/createClassSession'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token', // Add Bearer token for authorization
@@ -40,22 +50,21 @@ class ClassSessionService {
         }),
       );
 
+      print("Response Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body); // Return the response as a Map
+        // Parse and return the response as a Map
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception("Unauthorized. Please log in again.");
       } else {
         throw Exception('Failed to create class session: ${response.reasonPhrase}');
       }
+    } on SocketException {
+      throw Exception("No Internet connection. Please try again.");
     } catch (e) {
       throw Exception('Error creating class session: $e');
     }
   }
-
-
-
-
-
-
-
-// Class to handle the API call for fetching class sessions
-
 }
