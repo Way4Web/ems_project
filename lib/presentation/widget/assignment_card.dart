@@ -52,27 +52,29 @@ class AssignmentCard extends ConsumerWidget {
             const SizedBox(height: 16),
             assignmentsAsyncValue.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text(
-                  'Error: $error',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
+              error:
+                  (error, stack) => Center(
+                    child: Text(
+                      'Error: $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
               data: (assignments) {
                 if (assignments.isEmpty) {
                   return const Center(child: Text('No assignments available'));
                 }
 
                 return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
+                  height: MediaQuery.of(context).size.height * 0.21,
                   child: ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     itemCount: assignments.length,
                     itemBuilder: (context, index) {
                       final assignment = assignments[index];
-                      final submission = assignment.submissions?.isNotEmpty == true
-                          ? assignment.submissions!.first
-                          : null;
+                      final submission =
+                          assignment.submissions?.isNotEmpty == true
+                              ? assignment.submissions!.first
+                              : null;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -102,19 +104,22 @@ class AssignmentCard extends ConsumerWidget {
                                   const SizedBox(height: 10),
                                   LinearProgressIndicator(
                                     minHeight: 10.0,
-                                    value: submission?.grade != null
-                                        ? submission!.grade! / 100
-                                        : 0.0,
+                                    value:
+                                        submission?.grade != null
+                                            ? submission!.grade! / 100
+                                            : 0.0,
                                     backgroundColor: Colors.grey[300],
                                     color: Colors.blue,
                                   ),
                                   const SizedBox(height: 10),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Flexible(
                                         child: Text(
-                                          assignment.description ?? 'No Submissions',
+                                          assignment.description ??
+                                              'No Submissions',
                                           style: const TextStyle(fontSize: 14),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -132,7 +137,8 @@ class AssignmentCard extends ConsumerWidget {
                                               _showEditDialog(
                                                 context: context,
                                                 assignmentId: assignment.id!,
-                                                initialTitle: assignment.title ?? '',
+                                                initialTitle:
+                                                    assignment.title ?? '',
                                                 ref: ref,
                                               );
                                             },
@@ -144,23 +150,39 @@ class AssignmentCard extends ConsumerWidget {
                                               color: Colors.red,
                                             ),
                                             onPressed: () async {
-                                              final confirm = await _showDeleteConfirmationDialog(context);
+                                              final confirm =
+                                                  await _showDeleteConfirmationDialog(
+                                                    context,
+                                                  );
                                               if (confirm) {
                                                 try {
-                                                  await ref
-                                                      .read(deleteAssignmentProvider(assignment.id!).future);
+                                                  await ref.read(
+                                                    deleteAssignmentProvider(
+                                                      assignment.id!,
+                                                    ).future,
+                                                  );
                                                   // Refresh the assignments list
-                                                  ref.invalidate(assignmentsProviderTeacher);
+                                                  ref.invalidate(
+                                                    assignmentsProviderTeacher,
+                                                  );
 
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
                                                     const SnackBar(
-                                                      content: Text('Assignment deleted successfully'),
+                                                      content: Text(
+                                                        'Assignment deleted successfully',
+                                                      ),
                                                     ),
                                                   );
                                                 } catch (error) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
                                                     SnackBar(
-                                                      content: Text('Failed to delete assignment: $error'),
+                                                      content: Text(
+                                                        'Failed to delete assignment: $error',
+                                                      ),
                                                     ),
                                                   );
                                                 }
@@ -191,32 +213,32 @@ class AssignmentCard extends ConsumerWidget {
 
 Future<bool> _showDeleteConfirmationDialog(BuildContext context) async {
   return await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        title: const Text('Delete Assignment'),
-        content: const Text(
-          'Are you sure you want to delete this assignment?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.white),
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            title: const Text('Delete Assignment'),
+            content: const Text(
+              'Are you sure you want to delete this assignment?',
             ),
-          ),
-        ],
-      );
-    },
-  ) ??
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      ) ??
       false;
 }
 
@@ -254,58 +276,68 @@ void _showEditDialog({
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                onPressed: _isLoading
-                    ? null
-                    : () async {
-                  if (_titleController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Title cannot be empty')),
-                    );
-                    return;
-                  }
+                onPressed:
+                    _isLoading
+                        ? null
+                        : () async {
+                          if (_titleController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Title cannot be empty'),
+                              ),
+                            );
+                            return;
+                          }
 
-                  setState(() {
-                    _isLoading = true;
-                  });
+                          setState(() {
+                            _isLoading = true;
+                          });
 
-                  try {
-                    await ref.read(updateAssignmentProvider({
-                      'assignmentId': assignmentId,
-                      'title': _titleController.text.trim(),
-                    }).future);
+                          try {
+                            await ref.read(
+                              updateAssignmentProvider({
+                                'assignmentId': assignmentId,
+                                'title': _titleController.text.trim(),
+                              }).future,
+                            );
 
-                    // Refresh the assignments list
-                    ref.invalidate(assignmentsProviderTeacher);
+                            // Refresh the assignments list
+                            ref.invalidate(assignmentsProviderTeacher);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Assignment updated successfully!')),
-                    );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Assignment updated successfully!',
+                                ),
+                              ),
+                            );
 
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
-                  } finally {
-                    setState(() {
-                      _isLoading = false;
-                    });
-                  }
-                },
+                            Navigator.of(context).pop();
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          } finally {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                child: _isLoading
-                    ? const SizedBox(
-                  height: 16,
-                  width: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                    : const Text(
-                  'Save',
-                  style: TextStyle(color: Colors.white),
-                ),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text(
+                          'Save',
+                          style: TextStyle(color: Colors.white),
+                        ),
               ),
             ],
           );

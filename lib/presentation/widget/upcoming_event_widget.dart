@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class UpcomingEventsWidget extends ConsumerWidget {
+  const UpcomingEventsWidget({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the getClassSessionsProvider to fetch events
-    final eventsAsyncValue = ref.watch(
-      GetClassSessionService.getClassSessionsProvider,
-    );
+    final eventsAsyncValue = ref.watch(classSessionNotifierProvider);
 
     return Card(
       color: Colors.white,
@@ -45,14 +45,27 @@ class UpcomingEventsWidget extends ConsumerWidget {
                 final events = data['classSessions'] ?? [];
                 return events.isEmpty
                     ? const Center(child: Text('No upcoming events found.'))
-                    : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        return EventCard(event: event);
-                      },
+                    : SizedBox(
+                      height:
+                          MediaQuery.of(context).size.height *
+                          0.21, // Height to show 2 cards
+                      child: ListView.builder(
+                        physics:
+                            const BouncingScrollPhysics(), // Smooth scrolling
+                        itemCount: events.length,
+                        itemBuilder: (context, index) {
+                          final event = events[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height *
+                                  0.2, // Card height for 2 visible cards
+                              child: EventCard(event: event),
+                            ),
+                          );
+                        },
+                      ),
                     );
               },
             ),
@@ -66,7 +79,7 @@ class UpcomingEventsWidget extends ConsumerWidget {
 class EventCard extends StatelessWidget {
   final Map<String, dynamic> event;
 
-  EventCard({required this.event});
+  EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +97,6 @@ class EventCard extends StatelessWidget {
     return Card(
       surfaceTintColor: Colors.white,
       color: Colors.white,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       elevation: 2.0,
       child: Padding(
@@ -94,7 +106,7 @@ class EventCard extends StatelessWidget {
             // Left colored bar (for visual indication)
             Container(
               width: 5,
-              height: MediaQuery.of(context).size.height * 0.16,
+              height: double.infinity,
               color: Colors.red, // Customize color per event
             ),
             const SizedBox(width: 12),
@@ -154,7 +166,6 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Action Button (Mark Attendance)
           ],
         ),
       ),
