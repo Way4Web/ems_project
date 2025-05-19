@@ -1,21 +1,22 @@
+import 'package:ems_project/Domain/create_timetable_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TimetableEventData {
-  String? title;
-  String? startTime;
-  String? endTime;
-  String? type;
-  String? description;
-
-  TimetableEventData({
-    this.title = '',
-    this.startTime = '',
-    this.endTime = '',
-    this.type = 'Class',
-    this.description = '',
-  });
-}
+// class TimetableEventData {
+//   String? title;
+//   String? startTime;
+//   String? endTime;
+//   String? type;
+//   String? description;
+//
+//   TimetableEventData({
+//     this.title = '',
+//     this.startTime = '',
+//     this.endTime = '',
+//     this.type = 'Class',
+//     this.description = '',
+//   });
+// }
 
 class CreateTimetableScreen extends StatefulWidget {
   const CreateTimetableScreen({Key? key}) : super(key: key);
