@@ -17,13 +17,20 @@ class UpdateTimetableDialog extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<UpdateTimetableDialog> createState() => _UpdateTimetableDialogState();
+  ConsumerState<UpdateTimetableDialog> createState() =>
+      _UpdateTimetableDialogState();
 }
 
 class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
   late List<TimetableEventData> _events;
   final _formKey = GlobalKey<FormState>();
-  final List<String> _eventTypes = ['Class', 'Meeting', 'Exam', 'Study Group', 'Workshop'];
+  final List<String> _eventTypes = [
+    'Class',
+    'Meeting',
+    'Exam',
+    'Study Group',
+    'Workshop',
+  ];
   bool _isLoading = false;
 
   // Updated date and user info
@@ -37,10 +44,11 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
   void initState() {
     super.initState();
     // Convert TimetableEvent to TimetableEventData for editing
-    _events = widget.initialEvents.map((event) {
-      final service = ref.read(timeTableServiceProvider);
-      return service.convertEventToEventData(event);
-    }).toList();
+    _events =
+        widget.initialEvents.map((event) {
+          final service = ref.read(timeTableServiceProvider);
+          return service.convertEventToEventData(event);
+        }).toList();
 
     // If there are no events, add an empty one
     if (_events.isEmpty) {
@@ -62,10 +70,9 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
       insetPadding: EdgeInsets.zero,
 
       child: Container(
-        width: min(screenWidth - 16, 600), // Width is screen width minus 16px, with max of 600
-        constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.9,
-        ),
+        width: min(screenWidth - 16, 600),
+        // Width is screen width minus 16px, with max of 600
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,18 +111,13 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
         children: [
           const Text(
             'Update Timetable',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), //
           ),
           const Spacer(),
           IconButton(
@@ -237,7 +239,8 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
           _buildTextField(
             hint: 'Enter description',
             value: _events[index].description ?? '',
-            onChanged: (value) => setState(() => _events[index].description = value),
+            onChanged:
+                (value) => setState(() => _events[index].description = value),
             maxLines: 4,
           ),
         ],
@@ -250,10 +253,7 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -275,7 +275,10 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
           borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       validator: validator,
     );
@@ -337,7 +340,10 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
                 }
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(4),
@@ -350,9 +356,10 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
                             ? dateString
                             : hint,
                         style: TextStyle(
-                          color: dateString != null && dateString.isNotEmpty
-                              ? Colors.black
-                              : Colors.grey.shade600,
+                          color:
+                              dateString != null && dateString.isNotEmpty
+                                  ? Colors.black
+                                  : Colors.grey.shade600,
                         ),
                       ),
                     ),
@@ -366,10 +373,7 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
                 padding: const EdgeInsets.only(top: 8, left: 12),
                 child: Text(
                   state.errorText!,
-                  style: TextStyle(
-                    color: Colors.red.shade700,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.red.shade700, fontSize: 12),
                 ),
               ),
           ],
@@ -395,12 +399,10 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: InputBorder.none,
         ),
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
+        items:
+            items.map((String item) {
+              return DropdownMenuItem<String>(value: item, child: Text(item));
+            }).toList(),
       ),
     );
   }
@@ -409,16 +411,17 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
         children: [
           ElevatedButton.icon(
             onPressed: _isLoading ? null : _addNewEvent,
             icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text('Add Event', style: TextStyle(color: Colors.white)),
+            label: const Text(
+              'Add Event',
+              style: TextStyle(color: Colors.white),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -436,13 +439,17 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-              )
-                  : const Text('Update Timetable'),
+              child:
+                  _isLoading
+                      ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                      : const Text('Update Timetable'),
             ),
           ),
         ],
@@ -470,10 +477,10 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
 
       try {
         await ref.read(
-            updateTimetableProvider({
-              'timetableId': widget.timetableId,
-              'events': _events
-            }).future
+          updateTimetableProvider({
+            'timetableId': widget.timetableId,
+            'events': _events,
+          }).future,
         );
 
         // Close dialog and return success
@@ -500,3 +507,4 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
     }
   }
 }
+

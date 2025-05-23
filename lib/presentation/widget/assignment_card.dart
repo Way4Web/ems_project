@@ -21,7 +21,7 @@ class AssignmentCard extends ConsumerWidget {
               children: [
                 const Text(
                   'Assignments',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -66,140 +66,143 @@ class AssignmentCard extends ConsumerWidget {
 
                 return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.21,
-                  child: ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: assignments.length,
-                    itemBuilder: (context, index) {
-                      final assignment = assignments[index];
-                      final submission =
-                          assignment.submissions?.isNotEmpty == true
-                              ? assignment.submissions!.first
-                              : null;
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: assignments.length,
+                      itemBuilder: (context, index) {
+                        final assignment = assignments[index];
+                        final submission =
+                            assignment.submissions?.isNotEmpty == true
+                                ? assignment.submissions!.first
+                                : null;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          child: Card(
-                            color: Colors.white,
-                            surfaceTintColor: Colors.white,
-                            elevation: 5,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    assignment.title ?? 'Untitled Assignment',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2,
+                            child: Card(
+                              color: Colors.white,
+                              surfaceTintColor: Colors.white,
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      assignment.title ?? 'Untitled Assignment',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  LinearProgressIndicator(
-                                    minHeight: 10.0,
-                                    value:
-                                        submission?.grade != null
-                                            ? submission!.grade! / 100
-                                            : 0.0,
-                                    backgroundColor: Colors.grey[300],
-                                    color: Colors.blue,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          assignment.description ??
-                                              'No Submissions',
-                                          style: const TextStyle(fontSize: 14),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                    const SizedBox(height: 10),
+                                    LinearProgressIndicator(
+                                      minHeight: 10.0,
+                                      value:
+                                          submission?.grade != null
+                                              ? submission!.grade! / 100
+                                              : 0.0,
+                                      backgroundColor: Colors.grey[300],
+                                      color: Colors.blue,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            assignment.description ??
+                                                'No Submissions',
+                                            style: const TextStyle(fontSize: 14),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.edit,
-                                              size: 24,
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                size: 24,
+                                              ),
+                                              onPressed: () {
+                                                // Show edit dialog
+                                                _showEditDialog(
+                                                  context: context,
+                                                  assignmentId: assignment.id!,
+                                                  initialTitle:
+                                                      assignment.title ?? '',
+                                                  ref: ref,
+                                                );
+                                              },
                                             ),
-                                            onPressed: () {
-                                              // Show edit dialog
-                                              _showEditDialog(
-                                                context: context,
-                                                assignmentId: assignment.id!,
-                                                initialTitle:
-                                                    assignment.title ?? '',
-                                                ref: ref,
-                                              );
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              size: 24,
-                                              color: Colors.red,
-                                            ),
-                                            onPressed: () async {
-                                              final confirm =
-                                                  await _showDeleteConfirmationDialog(
-                                                    context,
-                                                  );
-                                              if (confirm) {
-                                                try {
-                                                  await ref.read(
-                                                    deleteAssignmentProvider(
-                                                      assignment.id!,
-                                                    ).future,
-                                                  );
-                                                  // Refresh the assignments list
-                                                  ref.invalidate(
-                                                    assignmentsProviderTeacher,
-                                                  );
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                size: 24,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: () async {
+                                                final confirm =
+                                                    await _showDeleteConfirmationDialog(
+                                                      context,
+                                                    );
+                                                if (confirm) {
+                                                  try {
+                                                    await ref.read(
+                                                      deleteAssignmentProvider(
+                                                        assignment.id!,
+                                                      ).future,
+                                                    );
+                                                    // Refresh the assignments list
+                                                    ref.invalidate(
+                                                      assignmentsProviderTeacher,
+                                                    );
 
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        'Assignment deleted successfully',
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'Assignment deleted successfully',
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                } catch (error) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        'Failed to delete assignment: $error',
+                                                    );
+                                                  } catch (error) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Failed to delete assignment: $error',
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
+                                                    );
+                                                  }
                                                 }
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 );
               },

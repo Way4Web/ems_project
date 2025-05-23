@@ -49,22 +49,25 @@ class UpcomingEventsWidget extends ConsumerWidget {
                       height:
                           MediaQuery.of(context).size.height *
                           0.21, // Height to show 2 cards
-                      child: ListView.builder(
-                        physics:
-                            const BouncingScrollPhysics(), // Smooth scrolling
-                        itemCount: events.length,
-                        itemBuilder: (context, index) {
-                          final event = events[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height *
-                                  0.2, // Card height for 2 visible cards
-                              child: EventCard(event: event),
-                            ),
-                          );
-                        },
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          physics:
+                              const BouncingScrollPhysics(), // Smooth scrolling
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            final event = events[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height *
+                                    0.2, // Card height for 2 visible cards
+                                child: EventCard(event: event),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     );
               },
@@ -172,3 +175,8 @@ class EventCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

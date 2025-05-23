@@ -218,6 +218,7 @@ class TimeTableService {
 
 // Riverpod provider for the service
 final timeTableServiceProvider = Provider<TimeTableService>((ref) {
+
   return TimeTableService();
 });
 

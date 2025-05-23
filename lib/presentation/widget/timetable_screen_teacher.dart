@@ -50,15 +50,18 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
         const Divider(height: 1),
         const SizedBox(height: 20),
         timetableAsyncValue.when(
-          data: (timetableEvents) => _buildTimetableCarousel(context, timetableEvents),
+          data:
+              (timetableEvents) =>
+                  _buildTimetableCarousel(context, timetableEvents),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Text(
-              'Error loading timetable: ${error.toString()}',
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          error:
+              (error, stack) => Center(
+                child: Text(
+                  'Error loading timetable: ${error.toString()}',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ),
         ),
       ],
     );
@@ -70,85 +73,87 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
 
     return isSmallScreen
         ? Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Class Timetable',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        _buildDatePicker(context),
-        const SizedBox(height: 16),
-        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _buildUpdateButton()),
-            const SizedBox(width: 8),
-            Expanded(child: _buildCreateButton()),
+            const Text(
+              'Class Timetable',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // _buildDatePicker(context),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _buildUpdateButton()),
+                const SizedBox(width: 8),
+                Expanded(child: _buildCreateButton()),
+              ],
+            ),
           ],
-        ),
-      ],
-    )
+        )
         : Row(
-      children: [
-        const Text(
-          'Class Timetable',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 16),
-        _buildDatePicker(context),
-        const Spacer(),
-        _buildUpdateButton(),
-        const SizedBox(width: 8),
-        _buildCreateButton(),
-      ],
-    );
+          children: [
+            const Text(
+              'Class Timetable',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 16),
+            // _buildDatePicker(context),
+            const Spacer(),
+            _buildUpdateButton(),
+            const SizedBox(width: 8),
+            _buildCreateButton(),
+          ],
+        );
   }
 
-  Widget _buildDatePicker(BuildContext context) {
-    final dateFormat = DateFormat('dd-MM-yyyy');
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-              });
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(dateFormat.format(_selectedDate)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                _selectedDate = _selectedDate.add(const Duration(days: 1));
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildDatePicker(BuildContext context) {
+  //   final dateFormat = DateFormat('dd-MM-yyyy');
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: Colors.grey.shade300),
+  //       borderRadius: BorderRadius.circular(4),
+  //     ),
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         IconButton(
+  //           icon: const Icon(Icons.chevron_left),
+  //           onPressed: () {
+  //             setState(() {
+  //               _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+  //             });
+  //           },
+  //         ),
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  //           child: Text(dateFormat.format(_selectedDate)),
+  //         ),
+  //         IconButton(
+  //           icon: const Icon(Icons.chevron_right),
+  //           onPressed: () {
+  //             setState(() {
+  //               _selectedDate = _selectedDate.add(const Duration(days: 1));
+  //             });
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildUpdateButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      onPressed: () => _showUpdateAllEventsDialog(),
-      child: const Text(
-        'Update Timetable',
-        style: TextStyle(color: Colors.white),
+    return Container(height: MediaQuery.of(context).size.height*0.054,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: () => _showUpdateAllEventsDialog(),
+        child: const Text(
+          'Update Timetable',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
@@ -160,23 +165,25 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
     timetableAsyncValue.when(
       data: (events) {
         if (events.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No events to update'))
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('No events to update')));
           return;
         }
 
         // Use the first event's ID as the timetable ID (or default)
-        final timetableId = events.isNotEmpty && events[0].id != null
-            ? events[0].id!
-            : defaultTimetableId;
+        final timetableId =
+            events.isNotEmpty && events[0].id != null
+                ? events[0].id!
+                : defaultTimetableId;
 
         showDialog(
           context: context,
-          builder: (context) => UpdateTimetableDialog(
-            timetableId: timetableId,
-            initialEvents: events, // Pass all events to the dialog
-          ),
+          builder:
+              (context) => UpdateTimetableDialog(
+                timetableId: timetableId,
+                initialEvents: events, // Pass all events to the dialog
+              ),
         ).then((result) {
           if (result == true) {
             // Refresh the timetable data
@@ -192,15 +199,17 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
           }
         });
       },
-      loading: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Loading events...'))
-      ),
-      error: (_, __) => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+      loading:
+          () => ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Loading events...'))),
+      error:
+          (_, __) => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
               content: Text('Could not load events to update'),
-              backgroundColor: Colors.red
-          )
-      ),
+              backgroundColor: Colors.red,
+            ),
+          ),
     );
   }
 
@@ -210,10 +219,11 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
 
     showDialog(
       context: context,
-      builder: (context) => UpdateTimetableDialog(
-        timetableId: timetableId,
-        initialEvents: [event], // Pass only this event to the dialog
-      ),
+      builder:
+          (context) => UpdateTimetableDialog(
+            timetableId: timetableId,
+            initialEvents: [event], // Pass only this event to the dialog
+          ),
     ).then((result) {
       if (result == true) {
         // Refresh the timetable data
@@ -231,24 +241,26 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
   }
 
   Widget _buildCreateButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) => const CreateTimetableDialog(),
-        ).then((result) {
-          if (result != null && result is List<TimetableEventData>) {
-            _handleCreatedEvents(result);
-          }
-        });
-      },
-      child: const Text(
-        'Create Timetable',
-        style: TextStyle(color: Colors.white),
+    return Container(height: MediaQuery.of(context).size.height*0.054,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => const CreateTimetableDialog(),
+          ).then((result) {
+            if (result != null && result is List<TimetableEventData>) {
+              _handleCreatedEvents(result);
+            }
+          });
+        },
+        child: const Text(
+          'Create Timetable',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
@@ -256,9 +268,9 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
   // Handle the created events using Riverpod
   void _handleCreatedEvents(List<TimetableEventData> events) async {
     // Show loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Creating events...'))
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Creating events...')));
 
     try {
       // Use the createTimetable provider
@@ -292,9 +304,9 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
   }
 
   Widget _buildTimetableCarousel(
-      BuildContext context,
-      List<TimetableEvent> events,
-      ) {
+    BuildContext context,
+    List<TimetableEvent> events,
+  ) {
     if (events.isEmpty) {
       return const SizedBox(
         height: 200,
@@ -372,13 +384,14 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 events.length,
-                    (index) => AnimatedContainer(
+                (index) => AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   height: 8,
                   width: _currentPageIndex == index ? 24 : 8,
                   decoration: BoxDecoration(
-                    color: _currentPageIndex == index ? Colors.blue : Colors.grey,
+                    color:
+                        _currentPageIndex == index ? Colors.blue : Colors.grey,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -403,6 +416,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
@@ -414,11 +428,13 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    child: Center(
+                      child: Text(
+                        '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -443,9 +459,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
             const SizedBox(height: 8),
             if (event.description != null && event.description!.isNotEmpty)
               Flexible(
-                child: SingleChildScrollView(
-                  child: Text(event.description!),
-                ),
+                child: SingleChildScrollView(child: Text(event.description!)),
               ),
             // if (event.type != null) ...[
             //   const SizedBox(height: 8),
