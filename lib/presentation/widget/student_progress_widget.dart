@@ -9,6 +9,7 @@ class StudentProgressWidget extends ConsumerWidget {
   final List<StudentProgress> students;
   final Function()? onAddProgress;
   final String currentUserLogin;
+
   // final DateTime currentDateTime;
   final String organizationId;
 
@@ -22,12 +23,12 @@ class StudentProgressWidget extends ConsumerWidget {
   }) : super(key: key);
 
   // Factory constructor with current date/time
-// Inside StudentProgressWidget.dart
-// Update the StudentProgressWidget factory constructor with the exact date/time specified
+  // Inside StudentProgressWidget.dart
+  // Update the StudentProgressWidget factory constructor with the exact date/time specified
   factory StudentProgressWidget.withCurrentDateTime({
     required List<StudentProgress> students,
     Function()? onAddProgress,
-    String currentUserLogin = 'Way4Web',  // Exact specified login
+    String currentUserLogin = 'Way4Web', // Exact specified login
     required String organizationId,
   }) {
     return StudentProgressWidget(
@@ -37,7 +38,9 @@ class StudentProgressWidget extends ConsumerWidget {
       // currentDateTime: DateTime.utc(2025, 5, 23, 9, 48, 28), // Exact date/time: 2025-05-23 09:48:28
       organizationId: organizationId,
     );
-  }    @override
+  }
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       color: Colors.white,
@@ -63,12 +66,12 @@ class StudentProgressWidget extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.35,
+                  width: MediaQuery.of(context).size.width * 0.27,
                   child: ElevatedButton.icon(
                     onPressed: () => _showRecordProgressDialog(context, ref),
                     icon: const Icon(Icons.add, color: Colors.white),
                     label: const Text(
-                      'Record Progress',
+                      'Record',
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -108,7 +111,8 @@ class StudentProgressWidget extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 12),
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text("",
+                  child: Text(
+                    "",
                     // 'Last updated by $currentUserLogin on ${_formatDateTime(currentDateTime)}',
                     style: TextStyle(
                       fontSize: 12,
@@ -183,17 +187,19 @@ class StudentProgressWidget extends ConsumerWidget {
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: student.imageUrl != null && student.imageUrl!.isNotEmpty
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.network(
-                  student.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (ctx, obj, stack) =>
-                      Icon(Icons.person, color: Colors.grey[500]),
-                ),
-              )
-                  : Icon(Icons.person, color: Colors.grey[500]),
+              child:
+                  student.imageUrl != null && student.imageUrl!.isNotEmpty
+                      ? ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          student.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (ctx, obj, stack) =>
+                                  Icon(Icons.person, color: Colors.grey[500]),
+                        ),
+                      )
+                      : Icon(Icons.person, color: Colors.grey[500]),
             ),
             const SizedBox(width: 16),
 
@@ -248,6 +254,7 @@ class StudentProgressWidget extends ConsumerWidget {
     return number.toString().padLeft(2, '0');
   }
 }
+
 class StudentProgress {
   final String testName;
   final String studentName;

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class UpcomingEventsWidget extends ConsumerWidget {
-  const UpcomingEventsWidget({super.key});
+  const UpcomingEventsWidget({super.key, required Future<void> Function() onRefresh});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

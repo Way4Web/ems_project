@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ems_project/Domain/create_timetable_model.dart';
 import 'package:ems_project/Domain/timetable_teacher_model.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,8 +14,26 @@ class TimeTableService {
   final String baseUrl = 'http://192.168.1.6:5000/api';
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
+  // Global key for accessing ScaffoldMessenger
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+  GlobalKey<ScaffoldMessengerState>();
+
   // Default datetime value in UTC for new events - updated with current timestamp
   static final DateTime defaultDateTime = DateTime.parse('2025-05-19 11:32:49Z');
+
+  // Show error SnackBar
+  void _showErrorSnackBar(String message) {
+    scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   // Get current user's login (or use the stored token)
   Future<String> getCurrentUserLogin() async {
@@ -33,6 +52,7 @@ class TimeTableService {
     final token = await _getToken();
 
     if (token == null) {
+      _showErrorSnackBar("Token not found. Please log in again.");
       throw Exception("Token not found. Please log in again.");
     }
 
@@ -49,9 +69,11 @@ class TimeTableService {
         final List<dynamic> data = json.decode(response.body)['events'];
         return data.map((e) => TimetableEvent.fromJson(e)).toList();
       } else {
+        _showErrorSnackBar('Failed to load timetable: ${response.body}');
         throw Exception('Failed to load timetable: ${response.body}');
       }
     } catch (e) {
+      _showErrorSnackBar('Error loading timetable: $e');
       throw Exception('Error loading timetable: $e');
     }
   }
@@ -62,6 +84,7 @@ class TimeTableService {
     final userLogin = await getCurrentUserLogin(); // Get current user's login
 
     if (token == null) {
+      _showErrorSnackBar("Token not found. Please log in again.");
       throw Exception("Token not found. Please log in again.");
     }
 
@@ -95,12 +118,103 @@ class TimeTableService {
         // Success - return the response data if needed
         return;
       } else {
-        throw Exception('Failed to create timetable: ${response.body}');
+        // Show an enhanced error SnackBar
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Failed to create timetable',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${response.body}',
+                        style: TextStyle(color: Colors.white70),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red.shade800,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'DISMISS',
+              textColor: Colors.white,
+              onPressed: () {
+                scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+              },
+            ),
+          ),
+        );
+        // throw Exception('Failed to create timetable: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error creating timetable: $e');
-    }
-  }
+      // Show an enhanced error SnackBar for caught exceptions
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Error creating timetable',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$e',
+                      style: TextStyle(color: Colors.white70),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'DISMISS',
+            textColor: Colors.white,
+            onPressed: () {
+              scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+      // throw Exception('Error creating timetable: $e');
+    }  }
 
   // Update existing timetable events
   Future<void> updateTimetableEvents(String timetableId, List<TimetableEventData> events) async {
@@ -108,6 +222,7 @@ class TimeTableService {
     final userLogin = await getCurrentUserLogin();
 
     if (token == null) {
+      _showErrorSnackBar("Token not found. Please log in again.");
       throw Exception("Token not found. Please log in again.");
     }
 
@@ -139,9 +254,11 @@ class TimeTableService {
       );
 
       if (response.statusCode != 200) {
+        _showErrorSnackBar('Failed to update timetable: ${response.body}');
         throw Exception('Failed to update timetable: ${response.body}');
       }
     } catch (e) {
+      _showErrorSnackBar('Error updating timetable: $e');
       throw Exception('Error updating timetable: $e');
     }
   }
@@ -218,7 +335,6 @@ class TimeTableService {
 
 // Riverpod provider for the service
 final timeTableServiceProvider = Provider<TimeTableService>((ref) {
-
   return TimeTableService();
 });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CreateTimetableDialog extends StatefulWidget {
-  const CreateTimetableDialog({Key? key}) : super(key: key);
+  const CreateTimetableDialog({Key? key, required DateTime initialDate}) : super(key: key);
 
   @override
   _CreateTimetableDialogState createState() => _CreateTimetableDialogState();

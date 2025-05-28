@@ -5,7 +5,7 @@ import 'dart:math';
 
 import '../../Services/pie_chart_present_absent_service.dart';
 
-class AttendanceWidget extends StatelessWidget {
+class AttendanceWidget extends StatefulWidget {
   final int present;
   final int absent;
   final int halfday;
@@ -25,6 +25,13 @@ class AttendanceWidget extends StatelessWidget {
     required this.weekEnd,
   }) : super(key: key);
 
+  @override
+  State<AttendanceWidget> createState() => _AttendanceWidgetState();
+
+}
+final ValueNotifier<String> selectedTimePeriod = ValueNotifier<String>("This Week");
+
+class _AttendanceWidgetState extends State<AttendanceWidget> {
   @override
   Widget build(BuildContext context) {
     final daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -50,101 +57,81 @@ class AttendanceWidget extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 18,
-                        color: Colors.black54,
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        "This Week",
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 18,
-                        color: Colors.black54,
-                      ),
-                    ],
-                  ),
+// Add this state variable to your class
+
+// Then replace your Container with this widget
+      ValueListenableBuilder<String>(
+      valueListenable: selectedTimePeriod,
+      builder: (context, value, child) {
+        return InkWell(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  title: const Text('Select Time Period'),
+                  children: <Widget>[
+                    SimpleDialogOption(
+                      onPressed: () {
+                        selectedTimePeriod.value = "This Week";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('This Week'),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () {
+                        selectedTimePeriod.value = "Last Week";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Last Week'),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () {
+                        selectedTimePeriod.value = "Last Month";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Last Month'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  size: 18,
+                  color: Colors.black54,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 18,
+                  color: Colors.black54,
                 ),
               ],
             ),
+          ),
+        );
+      },
+    )              ],
+            ),
 
             const SizedBox(height: 16),
-            // Days Row & Date Range
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text: "Last 7 Days ",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        TextSpan(
-                          text:
-                              "${dateFormat.format(weekStart)} - ${dateFormat.format(weekEnd)}",
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(7, (i) {
-                      final isWeekend = i >= 5;
-                      final dayDate = weekStart.add(Duration(days: i));
-                      final isCurrentDay =
-                          dayDate.day == currentDate.day &&
-                          dayDate.month == currentDate.month &&
-                          dayDate.year == currentDate.year;
-
-                      return CircleAvatar(
-                        radius: 18,
-                        backgroundColor:
-                            isWeekend
-                                ? Colors.grey[200]
-                                : isCurrentDay
-                                ? Colors.blue[700]
-                                : Colors.red[400],
-                        child: Text(
-                          daysOfWeek[i],
-                          style: TextStyle(
-                            color: isWeekend ? Colors.grey[400] : Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 8),
             // Total Working Days
             Row(
@@ -163,7 +150,7 @@ class AttendanceWidget extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       TextSpan(
-                        text: "$totalWorkingDays Days",
+                        text: "${widget.totalWorkingDays} Days",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -186,10 +173,10 @@ class AttendanceWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildStat("Present", present),
-                  _buildStat("Absent", absent),
-                  _buildStat("Halfday", halfday),
-                  _buildStat("Late", late),
+                  _buildStat("Present", widget.present),
+                  _buildStat("Absent", widget.absent),
+                  _buildStat("Halfday", widget.halfday),
+                  _buildStat("Late", widget.late),
                 ],
               ),
             ),
@@ -198,10 +185,10 @@ class AttendanceWidget extends StatelessWidget {
             SizedBox(
               height: 180,
               child: AttendanceDonutChart(
-                present: present,
-                absent: absent,
-                halfday: halfday,
-                late: late,
+                present: widget.present,
+                absent: widget.absent,
+                halfday: widget.halfday,
+                late: widget.late,
               ),
             ),
             const SizedBox(height: 12),
@@ -384,6 +371,9 @@ class AttendanceDashboardWidget extends ConsumerWidget {
       },
       loading:
           () => const Card(
+            color: Colors.white,
+            surfaceTintColor: Colors.white,
+
             margin: EdgeInsets.all(8),
             elevation: 2,
             child: Padding(
@@ -404,6 +394,9 @@ class AttendanceDashboardWidget extends ConsumerWidget {
           ),
       error:
           (error, _) => Card(
+            color: Colors.white,
+            surfaceTintColor: Colors.white,
+
             margin: const EdgeInsets.all(8),
             elevation: 2,
             shape: RoundedRectangleBorder(

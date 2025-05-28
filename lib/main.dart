@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'Services/create_timetable_service.dart';
+
 void main() {
   runApp(ProviderScope(child: MyApp()));
 }
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: TimeTableService.scaffoldMessengerKey,
+
       title: 'Register with Riverpod',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
