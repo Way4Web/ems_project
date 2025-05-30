@@ -303,7 +303,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const FilterablePerformanceChart(),
+                    PerformanceChart(),
                     const SizedBox(height: 16),
                   ],
                 ),

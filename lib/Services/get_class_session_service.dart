@@ -41,8 +41,8 @@ class ClassSessionNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>
 
 class GetClassSessionService {
   // Base URLs for API endpoints
-  static const String _fetchUrl = "http://192.168.1.6:5000/api/teacher/getClassSessions";
-  static const String _addEventUrl = "http://192.168.1.6:5000/api/teacher/createClassSession";
+  static const String _fetchUrl = "http://192.168.1.3:5000/api/teacher/getClassSessions";
+  static const String _addEventUrl = "http://192.168.1.3:5000/api/teacher/createClassSession";
 
   // Fetch class sessions from the API
   static Future<Map<String, dynamic>> fetchClassSessions() async {
@@ -114,7 +114,7 @@ class GetClassSessionService {
 
 class AttendanceService {
   static const String _baseUrl =
-      "http://192.168.1.6:5000/api/teacher/markAttendance/";
+      "http://192.168.1.3:5000/api/teacher/markAttendance/";
 
   // Mark attendance for a student
   static Future<void> markAttendance(

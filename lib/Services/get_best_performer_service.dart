@@ -17,7 +17,7 @@ Future<List<BestPerformerIndicator>> fetchAssignments() async {
   }
 
   final response = await http.get(
-    Uri.parse('http://192.168.1.6:5000/api/teacher/getAllAssignments'),
+    Uri.parse('http://192.168.1.3:5000/api/teacher/getAllAssignments'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

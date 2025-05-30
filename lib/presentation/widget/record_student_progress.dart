@@ -5,51 +5,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../providers/get_all_student_provider.dart' show Student, studentsProvider;
+import '../../providers/get_all_student_provider.dart'
+    show Student, studentsProvider;
+
+// Define constants for current date and user
+const String currentUserLogin = 'Way4Web';
+final DateTime currentDateTime = DateTime.parse('2025-05-29 06:24:19');
 
 // API service for recording student progress
-final progressRecordProvider = FutureProvider.family<Map<String, dynamic>, Map<String, dynamic>>(
-      (ref, progressData) async {
-    final storage = FlutterSecureStorage();
-    final token = await storage.read(key: "token");
+final progressRecordProvider =
+    FutureProvider.family<Map<String, dynamic>, Map<String, dynamic>>((
+      ref,
+      progressData,
+    ) async {
+      final storage = FlutterSecureStorage();
+      final token = await storage.read(key: "token");
 
-    if (token == null) {
-      throw Exception("Authentication token not found");
-    }
+      if (token == null) {
+        throw Exception("Authentication token not found");
+      }
 
-    final response = await http.post(
-      Uri.parse("http://192.168.1.6:5000/api/teacher/recordProgress"),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(progressData),
-    );
+      final response = await http.post(
+        Uri.parse("http://192.168.1.3:5000/api/teacher/recordProgress"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(progressData),
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to record progress: ${response.reasonPhrase}');
-    }
-  },
-);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Don't create UI elements here, just return the data
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to record progress: ${response.reasonPhrase}');
+      }
+    });
 
 class RecordStudentProgressDialog extends ConsumerStatefulWidget {
   final Function(StudentProgressRecord record)? onSave;
-  final String currentUserLogin;
-  // final DateTime currentDateTime;
   final String organizationId;
 
   const RecordStudentProgressDialog({
     Key? key,
     this.onSave,
-    String? currentUserLogin,
-    // DateTime? currentDateTime,
     required this.organizationId,
-  }) :
-        currentUserLogin = currentUserLogin ?? 'Way4Web',
-        // currentDateTime = currentDateTime ?? DateTime.utc(2025, 5, 22, 13, 11, 7),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   ConsumerState<RecordStudentProgressDialog> createState() =>
@@ -87,19 +88,22 @@ class _RecordStudentProgressDialogState
 
       try {
         // Get student details from selected ID
-        final studentsAsyncValue = ref.read(studentsProvider(widget.organizationId));
+        final studentsAsyncValue = ref.read(
+          studentsProvider(widget.organizationId),
+        );
 
         String studentName = "Unknown";
         studentsAsyncValue.whenData((students) {
           final selectedStudent = students.firstWhere(
-                (s) => s.id == selectedStudentId,
-            orElse: () => Student(
-              id: selectedStudentId!,
-              name: "Unknown",
-              email: "",
-              role: "",
-              organization: "",
-            ),
+            (s) => s.id == selectedStudentId,
+            orElse:
+                () => Student(
+                  id: selectedStudentId!,
+                  name: "Unknown",
+                  email: "",
+                  role: "",
+                  organization: "",
+                ),
           );
           studentName = selectedStudent.name;
         });
@@ -110,13 +114,32 @@ class _RecordStudentProgressDialogState
           "module": selectedModule!.toLowerCase(),
           "metrics": {
             "pagesRead": int.tryParse(pagesReadController.text) ?? 0,
-            "versesMemorized": int.tryParse(versesMemorizedController.text) ?? 0,
-            "namazLocation": selectedNamazLocation!.toLowerCase() == "mosque" ? "masjid" : selectedNamazLocation!.toLowerCase(),
-          }
+            "versesMemorized":
+                int.tryParse(versesMemorizedController.text) ?? 0,
+            "namazLocation":
+                selectedNamazLocation!.toLowerCase() == "mosque"
+                    ? "masjid"
+                    : selectedNamazLocation!.toLowerCase(),
+          },
+          "recordedAt": currentDateTime.toIso8601String(),
+          "recordedBy": currentUserLogin,
         };
 
         // Call the API using the provider
-        final resultAsync = await ref.read(progressRecordProvider(apiPayload).future);
+        final resultAsync = await ref.read(
+          progressRecordProvider(apiPayload).future,
+        );
+
+        // Show success message using SnackBar
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Progress recorded successfully!"),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
 
         // Create the record for the callback
         final record = StudentProgressRecord(
@@ -126,8 +149,8 @@ class _RecordStudentProgressDialogState
           pagesRead: int.tryParse(pagesReadController.text) ?? 0,
           versesMemorized: int.tryParse(versesMemorizedController.text) ?? 0,
           namazLocation: selectedNamazLocation!,
-          recordedBy: widget.currentUserLogin,
-          // recordedAt: widget.currentDateTime,
+          recordedBy: currentUserLogin,
+          recordedAt: currentDateTime,
         );
 
         if (widget.onSave != null) {
@@ -150,7 +173,9 @@ class _RecordStudentProgressDialogState
   @override
   Widget build(BuildContext context) {
     // Watch the student async value from provider
-    final studentsAsyncValue = ref.watch(studentsProvider(widget.organizationId));
+    final studentsAsyncValue = ref.watch(
+      studentsProvider(widget.organizationId),
+    );
 
     return Dialog(
       backgroundColor: Colors.white,
@@ -208,7 +233,9 @@ class _RecordStudentProgressDialogState
                                 Expanded(
                                   child: Text(
                                     _errorMessage!,
-                                    style: TextStyle(color: Colors.red.shade900),
+                                    style: TextStyle(
+                                      color: Colors.red.shade900,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -235,17 +262,18 @@ class _RecordStudentProgressDialogState
                           return DropdownButtonFormField<String>(
                             dropdownColor: Colors.white,
                             value: selectedStudentId,
-                            items: students
-                                .map(
-                                  (student) => DropdownMenuItem<String>(
-                                value: student.id,
-                                child: SizedBox(
-                                  width: 200,
-                                  child: Text(student.name),
-                                ),
-                              ),
-                            )
-                                .toList(),
+                            items:
+                                students
+                                    .map(
+                                      (student) => DropdownMenuItem<String>(
+                                        value: student.id,
+                                        child: SizedBox(
+                                          width: 200,
+                                          child: Text(student.name),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
                             onChanged: (value) {
                               setState(() {
                                 selectedStudentId = value;
@@ -263,22 +291,27 @@ class _RecordStudentProgressDialogState
                             },
                           );
                         },
-                        loading: () => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        error: (error, stack) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Error loading students: $error',
-                              style: const TextStyle(color: Colors.red),
+                        loading:
+                            () => const Center(
+                              child: CircularProgressIndicator(),
                             ),
-                            ElevatedButton(
-                              onPressed: () => ref.refresh(studentsProvider(widget.organizationId)),
-                              child: const Text('Retry'),
+                        error:
+                            (error, stack) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Error loading students: $error',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                                ElevatedButton(
+                                  onPressed:
+                                      () => ref.refresh(
+                                        studentsProvider(widget.organizationId),
+                                      ),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
                       ),
 
                       const SizedBox(height: 16),
@@ -306,12 +339,12 @@ class _RecordStudentProgressDialogState
                           ),
                         ),
                         items:
-                        modules.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                            modules.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select a module';
@@ -415,12 +448,12 @@ class _RecordStudentProgressDialogState
                           ),
                         ),
                         items:
-                        namazLocations.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                            namazLocations.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select a namaz location';
@@ -451,29 +484,30 @@ class _RecordStudentProgressDialogState
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          child: _isSubmitting
-                              ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('Submitting...'),
-                            ],
-                          )
-                              : const Text(
-                            'Record Progress',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
+                          child:
+                              _isSubmitting
+                                  ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text('Submitting...'),
+                                    ],
+                                  )
+                                  : const Text(
+                                    'Record Progress',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                         ),
                       ),
 
@@ -481,8 +515,8 @@ class _RecordStudentProgressDialogState
                       const SizedBox(height: 16),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Text("",
-                          // 'Form accessed by ${widget.currentUserLogin} on ${_formatDateTime(widget.currentDateTime)}',
+                        child: Text(
+                          "",
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -519,7 +553,7 @@ class StudentProgressRecord {
   final int versesMemorized;
   final String namazLocation;
   final String recordedBy;
-  // final DateTime recordedAt;
+  final DateTime recordedAt;
 
   StudentProgressRecord({
     required this.studentId,
@@ -529,7 +563,7 @@ class StudentProgressRecord {
     required this.versesMemorized,
     required this.namazLocation,
     required this.recordedBy,
-    // required this.recordedAt,
+    required this.recordedAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -541,7 +575,7 @@ class StudentProgressRecord {
       'versesMemorized': versesMemorized,
       'namazLocation': namazLocation,
       'recordedBy': recordedBy,
-      // 'recordedAt': recordedAt.toIso8601String(),
+      'recordedAt': recordedAt.toIso8601String(),
     };
   }
 }

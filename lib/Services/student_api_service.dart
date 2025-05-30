@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_project/Domain/get_all_assignment_studentProgress_TeacherDashboard.dart';
 import 'package:ems_project/Domain/student_model.dart';
 import 'package:ems_project/main.dart';
 import 'package:ems_project/providers/student_provider.dart';
@@ -48,8 +49,6 @@ class StudentApiService {
       final data = json.decode(response.body);
       final students = data['students'];
       final organization = data['organizationName'];
-      // return students.map<StudentModel>((json) => StudentModel.fromJson(json)).toList();
-      // return organization;
       return {
         'students':
             students
@@ -59,15 +58,23 @@ class StudentApiService {
       };
     } else {
       return {'status': 'error', 'message': response.body};
-
-      // final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
-      // throw Exception("Failed to update organization: $errorMessage");
-      //  ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Failed to update organization: $errorMessage')),
-      // );      // Handle error response
     }
   }
 }
+
+
+
+// Riverpod provider to fetch students
+final studentApiServiceProviderEdit = Provider<StudentApiService>((ref) {
+  return StudentApiService();
+});
+
+// Provider to fetch students' data
+final studentsProviderEdit = FutureProvider<List<StudentModel>>((ref) async {
+  final apiService = ref.watch(studentApiServiceProviderEdit);
+  final response = await apiService.fetchAllStudents();
+  return response['students'] as List<StudentModel>;
+});
 
 class DeleteStudentApiService {
   final String baseUrl = "${CommonClass.urlCommon}api/admin";
@@ -154,129 +161,10 @@ class EditApiStudentDetails {
   }
 }
 
-class GetAllAssignment {
-  String? organizationId;
-  String? organizationName;
-  List<AssignmentsData>? assignments;
 
-  GetAllAssignment({
-    this.organizationId,
-    this.organizationName,
-    this.assignments,
-  });
-
-  GetAllAssignment.fromJson(Map<String, dynamic> json) {
-    organizationId = json['organizationId'];
-    organizationName = json['organizationName'];
-    if (json['assignments'] != null) {
-      assignments = <AssignmentsData>[];
-      json['assignments'].forEach((v) {
-        assignments!.add(new AssignmentsData.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['organizationId'] = this.organizationId;
-    data['organizationName'] = this.organizationName;
-    if (this.assignments != null) {
-      data['assignments'] = this.assignments!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class AssignmentsData {
-  String? id;
-  String? title;
-  String? description;
-  String? dueDate;
-  String? teacher;
-  List<String>? students;
-  List<Submissions>? submissions;
-  String? videoLink;
-
-  AssignmentsData({
-    this.id,
-    this.title,
-    this.description,
-    this.dueDate,
-    this.teacher,
-    this.students,
-    this.submissions,
-    this.videoLink,
-  });
-
-  AssignmentsData.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    title = json['title'];
-    description = json['description'];
-    dueDate = json['dueDate'];
-    teacher = json['teacher'];
-    students = json['students'].cast<String>();
-    if (json['submissions'] != null) {
-      submissions = <Submissions>[];
-      json['submissions'].forEach((v) {
-        submissions!.add(new Submissions.fromJson(v));
-      });
-    }
-    videoLink = json['videoLink'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['description'] = this.description;
-    data['dueDate'] = this.dueDate;
-    data['teacher'] = this.teacher;
-    data['students'] = this.students;
-    if (this.submissions != null) {
-      data['submissions'] = this.submissions!.map((v) => v.toJson()).toList();
-    }
-    data['videoLink'] = this.videoLink;
-    return data;
-  }
-}
-
-class Submissions {
-  String? student;
-  String? studentName;
-  String? content;
-  int? grade;
-  String? submittedAt;
-
-  Submissions({
-    this.student,
-    this.studentName,
-    this.content,
-    this.grade,
-    this.submittedAt,
-  });
-
-  Submissions.fromJson(Map<String, dynamic> json) {
-    student = json['student'];
-    studentName = json['studentName'];
-    content = json['content'];
-    grade = json['grade'];
-    submittedAt = json['submittedAt'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['student'] = this.student;
-    data['studentName'] = this.studentName;
-    data['content'] = this.content;
-    data['grade'] = this.grade;
-    data['submittedAt'] = this.submittedAt;
-    return data;
-  }
-}
-
-class AssignmentService {
+class GetAllAssignmentService {
   static const String apiUrl =
-      'http://192.168.1.6:5000/api/teacher/getAllAssignments';
+      'http://192.168.1.3:5000/api/teacher/getAllAssignments';
   static final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   static Future<GetAllAssignment> fetchAssignmentResponse() async {
@@ -309,12 +197,19 @@ class AssignmentService {
 }
 
 // Riverpod Provider for AssignmentService
-final assignmentServiceProvider = Provider<AssignmentService>((ref) {
-  return AssignmentService();
+final assignmentServiceProvider = Provider<GetAllAssignmentService>((ref) {
+  return GetAllAssignmentService();
 });
 
 // Riverpod Provider for fetching assignments
 final assignmentsProviderStudent = FutureProvider<List<AssignmentsData>?>((ref) async {
   // final service = ref.read(assignmentServiceProvider);
-  return await AssignmentService.fetchAssignments();
+  return await GetAllAssignmentService.fetchAssignments();
 });
+
+
+
+
+
+
+

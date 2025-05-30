@@ -1,22 +1,26 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
+import 'package:jwt_decode/jwt_decode.dart';
 
-// Create an instance of FlutterSecureStorage
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
-// Example function to handle login success and store the token
 Future<void> handleLoginResponse(Map<String, dynamic> loginResponse) async {
-  // Extract the token from the API response
   String token = loginResponse['token'];
+  // String role = loginResponse['role'];
+  Map<String, dynamic> payload = Jwt.parseJwt(token);
 
-  // Optionally, store additional data (e.g., user details) if needed:
-  // String userJson = jsonEncode(loginResponse['user']);
+  String? role = payload['role'];
 
-  // Write the token securely
+  print('Role: $role');
+
+  // Store token and role securely
   await secureStorage.write(key: 'token', value: token);
+  await secureStorage.write(key: 'role', value: role);
+  //
+  print('Token and role stored successfully!');
 
-  // Optionally store user data:
-  // await secureStorage.write(key: 'user', value: userJson);
 
-  print('Token stored successfully!');
+
+  // String token = 'your_jwt_token_here';
+
+
 }

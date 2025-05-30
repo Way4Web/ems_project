@@ -23,7 +23,8 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
   bool _showVerses = true;
   bool _showPages = true;
 
-  static double _toX(DateTime dt) => dt.millisecondsSinceEpoch / Duration.millisecondsPerDay;
+  static double _toX(DateTime dt) =>
+      dt.millisecondsSinceEpoch / Duration.millisecondsPerDay;
 
   String _formatDate(double xValue) {
     final ms = (xValue * Duration.millisecondsPerDay).round();
@@ -37,7 +38,8 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
 
     return asyncProg.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(
+      error:
+          (err, _) => Center(
         child: Text(
           'Error loading data:\n$err',
           textAlign: TextAlign.center,
@@ -45,10 +47,13 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
         ),
       ),
       data: (prog) {
-        final filtered = prog.progress.where((item) {
+        final filtered =
+        prog.progress.where((item) {
           final dt = item.recordedAt;
-          if (widget.startDate != null && dt.isBefore(widget.startDate!)) return false;
-          if (widget.endDate != null && dt.isAfter(widget.endDate!)) return false;
+          if (widget.startDate != null && dt.isBefore(widget.startDate!))
+            return false;
+          if (widget.endDate != null && dt.isAfter(widget.endDate!))
+            return false;
           return true;
         }).toList();
 
@@ -56,11 +61,23 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
           return const Center(child: Text('No data in selected range.'));
         }
 
-        final versesSpots = filtered
-            .map((i) => FlSpot(_toX(i.recordedAt), i.metrics.versesMemorized.toDouble()))
+        final versesSpots =
+        filtered
+            .map(
+              (i) => FlSpot(
+            _toX(i.recordedAt),
+            i.metrics.versesMemorized.toDouble(),
+          ),
+        )
             .toList();
-        final pagesSpots = filtered
-            .map((i) => FlSpot(_toX(i.recordedAt), i.metrics.pagesRead.toDouble()))
+        final pagesSpots =
+        filtered
+            .map(
+              (i) => FlSpot(
+            _toX(i.recordedAt),
+            i.metrics.pagesRead.toDouble(),
+          ),
+        )
             .toList();
 
         final allX = [...versesSpots, ...pagesSpots].map((s) => s.x);
@@ -68,12 +85,13 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
         final maxX = allX.reduce((a, b) => a > b ? a : b);
         final allY = [
           ...filtered.map((i) => i.metrics.versesMemorized),
-          ...filtered.map((i) => i.metrics.pagesRead)
+          ...filtered.map((i) => i.metrics.pagesRead),
         ];
         final maxY = (allY.reduce((a, b) => a > b ? a : b)).toDouble();
 
         final spanDays = maxX - minX;
-        final xInterval = spanDays <= 7
+        final xInterval =
+        spanDays <= 7
             ? 1.0
             : spanDays <= 30
             ? (spanDays / 4).floorToDouble().clamp(1.0, spanDays)
@@ -83,33 +101,51 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(6),
               child: AspectRatio(
-                aspectRatio: 1.6,
+                aspectRatio: 1.45,
                 child: LineChart(
                   LineChartData(
-                    minX: minX,
-                    maxX: maxX,
+                    minX: minX - 1, // Added padding for axis
+                    maxX: maxX + 2, // Added padding for axis
                     minY: 0,
-                    maxY: maxY + 5,
+                    maxY: maxY + 10, // Increased maxY for some space
                     gridData: FlGridData(show: true),
-                    borderData: FlBorderData(show: true, border: Border.all(color: Colors.grey.shade400)),
+                    borderData: FlBorderData(
+                      show: true,
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           interval: xInterval,
-                          getTitlesWidget: (v, _) => Padding(
+                          getTitlesWidget:
+                              (v, _) => Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Text(_formatDate(v), style: const TextStyle(fontSize: 10)),
+                            child: Text(
+                              _formatDate(v),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                overflow: TextOverflow.ellipsis, // Avoid text overflow
+                              ),
+                            ),
                           ),
                         ),
                       ),
                       leftTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: true, interval: 10, reservedSize: 32),
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: 15,
+                          reservedSize: 27,
+                        ),
                       ),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                     lineBarsData: [
                       if (_showVerses)
@@ -117,18 +153,24 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
                           spots: versesSpots,
                           isCurved: true,
                           color: Colors.blue,
-                          barWidth: 3,
+                          barWidth: 2,
                           dotData: FlDotData(show: true),
-                          belowBarData: BarAreaData(show: true, color: Colors.blue.withOpacity(0.2)),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: Colors.blue.withOpacity(0.2),
+                          ),
                         ),
                       if (_showPages)
                         LineChartBarData(
                           spots: pagesSpots,
                           isCurved: true,
                           color: Colors.pink,
-                          barWidth: 3,
+                          barWidth: 2,
                           dotData: FlDotData(show: true),
-                          belowBarData: BarAreaData(show: true, color: Colors.pink.withOpacity(0.2)),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: Colors.pink.withOpacity(0.2),
+                          ),
                         ),
                     ],
                     lineTouchData: LineTouchData(enabled: true),
@@ -137,7 +179,7 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 1),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -145,14 +187,20 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
                     Colors.blue,
                     'Verses Memorized',
                     isActive: _showVerses,
-                    onTap: () => setState(() => _showVerses = !_showVerses), // Toggle visibility
+                    onTap:
+                        () => setState(
+                          () => _showVerses = !_showVerses,
+                    ), // Toggle visibility
                   ),
                   const SizedBox(width: 24),
                   _buildLegendItem(
                     Colors.pink,
                     'Pages Read',
                     isActive: _showPages,
-                    onTap: () => setState(() => _showPages = !_showPages), // Toggle visibility
+                    onTap:
+                        () => setState(
+                          () => _showPages = !_showPages,
+                    ), // Toggle visibility
                   ),
                 ],
               ),
@@ -163,8 +211,12 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
     );
   }
 
-  Widget _buildLegendItem(Color color, String label,
-      {required bool isActive, required VoidCallback onTap}) {
+  Widget _buildLegendItem(
+      Color color,
+      String label, {
+        required bool isActive,
+        required VoidCallback onTap,
+      }) {
     return GestureDetector(
       onTap: onTap,
       child: Row(
@@ -173,76 +225,22 @@ class _PerformanceChartState extends ConsumerState<PerformanceChart> {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: isActive ? color : color.withOpacity(0.3), // Dim if inactive
+              color: isActive ? color : color.withOpacity(0.3),
+              // Dim if inactive
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 6),
-          Text(label,
-              style: TextStyle(
-                fontSize: 12,
-                color: isActive ? Colors.black : Colors.grey, // Dim if inactive
-              )),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isActive ? Colors.black : Colors.grey, // Dim if inactive
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// Wrapper that lets the user pick a specific date range for zooming in.
-/// Adds refresh functionality.
-class FilterablePerformanceChart extends ConsumerStatefulWidget {
-  const FilterablePerformanceChart({Key? key}) : super(key: key);
-
-  @override
-  ConsumerState<FilterablePerformanceChart> createState() => _FilterablePerformanceChartState();
-}
-
-class _FilterablePerformanceChartState extends ConsumerState<FilterablePerformanceChart> {
-  DateTimeRange? _range;
-
-  Future<void> _pickRange() async {
-    final today = DateTime.now();
-    final first = DateTime(today.year - 1);
-    final last = DateTime(today.year + 1);
-
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: first,
-      lastDate: last,
-      initialDateRange: _range,
-    );
-    if (picked != null) setState(() => _range = picked);
-  }
-
-  Future<void> _refresh() async {
-    ref.invalidate(progressProvider); // Invalidate the provider to refresh data
-    await ref.read(progressProvider.future); // Wait for the provider to refresh
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ElevatedButton.icon(
-          icon: const Icon(Icons.date_range),
-          label: Text(
-            _range == null
-                ? 'Select Date Range'
-                : '${_range!.start.day}/${_range!.start.month} – ${_range!.end.day}/${_range!.end.month}',
-          ),
-          onPressed: _pickRange,
-        ),
-        const SizedBox(height: 8),
-        RefreshIndicator(
-          onRefresh: _refresh, // Refresh functionality
-          child: SizedBox(
-            height: 300,
-            child: PerformanceChart(startDate: _range?.start, endDate: _range?.end),
-          ),
-        ),
-      ],
-    );
-  }
-}

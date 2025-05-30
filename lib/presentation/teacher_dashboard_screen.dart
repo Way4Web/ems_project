@@ -308,7 +308,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                             UpcomingEventsWidget(onRefresh: () => _refreshData()),
                             const SizedBox(height: 20),
 
-                            const AssignmentCard(),
+                             AssignmentCard(),
                             const SizedBox(height: 20),
 
                             AttendanceDashboardWidget(),

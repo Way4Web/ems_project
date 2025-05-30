@@ -10,7 +10,7 @@ import 'get_best_performer_service.dart'
     show fetchAssignments;
 
 class DeleteAssignmentService {
-  static const String _baseUrl = "http://192.168.1.6:5000/api/teacher";
+  static const String _baseUrl = "http://192.168.1.3:5000/api/teacher";
 
   // Delete an assignment
   static Future<void> deleteAssignment(String assignmentId) async {
@@ -47,13 +47,24 @@ final deleteAssignmentProvider = FutureProvider.family<void, String>((
 });
 
 // Base URL for the API
-const String _baseUrl = "http://192.168.1.6:5000";
+
+// Current date/time and user constants
+final DateTime currentDateTime = DateTime.parse('2025-05-29 13:02:09');
+const String currentUserLogin = 'Way4Web';
+
+const String _baseUrl = "http://192.168.1.3:5000";
 
 class UpdateAssignmentService {
-  // Function to update an assignment
+  // Function to update an assignment with all fields
   static Future<void> updateAssignment({
     required String assignmentId,
     required String title,
+    String? description,
+    String? dueDate,
+    List<String>? students,
+    String? videoLink,
+    String? updatedBy,
+    String? updatedAt,
   }) async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -66,45 +77,84 @@ class UpdateAssignmentService {
 
     final String url = "$_baseUrl/api/teacher/updateAssignment/$assignmentId";
 
+    // Build the request body with all available fields
+    final Map<String, dynamic> requestBody = {
+      "title": title,
+    };
+
+    // Only add non-null fields to the request
+    if (description != null) requestBody["description"] = description;
+    if (dueDate != null) requestBody["dueDate"] = dueDate;
+    if (students != null) requestBody["students"] = students;
+    if (videoLink != null) requestBody["videoLink"] = videoLink;
+    if (updatedBy != null) requestBody["updatedBy"] = updatedBy;
+    if (updatedAt != null) requestBody["updatedAt"] = updatedAt;
+
     try {
+      print("Sending update request for assignment $assignmentId");
+      print("Request body: ${jsonEncode(requestBody)}");
+
       final response = await http.put(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
-          // Add Bearer token for authorization
         },
-        body: jsonEncode({"title": title}),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
         print("Assignment updated successfully.");
+        print("Response: ${response.body}");
       } else if (response.statusCode == 401) {
         throw Exception("Unauthorized. Please log in again.");
       } else {
+        print("Failed with status code: ${response.statusCode}");
+        print("Response body: ${response.body}");
         throw Exception(
           'Failed to update assignment: ${response.reasonPhrase}',
         );
       }
     } catch (e) {
+      print("Error in update assignment: $e");
       throw Exception('Error updating assignment: $e');
     }
   }
 }
 
-// Define a provider for the update assignment function
+// Define an updated provider for the update assignment function
 final updateAssignmentProvider =
-    FutureProvider.family<void, Map<String, String>>((ref, params) async {
-      final assignmentId = params['assignmentId']!;
-      final title = params['title']!;
-      await UpdateAssignmentService.updateAssignment(
-        assignmentId: assignmentId,
-        title: title,
-      );
-    });
+FutureProvider.family<void, Map<String, dynamic>>((ref, params) async {
+  // Extract all parameters from the params map
+  final String assignmentId = params['assignmentId'] as String;
+  final String title = params['title'] as String;
 
+  // Optional parameters that might not be present or might be null
+  final String? description = params['description'] as String?;
+  final String? dueDate = params['dueDate'] as String?;
+  final String? videoLink = params['videoLink'] as String?;
+  final String? updatedBy = params['updatedBy'] as String?;
+  final String? updatedAt = params['updatedAt'] as String?;
+
+  // Handle the students list
+  List<String>? students;
+  if (params.containsKey('students')) {
+    students = (params['students'] as List<dynamic>).cast<String>();
+  }
+
+  await UpdateAssignmentService.updateAssignment(
+    assignmentId: assignmentId,
+    title: title,
+    description: description,
+    dueDate: dueDate,
+    students: students,
+    videoLink: videoLink,
+    updatedBy: updatedBy,
+    updatedAt: updatedAt,
+  );
+});
 class CreateAssignmentService {
-  static const String _baseUrl = "http://192.168.1.6:5000";
+  static const String _baseUrl = "http://192.168.1.3:5000";
 
   /// Makes a POST request to create a new assignment.
   static Future<void> createAssignment(

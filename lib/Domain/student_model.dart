@@ -176,3 +176,58 @@ class Organization {
     );
   }
 }
+
+
+
+
+class StudentModelEdit {
+  String? organizationId;
+  String? organizationName;
+  List<StudentsData>? students;
+
+  StudentModelEdit({this.organizationId, this.organizationName, this.students});
+
+  StudentModelEdit.fromJson(Map<String, dynamic> json) {
+    organizationId = json['organizationId'];
+    organizationName = json['organizationName'];
+    if (json['students'] != null) {
+      students = <StudentsData>[];
+      json['students'].forEach((v) {
+        students!.add(new StudentsData.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['organizationId'] = this.organizationId;
+    data['organizationName'] = this.organizationName;
+    if (this.students != null) {
+      data['students'] = this.students!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class StudentsData {
+  String? id;
+  String? name;
+  String? email;
+
+  StudentsData({this.id, this.name, this.email});
+
+  StudentsData.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    email = json['email'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['email'] = this.email;
+    return data;
+  }
+}
+

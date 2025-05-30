@@ -22,7 +22,7 @@ class ClassSessionService {
       throw Exception("Token not found. Please log in again.");
     }
 
-    final String url = 'http://192.168.1.6:5000/api/teacher/createClassSession';
+    final String url = 'http://192.168.1.3:5000/api/teacher/createClassSession';
 
     try {
       print("Creating class session...");

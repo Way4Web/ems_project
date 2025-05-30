@@ -1,10 +1,12 @@
 import 'package:ems_project/presentation/add_organisation.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
+import 'package:ems_project/presentation/student_dashboard_screen.dart';
 import 'package:ems_project/presentation/teacher_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 import 'Services/create_timetable_service.dart';
 
@@ -37,23 +39,18 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => StartupScreen(),
-        '/second': (context) => SidebarScreen(),
-        '/addOrg': (context) => AddOrganisation(),
-        '/sideBarScreen': (context) => SidebarScreen(),
         '/signIn': (context) => SignInScreen(),
         '/teacherDash': (context) => TeacherDashboardScreen(),
+        '/studentDash': (context) => SidebarScreen(),
       },
     );
-
-
-
   }
 }
 
 class CommonClass {
   static final kbuttonColor = Color(0xff3366FF);
   static final kGreyColor = Color(0xFF3A4A64);
-  static final urlCommon = "http://192.168.1.6:5000/";
+  static final urlCommon = "http://192.168.1.3:5000/";
 }
 
 class StartupScreen extends ConsumerStatefulWidget {
@@ -71,12 +68,28 @@ class _StartupScreenState extends ConsumerState<StartupScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    final token = await secureStorage.read(key: 'token');
+    var token = await secureStorage.read(key: 'token') ?? "";
+    // String token = loginResponse['token'];
+    // String role = loginResponse['role'];
+    var role;
+    if(token != "") {
+      Map<String, dynamic> payload = Jwt.parseJwt(token!);
+
+       role = payload['role'];
+
+      print('Role: $role');
+    }
+    // final role = await secureStorage.read(key: 'role');
+
     if (token != null) {
-      // Navigate to SidebarScreen if token is found
-      Navigator.pushReplacementNamed(context, '/teacherDash');
+      if (role == 'student') {
+        Navigator.pushReplacementNamed(context, '/studentDash');
+      } else if (role == 'teacher') {
+        Navigator.pushReplacementNamed(context, '/teacherDash');
+      } else {
+        Navigator.pushReplacementNamed(context, '/signIn');
+      }
     } else {
-      // Navigate to SignInScreen if no token is found
       Navigator.pushReplacementNamed(context, '/signIn');
     }
   }

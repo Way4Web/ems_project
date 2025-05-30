@@ -134,7 +134,7 @@ class StudentProgressWidget extends ConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return RecordStudentProgressDialog(
-          currentUserLogin: currentUserLogin,
+          // currentUserLogin: currentUserLogin,
           // currentDateTime: currentDateTime,
           organizationId: organizationId,
           onSave: (record) {

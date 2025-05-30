@@ -107,7 +107,7 @@ class ClassSessionService {
   static const String currentUserLogin = 'Way4Web';
   static DateTime currentDateTime = DateTime.parse('2025-05-22 05:48:49');
 
-  final String baseUrl = 'http://192.168.1.6:5000/api';
+  final String baseUrl = 'http://192.168.1.3:5000/api';
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Get auth token from secure storage
@@ -256,3 +256,4 @@ final weekDatesProvider = Provider<Map<String, DateTime>>((ref) {
   final service = ref.watch(classSessionServiceProvider);
   return service.getCurrentWeekDates();
 });
+

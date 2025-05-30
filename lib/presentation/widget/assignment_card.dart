@@ -1,15 +1,28 @@
 import 'package:ems_project/Services/teacher_assignment_service.dart';
+import 'package:ems_project/providers/get_all_student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../Services/get_best_performer_service.dart';
+import 'package:intl/intl.dart';
 import 'create_assignment_screen.dart';
 
-class AssignmentCard extends ConsumerWidget {
-  const AssignmentCard({super.key});
+// Current date/time and user constants
+final DateTime currentDateTime = DateTime.parse('2025-05-29 12:54:23');
+const String currentUserLogin = 'Way4Web';
+
+class AssignmentCard extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<AssignmentCard> createState() => _AssignmentCardState();
+}
+
+class _AssignmentCardState extends ConsumerState<AssignmentCard> {
+  String? selectedStudentId; // Add this line
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final assignmentsAsyncValue = ref.watch(assignmentsProviderTeacher);
+    final studentsAsyncValue = ref.watch(
+      studentsProvider("67bed520465b90e0acad21f2"),
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -68,7 +81,9 @@ class AssignmentCard extends ConsumerWidget {
                   height: MediaQuery.of(context).size.height * 0.21,
                   child: Scrollbar(
                     thumbVisibility: true,
+                    controller: ScrollController(),
                     child: ListView.builder(
+                      controller: ScrollController(),
                       physics: const BouncingScrollPhysics(),
                       itemCount: assignments.length,
                       itemBuilder: (context, index) {
@@ -122,7 +137,9 @@ class AssignmentCard extends ConsumerWidget {
                                           child: Text(
                                             assignment.description ??
                                                 'No Submissions',
-                                            style: const TextStyle(fontSize: 14),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -135,13 +152,31 @@ class AssignmentCard extends ConsumerWidget {
                                                 size: 24,
                                               ),
                                               onPressed: () {
-                                                // Show edit dialog
+                                                // Show enhanced edit dialog with all fields
                                                 _showEditDialog(
                                                   context: context,
                                                   assignmentId: assignment.id!,
                                                   initialTitle:
                                                       assignment.title ?? '',
+                                                  initialDescription:
+                                                      assignment.description ??
+                                                      '',
+                                                  initialDueDate:
+                                                      assignment.dueDate != null
+                                                          ? DateTime.parse(
+                                                            assignment.dueDate!,
+                                                          )
+                                                          : null,
+                                                  initialStudents:
+                                                      assignment.students ?? [],
+                                                  initialVideoLink:
+                                                      assignment.videoLink ??
+                                                      '',
+                                                  organizationId:
+                                                      "67bed520465b90e0acad21f2",
+                                                  // Organization ID
                                                   ref: ref,
+                                                  selectedStudentId: selectedStudentId
                                                 );
                                               },
                                             ),
@@ -245,107 +280,512 @@ Future<bool> _showDeleteConfirmationDialog(BuildContext context) async {
       false;
 }
 
-/// Displays a dialog for editing the assignment title.
+/// Displays a dialog for editing the assignment with all fields.
 void _showEditDialog({
   required BuildContext context,
   required String assignmentId,
   required String initialTitle,
+  required String initialDescription,
+  required DateTime? initialDueDate,
+  required List<String> initialStudents,
+  required String initialVideoLink,
+  required String organizationId,
   required WidgetRef ref,
+  required String? selectedStudentId,
 }) {
-  final TextEditingController _titleController = TextEditingController();
-  _titleController.text = initialTitle;
+  final titleController = TextEditingController(text: initialTitle);
+  final descriptionController = TextEditingController(text: initialDescription);
+  final dueDateController = TextEditingController(
+    text:
+        initialDueDate != null
+            ? DateFormat('dd-MM-yyyy HH:mm').format(initialDueDate)
+            : '',
+  );
+  final videoLinkController = TextEditingController(text: initialVideoLink);
+
+  // For selected students
+  final List<String> selectedStudents = [...initialStudents];
+
+  DateTime? selectedDate = initialDueDate;
 
   showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
-      bool _isLoading = false;
+      bool isLoading = false;
 
       return StatefulBuilder(
         builder: (context, setState) {
-          return AlertDialog(
+          return Dialog(
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
-            title: const Text('Edit Assignment'),
-            content: TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 24.0,
+            ),
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+                maxWidth: 600,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Dialog header
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Update Assignment',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Divider(height: 1),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          const Text(
+                            'Title',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: titleController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 16,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Description
+                          const Text(
+                            'Description',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: descriptionController,
+                            maxLines: 4,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.all(12),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Due Date
+                          const Text(
+                            'Due Date',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: dueDateController,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 16,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.calendar_today),
+                                onPressed: () async {
+                                  try {
+                                    print("Opening date picker...");
+                                    // Get current context focus
+                                    FocusScope.of(
+                                      context,
+                                    ).requestFocus(FocusNode());
+
+                                    // Use builder context for dialogs
+                                    final date = await showDatePicker(
+                                      context: context,
+                                      initialDate:
+                                          selectedDate ?? DateTime.now(),
+                                      firstDate: DateTime.now().subtract(
+                                        const Duration(days: 365),
+                                      ),
+                                      // Allow selecting past dates too
+                                      lastDate: DateTime(2030),
+                                      builder: (context, child) {
+                                        return Theme(
+                                          data: Theme.of(context).copyWith(
+                                            colorScheme: ColorScheme.light(
+                                              primary: Colors.blue,
+                                              // Header background color
+                                              onPrimary: Colors.white,
+                                              // Header text color
+                                              onSurface:
+                                                  Colors
+                                                      .black, // Calendar text color
+                                            ),
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                    );
+
+                                    print("Selected date: $date");
+
+                                    if (date != null) {
+                                      print("Showing time picker...");
+                                      // Show time picker
+                                      final TimeOfDay?
+                                      time = await showTimePicker(
+                                        context: context,
+                                        initialTime:
+                                            selectedDate != null
+                                                ? TimeOfDay.fromDateTime(
+                                                  selectedDate!,
+                                                )
+                                                : TimeOfDay.now(),
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: Theme.of(context).copyWith(
+                                              colorScheme: ColorScheme.light(
+                                                primary: Colors.blue,
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
+                                      );
+
+                                      print("Selected time: $time");
+
+                                      if (time != null) {
+                                        setState(() {
+                                          // Create a DateTime with the selected date and time
+                                          selectedDate = DateTime(
+                                            date.year,
+                                            date.month,
+                                            date.day,
+                                            time.hour,
+                                            time.minute,
+                                          );
+
+                                          // Format and display in the text field
+                                          dueDateController.text = DateFormat(
+                                            'dd-MM-yyyy HH:mm',
+                                          ).format(selectedDate!);
+                                          print(
+                                            "Updated text field: ${dueDateController.text}",
+                                          );
+                                        });
+                                      }
+                                    }
+                                  } catch (e) {
+                                    print("Error in date/time picker: $e");
+
+                                    // Show error as a snackbar
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "Error selecting date/time: $e",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                            onTap: () async {
+                              // Also handle tapping on the field itself
+                              FocusScope.of(context).requestFocus(FocusNode());
+
+                              try {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: selectedDate ?? DateTime.now(),
+                                  firstDate: DateTime.now().subtract(
+                                    const Duration(days: 365),
+                                  ),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (date != null) {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        selectedDate != null
+                                            ? TimeOfDay.fromDateTime(
+                                              selectedDate!,
+                                            )
+                                            : TimeOfDay.now(),
+                                  );
+
+                                  if (time != null) {
+                                    setState(() {
+                                      selectedDate = DateTime(
+                                        date.year,
+                                        date.month,
+                                        date.day,
+                                        time.hour,
+                                        time.minute,
+                                      );
+                                      dueDateController.text = DateFormat(
+                                        'dd-MM-yyyy HH:mm',
+                                      ).format(selectedDate!);
+                                    });
+                                  }
+                                }
+                              } catch (e) {
+                                print(
+                                  "Error in date/time picker (field tap): $e",
+                                );
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Students
+                          const Text(
+                            'Students',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final studentsAsyncValue = ref.watch(
+                                studentsProvider("67bed520465b90e0acad21f2"), // Replace with your organization ID
+                              );
+
+                              return studentsAsyncValue.when(
+                                data: (students) {
+                                  if (students.isEmpty) {
+                                    return const Text('No students available');
+                                  }
+                                  return DropdownButtonFormField<String>(
+                                    dropdownColor: Colors.white,
+                                    value: selectedStudentId,
+                                    items: students
+                                        .map(
+                                          (student) => DropdownMenuItem<String>(
+                                        value: student.id,
+                                        child: SizedBox(
+                                          width: 200,
+                                          child: Text(student.name),
+                                        ),
+                                      ),
+                                    )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedStudentId = value;
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      labelText: 'Select Student',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please select a student';
+                                      }
+                                      return null;
+                                    },
+                                  );
+                                },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (error, stack) =>
+                                const Text('Failed to load students'),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Video Link
+                          const Text(
+                            'Video Link (optional)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: videoLinkController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Divider(height: 1),
+
+                  // Action buttons at bottom
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed:
+                              isLoading
+                                  ? null
+                                  : () async {
+                                    if (titleController.text.trim().isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Title cannot be empty',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+
+                                    try {
+                                      // Fixed data type issues
+                                      final Map<String, dynamic> updateData = {
+                                        'assignmentId': assignmentId,
+                                        'title': titleController.text.trim(),
+                                        'description':
+                                            descriptionController.text,
+                                        'students': selectedStudents,
+                                        'videoLink':
+                                            videoLinkController.text.trim(),
+                                        'updatedBy': currentUserLogin,
+                                        'updatedAt':
+                                            currentDateTime.toIso8601String(),
+                                      };
+
+                                      // Only add dueDate if it's not null
+                                      if (selectedDate != null) {
+                                        updateData['dueDate'] =
+                                            selectedDate!.toIso8601String();
+                                      }
+
+                                      await ref.read(
+                                        updateAssignmentProvider(
+                                          updateData,
+                                        ).future,
+                                      );
+
+                                      // Refresh the assignments list
+                                      ref.invalidate(
+                                        assignmentsProviderTeacher,
+                                      );
+
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Assignment updated successfully!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      if (context.mounted) {
+                                        Navigator.of(context).pop();
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(content: Text('Error: $e')),
+                                        );
+                                      }
+                                    } finally {
+                                      if (context.mounted) {
+                                        setState(() {
+                                          isLoading = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          child:
+                              isLoading
+                                  ? const SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Text('Update'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed:
-                    _isLoading
-                        ? null
-                        : () async {
-                          if (_titleController.text.trim().isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Title cannot be empty'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          setState(() {
-                            _isLoading = true;
-                          });
-
-                          try {
-                            await ref.read(
-                              updateAssignmentProvider({
-                                'assignmentId': assignmentId,
-                                'title': _titleController.text.trim(),
-                              }).future,
-                            );
-
-                            // Refresh the assignments list
-                            ref.invalidate(assignmentsProviderTeacher);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Assignment updated successfully!',
-                                ),
-                              ),
-                            );
-
-                            Navigator.of(context).pop();
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
-                          } finally {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                child:
-                    _isLoading
-                        ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Text(
-                          'Save',
-                          style: TextStyle(color: Colors.white),
-                        ),
-              ),
-            ],
           );
         },
       );
     },
   );
 }
+
+// Model classes
