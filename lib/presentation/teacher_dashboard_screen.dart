@@ -45,7 +45,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
       ref.invalidate(assignmentsProviderStudent);
       ref.invalidate(classSessionNotifierProvider);
       ref.invalidate(timetableProvider);
-      ref.invalidate(attendanceProvider);
+      ref.invalidate(attendanceStatsProvider);
       ref.invalidate(assignmentsProviderTeacher);
 
       // Wait for a brief moment to ensure all providers are properly refreshed
