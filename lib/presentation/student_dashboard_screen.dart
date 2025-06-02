@@ -63,6 +63,11 @@ class StudentDashboardScreen extends ConsumerWidget {
     ]);
   }
 
+  void _openSubjectFilter() {
+    // TODO: Implement subject filter logic
+    print('Subject filter opened');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final studentAsync = ref.watch(singleStudentProvider);
@@ -83,34 +88,32 @@ class StudentDashboardScreen extends ConsumerWidget {
           child: Column(
             children: [
               Container(
-                width: double.infinity, // Makes the card take the full width
-                color: Colors.blue, // Background color of the card
-                padding: const EdgeInsets.all(16), // Adds padding inside the card
+                width: double.infinity,
+                color: Colors.blue,
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile Picture
                     const CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white,
                       child: Icon(Icons.person, size: 50, color: Colors.blue),
                     ),
                     const SizedBox(height: 10),
-          
-                    // Name
                     Text(
-                      name, // Replace with the student's name
+                      name,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-          
-                    // Organization
                     Text(
-                      organization, // Replace with the student's organization
-                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                      organization,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
                     ),
                   ],
                 ),
@@ -123,7 +126,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                       leading: const Icon(Icons.person_outline),
                       title: const Text("My Profile"),
                       onTap: () {
-                        Navigator.pop(context); // Close the drawer
+                        Navigator.pop(context);
                       },
                     ),
                     ListTile(
@@ -138,8 +141,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                       leading: const Icon(Icons.logout),
                       title: const Text("Logout"),
                       onTap: () async {
-                        Navigator.pop(context); // Close the drawer
-                        await _logout(context); // Call the logout method
+                        Navigator.pop(context);
+                        await _logout(context);
                       },
                     ),
                   ],
@@ -150,19 +153,17 @@ class StudentDashboardScreen extends ConsumerWidget {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => _refreshData(ref), // Add refresh functionality
+        onRefresh: () => _refreshData(ref),
         child: studentAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('Error: $err')),
           data:
               (student) => SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                // Enable pull-to-refresh
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Profile Card
                     ProfileCard(
                       name: student.name,
                       organization: student.organization.name,
@@ -172,8 +173,6 @@ class StudentDashboardScreen extends ConsumerWidget {
                       onEdit: onEdit,
                     ),
                     const SizedBox(height: 16),
-
-                    // Today's Class
                     todaysClassAsync.when(
                       loading:
                           () =>
@@ -219,8 +218,6 @@ class StudentDashboardScreen extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Home Works
                     assignmentsAsync.when(
                       loading:
                           () =>
@@ -234,7 +231,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                             ),
                           ),
                       data: (list) {
-                        if (list.isEmpty) {
+                        if (list.assignments?.isEmpty ?? true) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: Text(
@@ -248,27 +245,24 @@ class StudentDashboardScreen extends ConsumerWidget {
                         }
                         return HomeWorksWidget(
                           items:
-                              list
-                                  .map(
-                                    (a) => HomeWorkData(
-                                      tag: a.title,
-                                      title: a.description,
-                                      teacherName: a.teacherName,
-                                      dueDate: a.dueDate,
-                                      progress: a.submitted ? 1.0 : 0.0,
-                                      thumbnailUrl: null,
-                                    ),
-                                  )
-                                  .toList(),
-                          onFilterTap: () {
-                            // TODO: open subject filter
-                          },
+                              list.assignments!.map((assignment) {
+                                return HomeWorkData(
+                                  tag: assignment.title!,
+                                  title: assignment.description!,
+                                  teacherName:
+                                      assignment.teacher?.name ??
+                                      'Unknown Teacher',
+                                  dueDate: DateTime.parse(assignment.dueDate!),
+                                  progress: assignment.submission?.grade ?? 0.0,
+                                  thumbnailUrl: null,
+                                  isSubmitted: assignment.submission != null,
+                                );
+                              }).toList(),
+                          onFilterTap: _openSubjectFilter,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Attendance
                     attendanceAsync.when(
                       loading:
                           () =>
@@ -293,8 +287,6 @@ class StudentDashboardScreen extends ConsumerWidget {
                           ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Performance Chart
                     const Text(
                       'Performance Overview',
                       style: TextStyle(
@@ -314,7 +306,6 @@ class StudentDashboardScreen extends ConsumerWidget {
   }
 }
 
-/// Opens the Zoom link in an external application and shows a spinner.
 void joinZoomMeeting(BuildContext context, String zoomLink) async {
   final uri = Uri.parse(zoomLink);
   showDialog(
@@ -334,27 +325,3 @@ void joinZoomMeeting(BuildContext context, String zoomLink) async {
     Navigator.of(context).pop();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
