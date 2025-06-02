@@ -247,6 +247,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                           items:
                               list.assignments!.map((assignment) {
                                 return HomeWorkData(
+                                  assignment.id,
                                   tag: assignment.title!,
                                   title: assignment.description!,
                                   teacherName:

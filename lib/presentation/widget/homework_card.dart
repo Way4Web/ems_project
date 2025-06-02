@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 /// Data model for a single homework entry.
 class HomeWorkData {
@@ -6,23 +9,25 @@ class HomeWorkData {
   final String title;
   final String teacherName;
   final DateTime dueDate;
-  final double progress;      // 0.0 – 1.0
+  final double progress; // 0.0 – 1.0
   final String? thumbnailUrl; // e.g. network image URL
-  final bool isSubmitted;     // Tracks whether homework is submitted
+  final String? id; // Assignment ID
+  bool isSubmitted; // Tracks whether homework is submitted (mutable)
 
-  HomeWorkData({
-    required this.tag,
-    required this.title,
-    required this.teacherName,
-    required this.dueDate,
-    required this.progress,
-    this.thumbnailUrl,
-    required this.isSubmitted,
-  });
+  HomeWorkData(
+      this.id, {
+        required this.tag,
+        required this.title,
+        required this.teacherName,
+        required this.dueDate,
+        required this.progress,
+        this.thumbnailUrl,
+        required this.isSubmitted,
+      });
 }
 
 /// The “Home Works” container + header + list of cards.
-class HomeWorksWidget extends StatelessWidget {
+class HomeWorksWidget extends StatefulWidget {
   final List<HomeWorkData> items;
   final VoidCallback onFilterTap; // Callback to open subject filter
 
@@ -31,6 +36,16 @@ class HomeWorksWidget extends StatelessWidget {
     required this.items,
     required this.onFilterTap,
   }) : super(key: key);
+
+  @override
+  _HomeWorksWidgetState createState() => _HomeWorksWidgetState();
+}
+
+class _HomeWorksWidgetState extends State<HomeWorksWidget> {
+  /// Refreshes the UI after changes to data.
+  void _refreshUI() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +76,7 @@ class HomeWorksWidget extends StatelessWidget {
                   ),
                 ),
                 InkWell(
-                  onTap: onFilterTap,
+                  onTap: widget.onFilterTap,
                   borderRadius: BorderRadius.circular(8),
                   hoverColor: Colors.blue.withOpacity(0.1),
                   child: Row(
@@ -79,7 +94,7 @@ class HomeWorksWidget extends StatelessWidget {
           const Divider(height: 1),
 
           // List or Empty State
-          if (items.isEmpty)
+          if (widget.items.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16),
               child: const Text(
@@ -89,10 +104,16 @@ class HomeWorksWidget extends StatelessWidget {
             )
           else
             Column(
-              children: items.map((data) {
+              children: widget.items.map((data) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _HomeWorkCard(data: data),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: _HomeWorkCard(
+                    data: data,
+                    onSubmissionSuccess: _refreshUI, // Pass callback to refresh UI
+                  ),
                 );
               }).toList(),
             ),
@@ -105,8 +126,13 @@ class HomeWorksWidget extends StatelessWidget {
 /// Individual homework card widget.
 class _HomeWorkCard extends StatelessWidget {
   final HomeWorkData data;
+  final VoidCallback onSubmissionSuccess;
 
-  const _HomeWorkCard({Key? key, required this.data}) : super(key: key);
+  const _HomeWorkCard({
+    Key? key,
+    required this.data,
+    required this.onSubmissionSuccess,
+  }) : super(key: key);
 
   /// Determines the progress color based on the percentage value.
   Color _getProgressColor(double progress) {
@@ -181,7 +207,9 @@ class _HomeWorkCard extends StatelessWidget {
                     child: Text(
                       data.title,
                       style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -215,34 +243,94 @@ class _HomeWorkCard extends StatelessWidget {
                     backgroundColor: Colors.grey[200],
                   ),
                   Text(
-                    '${(data.progress ).round()}%',
+                    '${(data.progress).round()}%',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
               )
                   : ElevatedButton(
-                onPressed: () {
-                  // Define submission logic here
+                onPressed: () async {
+                  final FlutterSecureStorage secureStorage =
+                  FlutterSecureStorage();
+
+                  final String apiUrl =
+                      "http://192.168.1.3:5000/api/student/submitAssignment/${data.id}/submit";
+
+                  try {
+                    final token = await secureStorage.read(key: "token");
+
+                    if (token == null) {
+                      throw Exception(
+                        "Token not found. Please log in again.",
+                      );
+                    }
+
+                    final response = await http.post(
+                      Uri.parse(apiUrl),
+                      headers: <String, String>{
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer $token',
+                      },
+                    );
+
+                    if (response.statusCode == 200) {
+                      // Successful submission
+                      final responseData = jsonDecode(response.body);
+                      print("Success: ${responseData['message']}");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Assignment submitted successfully!",
+                          ),
+                        ),
+                      );
+
+                      // Mark the assignment as submitted
+                      data.isSubmitted = true;
+
+                      // Trigger UI refresh
+                      onSubmissionSuccess();
+                    } else {
+                      print(
+                        "Error: ${response.statusCode}, ${response.body}",
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Failed to submit assignment. Please try again.",
+                          ),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    print("Exception: $e");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "An error occurred. Please try again.",
+                        ),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  fixedSize: const Size(100, 40), // Updated size to match image
+                  fixedSize: const Size(100, 40),
                   padding: EdgeInsets.zero,
                 ),
                 child: const Text(
                   'Submit',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14, // Adjusted font size for clarity
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            )
-
+            ),
           ],
         ),
         const SizedBox(height: 8),
