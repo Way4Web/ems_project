@@ -1,6 +1,11 @@
-import 'package:ems_project/Infrastructure/login_api.dart';
+import 'package:ems_project/Services/login_api.dart';
 import 'package:ems_project/main.dart';
 import 'package:ems_project/presentation/registration_screen.dart';
+import 'package:ems_project/presentation/sidebar_screen.dart';
+import 'package:ems_project/presentation/student_dashboard_screen.dart';
+import 'package:ems_project/presentation/teacher_dashboard_screen.dart';
+import 'package:ems_project/presentation/widget/edit_single_student.dart';
+import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +21,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
+  late String role;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +81,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF3A4A64),
-                                  width: 2.0,
+                                  color: Color(0xFFDCE0E5),
+                                  width: 1.0,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(
+                                    0xFFE0E0E0,
+                                  ), // Light grey color for enabled state
                                 ),
                               ),
                               suffixIcon: Icon(Icons.email_outlined),
@@ -120,10 +133,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF3A4A64),
-                                  width: 2.0,
+                                  color: Color(0xFFE0E0E0),
+                                  // width: 2.0,
                                 ),
                               ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(
+                                    0xFFE0E0E0,
+                                  ), // Light grey color for enabled state
+                                ),
+                              ),
+
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
@@ -152,28 +174,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                activeColor: CommonColor.kbuttonColor,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _rememberMe = value ?? false;
-                                  });
-                                },
-                              ),
-                              const Text('Remember Me'),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              // Forgot Password Logic
-                            },
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(color: Colors.red),
-                            ),
+                          Container(),
+                          const Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.red),
                           ),
                         ],
                       ),
@@ -185,17 +189,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         child: ElevatedButton(
                           onPressed: loginState.isLoading ? null : _onSignIn,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue, // Replace with your button color e.g. CommonColor.kbuttonColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                8,
+                              ), // Rounded corners
+                            ),
+                            backgroundColor: CommonClass.kbuttonColor,
+                            // Replace with your button color e.g. CommonColor.kbuttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: loginState.isLoading
-                              ? CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                              : const Text(
-                            'Sign In',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child:
+                              loginState.isLoading
+                                  ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Sign In',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -203,7 +216,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         Center(
                           child: Text(
                             loginState.message!,
-                            style: TextStyle(color: CommonColor.kbuttonColor),
+                            style: TextStyle(color: CommonClass.kbuttonColor),
                           ),
                         ),
 
@@ -220,11 +233,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                   builder: (context) => const RegisterScreen(),
                                 ),
                               );
-                            },
+                            }, //
                             child: Text(
                               'Create Account',
-                              style: TextStyle(color: Colors.blue), // Replace with your button color if needed
-                            ),
+                              style: TextStyle(
+                                color: CommonClass.kbuttonColor,
+                              ), // Replace with your button color if needed
+                            ), //
                           ),
                         ],
                       ),
@@ -257,11 +272,54 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       // Retrieve the API service from the provider using Riverpod
       final loginApiService = ref.read(loginStateProvider.notifier);
 
-      // Call the loginUser method from your API service
-      await loginApiService.loginUser(email, password);
+      // Call the loginUser method and expect a bool result indicating success
+      final success = await loginApiService.loginUser(email, password);
+      final loginState = ref.watch(loginStateProvider);
+
+      if (success) {
+        // Navigate to the AddOrganisation screen if login is successful.
+        if (loginState.role == 'student') {
+          final student = await ref.read(singleStudentProvider.future);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentDashboardScreen(
+                name: student.name,
+                organization: student.organization.name,
+                status: student.status,
+                email: student.email,
+                id: student.id, onEdit: () {  },
+              ),
+            ),
+          );
+        }
+        else if (loginState.role == 'teacher') {
+          // final student = await ref.read(singleStudentProvider.future);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeacherDashboardScreen()
+            ),
+          );
+        }
+        else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SidebarScreen()),
+            // AddOrganisation()),
+          );
+        }
+      } else {
+        // Handle login failure (show an error message, etc.)
+        debugPrint('Login failed.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed. Please try again.')),
+        );
+      }
 
       debugPrint('Signing in...');
     }
   }
 }
-
