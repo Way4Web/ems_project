@@ -1,43 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ems_project/Services/get_best_performer_service.dart';
-
-import 'best_perfomer_indicator.dart' as api;
-// Import with prefix to avoid conflict
+import 'package:ems_project/Domain/get_all_assignment_studentProgress_TeacherDashboard.dart';
+import '../../Services/student_api_service.dart' show assignmentsProviderStudent;
 
 class AssignmentProgressWidget extends ConsumerWidget {
   final List<AssignmentProgress> assignments;
   final String currentUserLogin;
-  // final String currentDateTime;
 
   const AssignmentProgressWidget({
     Key? key,
     required this.assignments,
     this.currentUserLogin = 'Way4Web',
-    // required this.currentDateTime,
   }) : super(key: key);
 
   // Factory constructor with the exact specified date/time
   factory AssignmentProgressWidget.withCurrentDateTime({
     required List<AssignmentProgress> assignments,
-    String currentUserLogin = 'Way4Web',  // Exact specified login
+    String currentUserLogin = 'Way4Web',  // Default user login
   }) {
     return AssignmentProgressWidget(
       assignments: assignments,
       currentUserLogin: currentUserLogin,
-      // currentDateTime: '2025-05-23 11:08:34', // Using exact specified date/time from requirements
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch assignments provider for API integration
-    final assignmentsAsync = ref.watch(assignmentsProvider);
+    final assignmentsAsync = ref.watch(assignmentsProviderStudent);
 
     return Card(
       color: Colors.white,
       surfaceTintColor: Colors.white,
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(6),
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -59,23 +54,17 @@ class AssignmentProgressWidget extends ConsumerWidget {
                   ),
                 ),
                 // Date/time text
-                Text(
-                  // 'Updated: $currentDateTime',
-                  "",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
+                // Text(
+                //   "2025-06-03 07:59:41", // Updated with the time you provided
+                //   style: TextStyle(fontSize: 12, color: Colors.grey),
+                // ),
               ],
             ),
             const SizedBox(height: 24),
 
             // Handle different states of assignments fetching
             assignmentsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, stack) => Center(
                 child: Text(
                   'Error loading assignments: $err',
@@ -83,23 +72,17 @@ class AssignmentProgressWidget extends ConsumerWidget {
                 ),
               ),
               data: (fetchedAssignments) {
-                // If we have assignments from the API, process them
-                if (fetchedAssignments.isNotEmpty) {
-                  // Take only the first assignment and calculate average grade
-                  final firstAssignment = fetchedAssignments.first;
-                  final averageProgress = _calculateAverageProgress(fetchedAssignments);
+                // Process assignment data to calculate average grades
+                final List<AssignmentProgress> progressAssignments =
+                _processAssignmentsData(fetchedAssignments!);
 
-                  final assignment = AssignmentProgress(
-                    name: firstAssignment.title ?? 'Untitled',
-                    progressPercentage: averageProgress,
-                  );
-
-                  return _buildAssignmentProgressItem(assignment);
+                if (progressAssignments.isNotEmpty) {
+                  return _buildAssignmentProgressList(progressAssignments);
                 }
 
-                // Otherwise use the first provided static assignment if available
+                // If no data from API, use provided static assignments if available
                 if (assignments.isNotEmpty) {
-                  return _buildAssignmentProgressItem(assignments.first);
+                  return _buildAssignmentProgressList(assignments);
                 }
 
                 // If no assignments at all
@@ -123,91 +106,102 @@ class AssignmentProgressWidget extends ConsumerWidget {
     );
   }
 
-  // Calculate average progress percentage across all assignments
-  int _calculateAverageProgress(List<api.BestPerformerIndicator> indicators) {
-    if (indicators.isEmpty) return 0;
+  // Process assignments data to calculate average grades
+  List<AssignmentProgress> _processAssignmentsData(
+      List<AssignmentsData> assignmentsData,
+      ) {
+    List<AssignmentProgress> progressList = [];
 
-    // Count assignments with valid grades for calculation
-    int validGradeCount = 0;
-    int totalProgress = 0;
-
-    for (var indicator in indicators) {
-      // Get individual progress for this assignment
-      int progress = _calculateProgress(indicator);
-      if (progress >= 0) { // Only count valid progress values
-        totalProgress += progress;
-        validGradeCount++;
-      }
-    }
-
-    // Calculate average, avoid division by zero
-    return validGradeCount > 0 ? (totalProgress / validGradeCount).round() : 0;
-  }
-
-  // Calculate progress percentage from api.BestPerformerIndicator object
-  int _calculateProgress(api.BestPerformerIndicator indicator) {
-    // Check if indicator has student submissions with grades
-    if (indicator.submissions != null && indicator.submissions!.isNotEmpty) {
-      // Calculate average grade from all student submissions
-      int totalGrades = 0;
+    // Process each assignment to calculate average grade
+    for (var assignment in assignmentsData) {
+      String assignmentName = assignment.title ?? 'Untitled Assignment';
+      double totalAssignmentGrades = 0.0;
       int validSubmissions = 0;
 
-      for (var submission in indicator.submissions!) {
-        if (submission.grade != null) {
-          totalGrades += submission.grade!;
-          validSubmissions++;
+      // Calculate total grades and count valid submissions
+      if (assignment.submissions != null && assignment.submissions!.isNotEmpty) {
+        for (var submission in assignment.submissions!) {
+          if (submission.grade != null) {
+            totalAssignmentGrades += submission.grade!.toDouble();
+            validSubmissions++;
+          }
         }
       }
 
+      // Calculate average grade as progress percentage
+      int progressPercentage = 0;
       if (validSubmissions > 0) {
-        return (totalGrades / validSubmissions).round();
+        progressPercentage = (totalAssignmentGrades / validSubmissions).round();
       }
+
+      // Add to progress list
+      progressList.add(
+        AssignmentProgress(
+          name: assignmentName,
+          progressPercentage: progressPercentage,
+        ),
+      );
     }
 
-    // Fallback to other indicators if no submissions with grades
-    if (indicator.completionStatus == 'completed') {
-      return 100;
-    } else if (indicator.completionStatus == 'in-progress') {
-      return 50; // Default in-progress value
-    } else if (indicator.assignmentStatus != null) {
-      // Try to extract percentage from status if available
-      switch (indicator.assignmentStatus?.toLowerCase()) {
-        case 'completed':
-          return 100;
-        case 'in progress':
-          return 50;
-        case 'not started':
-          return 0;
-        default:
-        // Try to calculate from scores if available
-          if (indicator.score != null && indicator.totalScore != null &&
-              indicator.totalScore! > 0) {
-            return ((indicator.score! / indicator.totalScore!) * 100).round();
-          }
-      }
-    }
+    // Sort by progress percentage (highest first)
+    progressList.sort(
+          (a, b) => b.progressPercentage.compareTo(a.progressPercentage),
+    );
 
-    // Default fallback percentage
-    return 40; // Matching the example percentage in the UI
+    return progressList;
   }
 
-  Widget _buildAssignmentProgressItem(AssignmentProgress assignment) {
+  // Build a list of all assignment progress items
+  Widget _buildAssignmentProgressList(
+      List<AssignmentProgress> progressAssignments,
+      ) {
+    return Column(
+      children: progressAssignments.map((assignment) {
+        return _buildAssignmentProgressItem(
+          assignment,
+          // Get index for color variation
+          progressAssignments.indexOf(assignment) % 3,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildAssignmentProgressItem(
+      AssignmentProgress assignment,
+      int colorIndex,
+      ) {
+    // Define different colors based on index for visual variety
+    final List<Color> progressColors = [
+      const Color(0xFF3b5de7), // Blue
+      Colors.amber, // Amber/Yellow
+      Colors.cyan, // Cyan/Light Blue
+    ];
+
+    Color progressColor = progressColors[colorIndex];
+
+    // Calculate progress width factor, ensuring it's at least 0.05 to fit the dots
+    double widthFactor = assignment.progressPercentage > 0
+        ? assignment.progressPercentage / 100
+        : 0.05;
+
+    // If progress percentage is low but we need dots, ensure there's enough space
+    if (colorIndex == 2 && widthFactor < 0.15) widthFactor = 0.15;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
           // Assignment name
           SizedBox(
-            width: 80,
+            width: 90, // Fixed width for assignment name
             child: Text(
               assignment.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
 
           // Progress bar
           Expanded(
@@ -223,26 +217,60 @@ class AssignmentProgressWidget extends ConsumerWidget {
                 ),
                 // Progress indicator
                 FractionallySizedBox(
-                  widthFactor: assignment.progressPercentage / 100,
+                  widthFactor: widthFactor,
                   child: Container(
                     height: 24,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3b5de7),
+                      color: progressColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Only show dots if we have enough space
+                        if (constraints.maxWidth < 20) {
+                          return Container(); // Empty container if too small
+                        }
+
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // First white dot (always present)
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            // Add extra white dots for cyan color bars if there's enough space
+                            if (colorIndex == 2 && constraints.maxWidth >= 60)
+                              Row(
+                                children: [
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -260,10 +288,7 @@ class AssignmentProgressWidget extends ConsumerWidget {
             ),
             child: Text(
               '${assignment.progressPercentage}%',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ],

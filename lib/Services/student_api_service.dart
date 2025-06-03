@@ -209,7 +209,49 @@ final assignmentsProviderStudent = FutureProvider<List<AssignmentsData>?>((ref) 
 
 
 
+Future<void> updateAssignmentGrade({
+  required String assignmentId,
+  required String studentId,
+  required double grade,
+}) async {
+  try {
+    // Get the stored token for authentication
+    final String? token = await FlutterSecureStorage().read(key: 'token');
+    if (token == null) {
+      throw Exception('Authentication token not found');
+    }
 
+    // Format the current date and time for logging
+    final now = DateTime.now();
+    final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} "
+        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+
+    print('[$formattedDate] Updating grade for assignment: $assignmentId, student: $studentId, grade: $grade');
+
+    // Make the API call to update the grade
+    final response = await http.put(
+      Uri.parse('http://192.168.1.3:5000/api/teacher/gradeAssignment/$assignmentId/grade'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'studentId': studentId,
+        'grade': grade,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      print('API error: ${response.body}');
+      throw Exception('Failed to update grade. Status code: ${response.statusCode}');
+    }
+
+    print('[$formattedDate] Grade updated successfully');
+  } catch (e) {
+    print('Error updating grade: $e');
+    throw Exception('Failed to update grade: $e');
+  }
+}
 
 
 
