@@ -64,10 +64,31 @@ class GetClassSessionService {
       );
 
       print("Response Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+
+        // Filter the data before returning
+        final DateTime currentDateTime = DateTime.now();
+
+        // Create a new filtered list
+        final List<dynamic> filteredSessions = (data['classSessions'] as List?)
+            ?.where((session) {
+          try {
+            final DateTime startTime = DateTime.parse(session['startTime']);
+            return !startTime.isBefore(currentDateTime);
+          } catch (e) {
+            print('Error parsing date: $e');
+            return false;
+          }
+        })
+            .toList() ?? [];
+
+        // Replace the original list with the filtered one
+        data['classSessions'] = filteredSessions;
+
+        print("Filtered ${filteredSessions.length} upcoming sessions");
+        return data;
       } else {
         throw Exception('Failed to fetch class sessions: ${response.body}');
       }
@@ -75,7 +96,6 @@ class GetClassSessionService {
       throw Exception('Error fetching class sessions: $e');
     }
   }
-
   // Add a new event
   static Future<void> addNewEvent(Map<String, dynamic> eventData) async {
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();

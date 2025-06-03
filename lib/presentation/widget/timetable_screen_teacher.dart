@@ -12,12 +12,12 @@ import 'update_timetable_dialog.dart';
 
 class TimetableWidget extends ConsumerStatefulWidget {
   final String userId;
-  final DateTime? selectedDate; // Make it optional
+  final DateTime? selectedDate;
 
   const TimetableWidget({
     Key? key,
     required this.userId,
-    this.selectedDate, // Optional parameter
+    this.selectedDate,
   }) : super(key: key);
 
   @override
@@ -33,7 +33,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
   final String defaultTimetableId = '682b0e9b9d783e6f901e6f85';
 
   // Current date/time and user
-  final DateTime currentDateTime = DateTime.parse('2025-05-28 10:27:01');
+  final DateTime currentDateTime = DateTime.parse('2025-06-03 11:14:42');
   final String currentUser = 'Way4Web';
 
   @override
@@ -76,25 +76,46 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildHeader(context),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         const Divider(height: 1),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         timetableAsyncValue.when(
           data: (timetableEvents) {
             // Print debug info
             print('Total events: ${timetableEvents.length}');
             print('Selected date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}');
 
-            // Filter the events based on the selected date
-            final filteredEvents = timetableEvents.where((event) {
-              final eventDate = DateTime(event.startTime.year, event.startTime.month, event.startTime.day);
-              final selectedDateOnly = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-              return eventDate.isAtSameMomentAs(selectedDateOnly);
+            // Filter events that are active on the selected date
+            // An event is "active" if the selected date falls between the event's start and end date (inclusive)
+            final activeEvents = timetableEvents.where((event) {
+              final selectedDateOnly = DateTime(
+                _selectedDate.year,
+                _selectedDate.month,
+                _selectedDate.day,
+              );
+
+              final eventStartDate = DateTime(
+                event.startTime.year,
+                event.startTime.month,
+                event.startTime.day,
+              );
+
+              final eventEndDate = DateTime(
+                event.endTime.year,
+                event.endTime.month,
+                event.endTime.day,
+              );
+
+              // Event is active if selected date falls between event's start and end dates (inclusive)
+              return (selectedDateOnly.isAtSameMomentAs(eventStartDate) ||
+                  selectedDateOnly.isAfter(eventStartDate)) &&
+                  (selectedDateOnly.isAtSameMomentAs(eventEndDate) ||
+                      selectedDateOnly.isBefore(eventEndDate));
             }).toList();
 
-            print('Filtered events: ${filteredEvents.length}');
+            print('Active events: ${activeEvents.length}');
 
-            return _buildTimetableCarousel(context, filteredEvents);
+            return _buildSimplifiedTimetableCarousel(context, activeEvents);
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => Center(
@@ -117,9 +138,14 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
         ? Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Class Timetable',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Class Timetable',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         _buildDatePicker(context),
@@ -188,7 +214,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
 
   Widget _buildUpdateButton() {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.056,
+      height: MediaQuery.of(context).size.height * 0.062,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
@@ -281,7 +307,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
 
   Widget _buildCreateButton() {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.056,
+      height: MediaQuery.of(context).size.height * 0.062,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
@@ -337,10 +363,8 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
     }
   }
 
-  Widget _buildTimetableCarousel(
-      BuildContext context,
-      List<TimetableEvent> events,
-      ) {
+  // New simplified carousel that matches the screenshot design
+  Widget _buildSimplifiedTimetableCarousel(BuildContext context, List<TimetableEvent> events) {
     if (events.isEmpty) {
       return SizedBox(
         height: 200,
@@ -373,176 +397,147 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Fixed height container for the PageView
-        SizedBox(
-          height: 300, // Fixed height for cards
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              PageView.builder(
-                controller: _pageController,
-                itemCount: events.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPageIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                    child: _buildTimetableCard(events[index]),
-                  );
-                },
-              ),
-              if (events.length > 1) ...[
-                Positioned(
-                  left: 0,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    child: IconButton(
-                      icon: const Icon(Icons.chevron_left, color: Colors.white),
-                      onPressed: () {
-                        _pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.chevron_right,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ],
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
           ),
-        ),
-        // Page indicators
-        if (events.length > 1)
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                events.length,
-                    (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  height: 8,
-                  width: _currentPageIndex == index ? 24 : 8,
-                  decoration: BoxDecoration(
-                    color:
-                    _currentPageIndex == index ? Colors.blue : Colors.grey,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Fixed height container for the PageView
+          SizedBox(
+            height: 180, // Adjusted height to match screenshot
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: events.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPageIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.18),
+                      child: _buildSimplifiedTimetableCard(events[index], index),
+                    );
+                  },
                 ),
-              ),
+                if (events.length > 1) ...[
+                  Positioned(
+                    left: 0,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.blue,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        iconSize: 20,
+                        icon: const Icon(Icons.chevron_left, color: Colors.white),
+                        onPressed: () {
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.blue,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        iconSize: 20,
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildTimetableCard(TimetableEvent event) {
+  Widget _buildSimplifiedTimetableCard(TimetableEvent event, int index) {
+    final timeFormat = DateFormat('HH:mm');
     final dateFormat = DateFormat('dd MMM yyyy');
 
-    return Card(
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _handleUpdateEvent(event),
-                  tooltip: 'Edit event',
-                ),
-              ],
+    // Use index to alternate between creators as shown in the screenshot
+    String creatorName = index % 2 == 0 ? 'Way4' : 'Way4Webjwje';
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Time badge at the top
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 12),
-            Text(
-              event.title ?? 'Untitled Event',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${dateFormat.format(event.startTime)} - ${dateFormat.format(event.endTime)}',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            if (event.description != null && event.description!.isNotEmpty)
-              Flexible(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: Text(event.description!),
-                ),
+            child: Text(
+              '${timeFormat.format(event.startTime)} - ${timeFormat.format(event.endTime)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => _handleUpdateEvent(event),
-                  icon: const Icon(Icons.edit, color: Colors.white),
-                  label: const Text(
-                    'Edit Event',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+
+          // Event title
+          Text(
+            event.title ?? 'Untitled Event',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+
+          // Date range
+          Text(
+            '${dateFormat.format(event.startTime)} - ${dateFormat.format(event.endTime)}',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 4),
+
+        ],
       ),
     );
   }

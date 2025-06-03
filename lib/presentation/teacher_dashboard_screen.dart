@@ -6,10 +6,9 @@ import 'package:ems_project/presentation/widget/attendance_pie_chart.dart';
 import 'package:ems_project/presentation/widget/create_class_session.dart';
 import 'package:ems_project/presentation/widget/overall_assignment_progress.dart';
 import 'package:ems_project/presentation/widget/profile_card.dart';
-import 'package:ems_project/presentation/widget/student_progress_widget.dart';
+import 'package:ems_project/presentation/widget/record_student_progress.dart';
 import 'package:ems_project/presentation/widget/timetable_screen_teacher.dart';
 import 'package:ems_project/presentation/widget/upcoming_event_widget.dart';
-import 'package:ems_project/providers/attendance_notifier.dart';
 import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +26,12 @@ class TeacherDashboardScreen extends ConsumerStatefulWidget {
   const TeacherDashboardScreen({super.key});
 
   @override
-  ConsumerState<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
+  ConsumerState<TeacherDashboardScreen> createState() =>
+      _TeacherDashboardScreenState();
 }
 
-class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen> {
+class _TeacherDashboardScreenState
+    extends ConsumerState<TeacherDashboardScreen> {
   static final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   // Current date/time and user
@@ -49,6 +50,9 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
       ref.invalidate(timetableProvider);
       ref.invalidate(attendanceStatsProvider);
       ref.invalidate(assignmentsProviderTeacher);
+      ref.invalidate(classSessionNotifierProvider);
+      ref.invalidate(attendanceStatsProvider);
+      ref.invalidate(attendanceApiServiceProvider);
 
       // Wait for a brief moment to ensure all providers are properly refreshed
       await Future.delayed(const Duration(milliseconds: 500));
@@ -61,23 +65,24 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
   Future<void> _handleLogout(BuildContext context) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout Confirmation'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout Confirmation'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
     );
 
     if (shouldLogout == true) {
@@ -88,7 +93,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const SignInScreen()),
-              (route) => false,
+          (route) => false,
         );
       } catch (e) {
         print('Error during logout: $e');
@@ -110,10 +115,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
         title: const Text('Teacher Dashboard'),
         surfaceTintColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshData,
-          ),
+          // IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshData),
         ],
       ),
       drawer: _buildSidebar(context, teacherAsync),
@@ -128,17 +130,22 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     teacherAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (err, stack) => Center(
-                        child: Text(
-                          'Error: $err',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (err, stack) => Center(
+                            child: Text(
+                              'Error: $err',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
                       data: (teacherData) {
-                        final String teacherName = teacherData['name'] ?? 'Teacher';
+                        final String teacherName =
+                            teacherData['name'] ?? 'Teacher';
                         final String organizationId =
-                            teacherData['organizationId'] ?? '67bed520465b90e0acad21f2';
+                            teacherData['organizationId'] ??
+                            '67bed520465b90e0acad21f2';
 
                         return Column(
                           children: [
@@ -194,7 +201,8 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Text(
                                       'Schedules',
@@ -209,14 +217,17 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>  CreateClassSession(),
+                                            builder:
+                                                (context) =>
+                                                    CreateClassSession(),
                                           ),
                                         );
                                       },
                                       style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all(
-                                          Colors.blue,
-                                        ),
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                              Colors.blue,
+                                            ),
                                       ),
                                       child: Row(
                                         children: const [
@@ -227,7 +238,9 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                                           SizedBox(width: 5),
                                           Text(
                                             'Add New',
-                                            style: TextStyle(color: Colors.white),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -261,7 +274,9 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                                       },
                                       onDaySelected: (selectedDay, focusedDay) {
                                         // Update the provider when a day is selected
-                                        ref.read(selectedDateProvider.notifier).state = selectedDay;
+                                        ref
+                                            .read(selectedDateProvider.notifier)
+                                            .state = selectedDay;
                                       },
                                       calendarFormat: CalendarFormat.month,
                                       daysOfWeekHeight: 30,
@@ -307,10 +322,15 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
                             ),
                             const SizedBox(height: 16),
 
-                             UpcomingEventsWidget(onRefresh: (){}),
+                            UpcomingEventsWidget(
+                              onRefresh: () {
+                                ref.invalidate(classSessionNotifierProvider);
+                                ref.invalidate(attendanceStatsProvider);
+                              },
+                            ),
                             const SizedBox(height: 20),
 
-                             AssignmentCard(),
+                            AssignmentCard(),
                             const SizedBox(height: 20),
 
                             const AttendanceDashboardWidget(),
@@ -321,7 +341,8 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
 
                             AssignmentProgressWidget(
                               assignments: [], // Pass empty list as fallback
-                              currentUserLogin: 'Way4Web', // Using the current user login you provided
+                              currentUserLogin:
+                                  'Way4Web', // Using the current user login you provided
                             ),
                           ],
                         );
@@ -336,9 +357,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
           if (isRefreshing)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
@@ -351,75 +370,78 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
         padding: EdgeInsets.zero,
         children: [
           teacherAsync.when(
-            loading: () => Container(
-              height: 200,
-              color: Colors.blue,
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            ),
-            error: (err, stack) => Container(
-              height: 200,
-              color: Colors.blue,
-              child: const Center(
-                child: Text(
-                  'Error loading profile',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            data: (teacherData) => Container(
-              height: 200,
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: NetworkImage(
-                    'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029',
+            loading:
+                () => Container(
+                  height: 200,
+                  color: Colors.blue,
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
                   ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        (teacherData['name'] as String?)?.isNotEmpty == true
-                            ? (teacherData['name'] as String)
-                            .substring(0, 1)
-                            .toUpperCase()
-                            : 'T',
-                        style: const TextStyle(
-                          fontSize: 36.0,
-                          color: Colors.blue,
-                        ),
-                      ),
+            error:
+                (err, stack) => Container(
+                  height: 200,
+                  color: Colors.blue,
+                  child: const Center(
+                    child: Text(
+                      'Error loading profile',
+                      style: TextStyle(color: Colors.white),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      teacherData['name'] ?? 'Teacher',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      teacherData['email'] ?? 'teacher@example.com',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+            data:
+                (teacherData) => Container(
+                  height: 200,
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                        'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029',
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        CircleAvatar(
+                          radius: 36,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            (teacherData['name'] as String?)?.isNotEmpty == true
+                                ? (teacherData['name'] as String)
+                                    .substring(0, 1)
+                                    .toUpperCase()
+                                : 'T',
+                            style: const TextStyle(
+                              fontSize: 36.0,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          teacherData['name'] ?? 'Teacher',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          teacherData['email'] ?? 'teacher@example.com',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
           ),
 
           ListTile(
@@ -439,12 +461,13 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
 
     return assignmentsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(
-        child: Text(
-          'Error loading student progress: $error',
-          style: const TextStyle(color: Colors.red),
-        ),
-      ),
+      error:
+          (error, stackTrace) => Center(
+            child: Text(
+              'Error loading student progress: $error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
       data: (assignmentsData) {
         if (assignmentsData == null || assignmentsData.isEmpty) {
           return const Center(
@@ -491,12 +514,12 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
           onGradeSubmission: (String studentId, String assignmentId) {
             // Find the specific assignment and submission
             final assignment = assignmentsData.firstWhere(
-                  (a) => a.id == assignmentId,
-              orElse: () =>   AssignmentsData(),
+              (a) => a.id == assignmentId,
+              orElse: () => AssignmentsData(),
             );
 
             final submission = assignment.submissions?.firstWhere(
-                  (s) => s.student == studentId,
+              (s) => s.student == studentId,
               orElse: () => Submissions(),
             );
 
@@ -532,17 +555,11 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
         );
       },
     );
-  }}
+  }
+}
 
 // Add a provider to track global refresh state
 final isRefreshingProvider = StateProvider<bool>((ref) => false);
-
-
-
-
-
-
-
 
 // StudentProgress model
 // StudentProgress model
@@ -565,6 +582,7 @@ class StudentProgress {
     this.needsGrading = false,
   });
 }
+
 // StudentProgressWidget
 class StudentProgressWidget extends StatelessWidget {
   final List<StudentProgress> students;
@@ -592,13 +610,17 @@ class StudentProgressWidget extends StatelessWidget {
           children: [
             const Text(
               'Student Progress',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             ElevatedButton(
-              onPressed: onAddProgress,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => RecordStudentProgressDialog(
+                    organizationId: '67bed520465b90e0acad21f2',
+                  ),
+                );
+              },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.blue),
               ),
@@ -609,8 +631,7 @@ class StudentProgressWidget extends StatelessWidget {
                   Text('Add Progress', style: TextStyle(color: Colors.white)),
                 ],
               ),
-            ),
-          ],
+            ),          ],
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -640,48 +661,53 @@ class StudentProgressWidget extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               student.studentName,
-                              style: TextStyle(
-                                color: Colors.grey[700],
-                              ),
+                              style: TextStyle(color: Colors.grey[700]),
                             ),
                           ],
                         ),
                       ),
                       Expanded(
                         flex: 1,
-                        child: student.needsGrading
-                            ? ElevatedButton(
-                          onPressed: () {
-                            if (student.studentId != null && student.assignmentId != null) {
-                              onGradeSubmission(student.studentId!, student.assignmentId!);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                          ),
-                          child: const Text(
-                            'Grade',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        )
-                            : Column(
-                          children: [
-                            Text(
-                              "${student.progressPercentage.toInt()}%",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: student.progressPercentage / 100,
-                              backgroundColor: Colors.grey[300],
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getColorForPercentage(student.progressPercentage),
-                              ),
-                            ),
-                          ],
-                        ),
+                        child:
+                            student.needsGrading
+                                ? ElevatedButton(
+                                  onPressed: () {
+                                    if (student.studentId != null &&
+                                        student.assignmentId != null) {
+                                      onGradeSubmission(
+                                        student.studentId!,
+                                        student.assignmentId!,
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                  child: const Text(
+                                    'Grade',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                                : Column(
+                                  children: [
+                                    Text(
+                                      "${student.progressPercentage.toInt()}%",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    LinearProgressIndicator(
+                                      value: student.progressPercentage / 100,
+                                      backgroundColor: Colors.grey[300],
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        _getColorForPercentage(
+                                          student.progressPercentage,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                       ),
                     ],
                   ),
@@ -704,10 +730,6 @@ class StudentProgressWidget extends StatelessWidget {
     }
   }
 }
-
-
-
-
 
 Future<void> showGradeAssignmentDialog({
   required BuildContext context,
@@ -757,15 +779,15 @@ Future<void> showGradeAssignmentDialog({
 
                   const Text(
                     'Assignment Title',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4),
@@ -776,15 +798,15 @@ Future<void> showGradeAssignmentDialog({
 
                   const Text(
                     'Assignment Description',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4),
@@ -795,15 +817,15 @@ Future<void> showGradeAssignmentDialog({
 
                   const Text(
                     'Student Name',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4),
@@ -814,10 +836,7 @@ Future<void> showGradeAssignmentDialog({
 
                   const Text(
                     'Grade (0-100)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   TextField(
@@ -827,85 +846,93 @@ Future<void> showGradeAssignmentDialog({
                       border: OutlineInputBorder(),
                       hintText: 'Enter grade (0-100)',
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 24),
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: isSubmitting
-                          ? null
-                          : () async {
-                        if (gradeController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter a grade'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
+                      onPressed:
+                          isSubmitting
+                              ? null
+                              : () async {
+                                if (gradeController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Please enter a grade'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                        final grade = double.tryParse(gradeController.text);
-                        if (grade == null || grade < 0 || grade > 100) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter a valid grade between 0 and 100'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
+                                final grade = double.tryParse(
+                                  gradeController.text,
+                                );
+                                if (grade == null || grade < 0 || grade > 100) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Please enter a valid grade between 0 and 100',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                        // Show loading indicator
-                        setState(() {
-                          isSubmitting = true;
-                        });
+                                // Show loading indicator
+                                setState(() {
+                                  isSubmitting = true;
+                                });
 
-                        try {
-                          // Call the callback function to submit the grade
-                          await onGradeSubmitted(grade);
+                                try {
+                                  // Call the callback function to submit the grade
+                                  await onGradeSubmitted(grade);
 
-                          // Close the dialog on success
-                          Navigator.of(context).pop();
+                                  // Close the dialog on success
+                                  Navigator.of(context).pop();
 
-                          // Show success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Grade submitted successfully'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } catch (error) {
-                          setState(() {
-                            isSubmitting = false;
-                          });
+                                  // Show success message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Grade submitted successfully',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } catch (error) {
+                                  setState(() {
+                                    isSubmitting = false;
+                                  });
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error submitting grade: $error'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Error submitting grade: $error',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(150, 45),
                       ),
-                      child: isSubmitting
-                          ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                          : const Text('Submit Grade'),
+                      child:
+                          isSubmitting
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text('Submit Grade'),
                     ),
                   ),
                 ],
