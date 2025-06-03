@@ -37,11 +37,6 @@ class UpcomingEventsWidget extends ConsumerWidget {
                   'Upcoming Events',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: onRefresh,
-                  tooltip: 'Refresh events',
-                ),
               ],
             ),
             const SizedBox(height: 12),
