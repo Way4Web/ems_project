@@ -87,66 +87,72 @@ class StudentDashboardScreen extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                color: Colors.blue,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.person, size: 50, color: Colors.blue),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      organization,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   width: double.infinity,
+              //   color: Colors.blue,
+              //   padding: const EdgeInsets.all(16),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       const CircleAvatar(
+              //         radius: 40,
+              //         backgroundColor: Colors.white,
+              //         child: Icon(Icons.person, size: 50, color: Colors.blue),
+              //       ),
+              //       const SizedBox(height: 10),
+              //       Text(
+              //         name,
+              //         style: const TextStyle(
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.bold,
+              //           color: Colors.white,
+              //         ),
+              //       ),
+              //       Text(
+              //         organization,
+              //         style: const TextStyle(
+              //           fontSize: 14,
+              //           color: Colors.white70,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.person_outline),
-                      title: const Text("My Profile"),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.settings),
-                      title: const Text("Settings"),
-                      onTap: () {
-                        // Handle settings tap
-                      },
+                      title: const Text(
+                        'EMS Project',
+                        style: TextStyle(color: Colors.black, fontSize: 24),
+                      ),
                     ),
                     const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text("Logout"),
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await _logout(context);
-                      },
-                    ),
+                    // ListTile(
+                    //   leading: const Icon(Icons.person_outline),
+                    //   title: const Text("My Profile"),
+                    //   onTap: () {
+                    //     Navigator.pop(context);
+                    //   },
+                    // ),
+                    // ListTile(
+                    //   leading: const Icon(Icons.settings),
+                    //   title: const Text("Settings"),
+                    //   onTap: () {
+                    //     // Handle settings tap
+                    //   },
+                    // ),
                   ],
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text("Logout"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _logout(context);
+                },
               ),
             ],
           ),
