@@ -34,9 +34,9 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
 
   /// Helper to select date and time
   Future<void> _selectDateTime(
-      BuildContext context,
-      TextEditingController controller,
-      ) async {
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
     DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -110,14 +110,20 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
             .addNewEvent(eventData);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Class session created successfully!')),
+          const SnackBar(
+            content: Text('Class session created successfully!'),
+            backgroundColor: Colors.green,
+          ),
         );
 
         Navigator.pop(context); // Close the screen
         _resetForm(); // Clear the form fields
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating class session: $e')),
+          SnackBar(
+            content: Text('Error creating class session: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       } finally {
         setState(() => _isLoading = false);
@@ -157,7 +163,9 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
                 Consumer(
                   builder: (context, ref, _) {
                     final studentsAsyncValue = ref.watch(
-                      studentsProvider("67bed520465b90e0acad21f2"), // Replace with your organization ID
+                      studentsProvider(
+                        "67bed520465b90e0acad21f2",
+                      ), // Replace with your organization ID
                     );
 
                     return studentsAsyncValue.when(
@@ -168,17 +176,18 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
                         return DropdownButtonFormField<String>(
                           dropdownColor: Colors.white,
                           value: selectedStudentId,
-                          items: students
-                              .map(
-                                (student) => DropdownMenuItem<String>(
-                              value: student.id,
-                              child: SizedBox(
-                                width: 200,
-                                child: Text(student.name),
-                              ),
-                            ),
-                          )
-                              .toList(),
+                          items:
+                              students
+                                  .map(
+                                    (student) => DropdownMenuItem<String>(
+                                      value: student.id,
+                                      child: SizedBox(
+                                        width: 200,
+                                        child: Text(student.name),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
                           onChanged: (value) {
                             setState(() {
                               selectedStudentId = value;
@@ -196,11 +205,12 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
                           },
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      error: (error, stack) =>
-                      const Text('Failed to load students'),
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (error, stack) =>
+                              const Text('Failed to load students'),
                     );
                   },
                 ),
@@ -279,8 +289,10 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
                       backgroundColor: MaterialStateProperty.all(Colors.blue),
                     ),
                     onPressed: () => _createClassSession(context),
-                    child: const Text('Create',
-                        style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      'Create',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
               ],
             ),

@@ -76,20 +76,27 @@ class _CreateAssignmentScreenState
         ref.invalidate(assignmentsProviderTeacher);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Assignment created successfully!')),
+          const SnackBar(
+            content: Text('Assignment created successfully!'),
+            backgroundColor: Colors.green,
+          ),
         );
 
         Navigator.pop(context);
         _resetForm();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating assignment: $e')),
+          SnackBar(
+            content: Text('Error creating assignment: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       } finally {
         setState(() => _isLoading = false);
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
