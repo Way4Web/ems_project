@@ -464,7 +464,10 @@ class _TeacherDashboardScreenState
                 Icons.logout,
                 //  color: Colors.red
               ),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              title: const Text(
+                'Logout',
+                //  style: TextStyle(color: Colors.red)
+              ),
               onTap: () => _handleLogout(context),
             ),
 
