@@ -750,6 +750,8 @@ Future<void> showGradeAssignmentDialog({
       return StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
             insetPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(
               width: double.infinity,
