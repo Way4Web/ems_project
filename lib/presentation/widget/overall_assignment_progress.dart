@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ems_project/Domain/get_all_assignment_studentProgress_TeacherDashboard.dart';
-import '../../Services/student_api_service.dart' show assignmentsProviderStudent;
+import '../../Services/student_api_service.dart'
+    show assignmentsProviderStudent;
 
 class AssignmentProgressWidget extends ConsumerWidget {
   final List<AssignmentProgress> assignments;
@@ -16,7 +17,7 @@ class AssignmentProgressWidget extends ConsumerWidget {
   // Factory constructor with the exact specified date/time
   factory AssignmentProgressWidget.withCurrentDateTime({
     required List<AssignmentProgress> assignments,
-    String currentUserLogin = 'Way4Web',  // Default user login
+    String currentUserLogin = 'Way4Web', // Default user login
   }) {
     return AssignmentProgressWidget(
       assignments: assignments,
@@ -54,10 +55,6 @@ class AssignmentProgressWidget extends ConsumerWidget {
                   ),
                 ),
                 // Date/time text
-                // Text(
-                //   "2025-06-03 07:59:41", // Updated with the time you provided
-                //   style: TextStyle(fontSize: 12, color: Colors.grey),
-                // ),
               ],
             ),
             const SizedBox(height: 24),
@@ -65,16 +62,17 @@ class AssignmentProgressWidget extends ConsumerWidget {
             // Handle different states of assignments fetching
             assignmentsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(
-                child: Text(
-                  'Error loading assignments: $err',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
+              error:
+                  (err, stack) => Center(
+                    child: Text(
+                      'Error loading assignments: $err',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
               data: (fetchedAssignments) {
                 // Process assignment data to calculate average grades
                 final List<AssignmentProgress> progressAssignments =
-                _processAssignmentsData(fetchedAssignments!);
+                    _processAssignmentsData(fetchedAssignments!);
 
                 if (progressAssignments.isNotEmpty) {
                   return _buildAssignmentProgressList(progressAssignments);
@@ -108,8 +106,8 @@ class AssignmentProgressWidget extends ConsumerWidget {
 
   // Process assignments data to calculate average grades
   List<AssignmentProgress> _processAssignmentsData(
-      List<AssignmentsData> assignmentsData,
-      ) {
+    List<AssignmentsData> assignmentsData,
+  ) {
     List<AssignmentProgress> progressList = [];
 
     // Process each assignment to calculate average grade
@@ -119,7 +117,8 @@ class AssignmentProgressWidget extends ConsumerWidget {
       int validSubmissions = 0;
 
       // Calculate total grades and count valid submissions
-      if (assignment.submissions != null && assignment.submissions!.isNotEmpty) {
+      if (assignment.submissions != null &&
+          assignment.submissions!.isNotEmpty) {
         for (var submission in assignment.submissions!) {
           if (submission.grade != null) {
             totalAssignmentGrades += submission.grade!.toDouble();
@@ -145,7 +144,7 @@ class AssignmentProgressWidget extends ConsumerWidget {
 
     // Sort by progress percentage (highest first)
     progressList.sort(
-          (a, b) => b.progressPercentage.compareTo(a.progressPercentage),
+      (a, b) => b.progressPercentage.compareTo(a.progressPercentage),
     );
 
     return progressList;
@@ -153,23 +152,24 @@ class AssignmentProgressWidget extends ConsumerWidget {
 
   // Build a list of all assignment progress items
   Widget _buildAssignmentProgressList(
-      List<AssignmentProgress> progressAssignments,
-      ) {
+    List<AssignmentProgress> progressAssignments,
+  ) {
     return Column(
-      children: progressAssignments.map((assignment) {
-        return _buildAssignmentProgressItem(
-          assignment,
-          // Get index for color variation
-          progressAssignments.indexOf(assignment) % 3,
-        );
-      }).toList(),
+      children:
+          progressAssignments.map((assignment) {
+            return _buildAssignmentProgressItem(
+              assignment,
+              // Get index for color variation
+              progressAssignments.indexOf(assignment) % 3,
+            );
+          }).toList(),
     );
   }
 
   Widget _buildAssignmentProgressItem(
-      AssignmentProgress assignment,
-      int colorIndex,
-      ) {
+    AssignmentProgress assignment,
+    int colorIndex,
+  ) {
     // Define different colors based on index for visual variety
     final List<Color> progressColors = [
       const Color(0xFF3b5de7), // Blue
@@ -180,9 +180,10 @@ class AssignmentProgressWidget extends ConsumerWidget {
     Color progressColor = progressColors[colorIndex];
 
     // Calculate progress width factor, ensuring it's at least 0.05 to fit the dots
-    double widthFactor = assignment.progressPercentage > 0
-        ? assignment.progressPercentage / 100
-        : 0.05;
+    double widthFactor =
+        assignment.progressPercentage > 0
+            ? assignment.progressPercentage / 100
+            : 0.05;
 
     // If progress percentage is low but we need dots, ensure there's enough space
     if (colorIndex == 2 && widthFactor < 0.15) widthFactor = 0.15;
