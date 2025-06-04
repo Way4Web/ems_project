@@ -73,10 +73,26 @@ class ApiService {
 // Provider for API service
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
-// Provider for class sessions with auto-refresh capability
-final classSessionsProvider = FutureProvider.autoDispose<List<ClassSession>>((ref) async {
+// Provider for today's class sessions with auto-refresh capability
+final todaysClassSessionsProvider = FutureProvider.autoDispose<List<ClassSession>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
-  return apiService.fetchClassSessions();
+  final allSessions = await apiService.fetchClassSessions();
+
+  // Filter sessions for today's date only
+  final today = DateTime.now();
+  final todaySessions = allSessions.where((session) {
+    final sessionDate = DateTime.parse(session.startTime);
+    return sessionDate.year == today.year &&
+        sessionDate.month == today.month &&
+        sessionDate.day == today.day;
+  }).toList();
+
+  // Sort by start time
+  todaySessions.sort((a, b) =>
+      DateTime.parse(a.startTime).compareTo(DateTime.parse(b.startTime))
+  );
+
+  return todaySessions;
 });
 
 // Function to join zoom meeting (can be overridden when using the widget)
@@ -118,14 +134,14 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
   void initState() {
     super.initState();
     // Initial data fetch when widget is created
-    ref.refresh(classSessionsProvider);
+    ref.refresh(todaysClassSessionsProvider);
   }
 
   @override
   void didUpdateWidget(TodaysClassesWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Refresh data when widget is updated
-    ref.refresh(classSessionsProvider);
+    ref.refresh(todaysClassSessionsProvider);
   }
 
   @override
@@ -135,7 +151,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
     final formattedDate = DateFormat('dd-MM-yyyy').format(today);
 
     // Watch the class sessions provider
-    final classSessionsAsync = ref.watch(classSessionsProvider);
+    final classSessionsAsync = ref.watch(todaysClassSessionsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +180,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                     Icon(Icons.access_time, size: 20, color: Colors.blue),
                     SizedBox(width: 8),
                     Text(
-                      '2025-06-04 12:34:58', // Updated current date/time
+                      '2025-06-04 12:47:33', // Updated current date/time
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -251,7 +267,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: () => ref.refresh(classSessionsProvider),
+                          onPressed: () => ref.refresh(todaysClassSessionsProvider),
                           child: const Text('Retry'),
                         )
                       ],
