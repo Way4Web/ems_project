@@ -26,7 +26,7 @@ final progressRecordProvider =
       }
 
       final response = await http.post(
-        Uri.parse("http://192.168.1.3:5000/api/teacher/recordProgress"),
+        Uri.parse("http://46.202.190.84:8002/api/teacher/recordProgress"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

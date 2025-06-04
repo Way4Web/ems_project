@@ -11,7 +11,7 @@ class TimeTableService {
   // Constants
   static const String _uiDateFormat = 'dd-MM-yyyy HH:mm';
   static const String _defaultUser = 'Way4Web'; // Default user login
-  final String baseUrl = 'http://192.168.1.3:5000/api';
+  final String baseUrl = 'http://46.202.190.84:8002/api';
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Global key for accessing ScaffoldMessenger

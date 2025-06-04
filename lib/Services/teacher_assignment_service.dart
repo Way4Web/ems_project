@@ -10,7 +10,7 @@ import 'get_best_performer_service.dart'
     show fetchAssignments;
 
 class DeleteAssignmentService {
-  static const String _baseUrl = "http://192.168.1.3:5000/api/teacher";
+  static const String _baseUrl = "http://46.202.190.84:8002/api/teacher";
 
   // Delete an assignment
   static Future<void> deleteAssignment(String assignmentId) async {
@@ -52,7 +52,7 @@ final deleteAssignmentProvider = FutureProvider.family<void, String>((
 final DateTime currentDateTime = DateTime.parse('2025-05-29 13:02:09');
 const String currentUserLogin = 'Way4Web';
 
-const String _baseUrl = "http://192.168.1.3:5000";
+const String _baseUrl = "http://46.202.190.84:8002";
 
 class UpdateAssignmentService {
   // Function to update an assignment with all fields
@@ -154,7 +154,7 @@ FutureProvider.family<void, Map<String, dynamic>>((ref, params) async {
   );
 });
 class CreateAssignmentService {
-  static const String _baseUrl = "http://192.168.1.3:5000";
+  static const String _baseUrl = "http://46.202.190.84:8002";
 
   /// Makes a POST request to create a new assignment.
   static Future<void> createAssignment(

@@ -192,7 +192,7 @@ class Submission {
   }
 }
 final assignmentsProvider = FutureProvider<GetAssignmentModelStudent>((ref) async {
-  const String url = 'http://192.168.1.3:5000/api/student/getAssignments';
+  const String url = 'http://46.202.190.84:8002/api/student/getAssignments';
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   try {

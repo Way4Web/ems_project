@@ -254,7 +254,7 @@ class _HomeWorkCard extends StatelessWidget {
                   FlutterSecureStorage();
 
                   final String apiUrl =
-                      "http://192.168.1.3:5000/api/student/submitAssignment/${data.id}/submit";
+                      "http://46.202.190.84:8002/api/student/submitAssignment/${data.id}/submit";
 
                   try {
                     final token = await secureStorage.read(key: "token");

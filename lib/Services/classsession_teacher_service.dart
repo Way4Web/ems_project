@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class TimetableService {
-  final String apiUrl = 'http://192.168.1.3:5000/api/teacher/getTimeTable';
+  final String apiUrl = 'http://46.202.190.84:8002/api/teacher/getTimeTable';
 
   Future<List<TimetableEvent>> fetchTimetable(String userId) async {
 

@@ -131,7 +131,7 @@ class AddDonorApiService {
 
 class EditApiDonorDetails {
   final String apiUrl =
-      "http://192.168.29.255:5000/api/admin/updateDonor";
+      "http://46.202.190.84:8002/api/admin/updateDonor";
 
   // BuildContext get context => null; // Replace with your API URL
 

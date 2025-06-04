@@ -164,7 +164,7 @@ class EditApiStudentDetails {
 
 class GetAllAssignmentService {
   static const String apiUrl =
-      'http://192.168.1.3:5000/api/teacher/getAllAssignments';
+      'http://46.202.190.84:8002/api/teacher/getAllAssignments';
   static final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   static Future<GetAllAssignment> fetchAssignmentResponse() async {
@@ -230,7 +230,7 @@ Future<void> updateAssignmentGrade({
 
     // Make the API call to update the grade
     final response = await http.put(
-      Uri.parse('http://192.168.1.3:5000/api/teacher/gradeAssignment/$assignmentId/grade'),
+      Uri.parse('http://46.202.190.84:8002/api/teacher/gradeAssignment/$assignmentId/grade'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
