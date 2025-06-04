@@ -294,7 +294,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ),
           );
         }
-        if (loginState.role == 'teacher') {
+        else if (loginState.role == 'teacher') {
           // final student = await ref.read(singleStudentProvider.future);
 
           Navigator.pushReplacement(
