@@ -350,7 +350,7 @@ class _AddDonorsScreenState extends ConsumerState<AddDonors> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Failed to add Donor. Please try again later.",
+                              "Donor already exists.",
                             ),
                             backgroundColor: Colors.red,
 

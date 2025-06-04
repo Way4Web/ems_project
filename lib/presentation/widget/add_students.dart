@@ -19,7 +19,6 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
 
-
   @override
   void dispose() {
     // Dispose controllers when the widget is removed
@@ -28,7 +27,6 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
     _passwordCtrl.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -263,13 +261,6 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                             ),
                             // suffixIcon: Icon(Icons.email_outlined),
                           ),
-                          // keyboardType: TextInputType.emailAddress,
-                          // validator: (value) {
-                          //   if (value == null || value.isEmpty) {
-                          //     return 'Please enter your email';
-                          //   }
-                          //   return null;
-                          // },
                         ),
                       ],
                     ),
@@ -278,10 +269,7 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                   ],
                 ),
               ),
-              SizedBox(height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.05),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -290,11 +278,12 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(
-                          Color(0xff53C2D0)),
+                        Color(0xff53C2D0),
+                      ),
                       foregroundColor: WidgetStateProperty.all(Colors.white),
                       minimumSize: WidgetStateProperty.all(
-                          Size(20, 50)), // Set the width and height
-
+                        Size(20, 50),
+                      ), // Set the width and height
                     ),
                     onPressed: () {
                       // Cancel button returns false
@@ -306,19 +295,19 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                     },
                     child: Text('Cancel'),
                   ),
-                  SizedBox(width: 8,),
+                  SizedBox(width: 8),
 
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(
-                          Color(0xff3356DF)),
+                        Color(0xff3356DF),
+                      ),
                       foregroundColor: WidgetStateProperty.all(Colors.white),
                       minimumSize: WidgetStateProperty.all(
-                          Size(20, 50)), // Set the width and height
-
+                        Size(20, 50),
+                      ), // Set the width and height
                     ),
                     child: Text('Add Student'),
-
 
                     onPressed: () async {
                       // Check if the form is valid
@@ -331,31 +320,32 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
                       final email = _emailCtrl.text.trim();
                       final password = _passwordCtrl.text.trim();
 
-                      final success = await ref.read(addStudentProvider.notifier).createStudent(
-                          email, password, admin, context);
+                      final success = await ref
+                          .read(addStudentProvider.notifier)
+                          .createStudent(email, password, admin, context);
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Student added successfully!"),
+                          SnackBar(
+                            content: Text("Student added successfully!"),
                             backgroundColor: Colors.green,
-
                           ),
                         );
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Failed to add student. Please try again later."),
+                          SnackBar(
+                            content: Text(
+                              "Student already exists.",
+                            ),
                             backgroundColor: Colors.red,
-
                           ),
                         );
                       }
                     },
                   ),
-
                 ],
-              )
-
+              ),
             ],
           ),
         ),
@@ -363,4 +353,3 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
     );
   }
 }
-

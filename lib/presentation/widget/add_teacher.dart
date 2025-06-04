@@ -349,7 +349,7 @@ class _AddTeachersScreenState extends ConsumerState<AddTeachers> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Failed to add Teacher. Please try again later.",
+                              "Teacher already exists.",
                             ),
                             backgroundColor: Colors.red,
 

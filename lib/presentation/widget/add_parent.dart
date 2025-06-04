@@ -374,7 +374,7 @@ class _AddStudentsScreenState extends ConsumerState<AddParents> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Failed to add parent. Please try again later.",
+                              "Parent already exists.",
                             ),
                             backgroundColor: Colors.red,
 

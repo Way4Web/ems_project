@@ -348,6 +348,11 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
           'context': context
         }).future,
       );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Timetable already exists for this teacher—use update instead'),
+          backgroundColor: Colors.red,
+        ),
+      );
 
       // If we get here, it was successful
       // Refresh the timetable data

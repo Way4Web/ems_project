@@ -119,100 +119,101 @@ class TimeTableService {
         return;
       } else {
         // Show an enhanced error SnackBar
-        scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Failed to create timetable',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'TIme table already exist,kindly update the time table',
-                        style: TextStyle(color: Colors.white70),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red.shade800,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 4),
-            action: SnackBarAction(
-              label: 'DISMISS',
-              textColor: Colors.white,
-              onPressed: () {
-                scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
-              },
-            ),
-          ),
-        );
+        // scaffoldMessengerKey.currentState?.showSnackBar(
+        //   SnackBar(
+        //     content: Row(
+        //       children: [
+        //         Icon(Icons.error_outline, color: Colors.white),
+        //         const SizedBox(width: 12),
+        //         Expanded(
+        //           child: Column(
+        //             mainAxisSize: MainAxisSize.min,
+        //             crossAxisAlignment: CrossAxisAlignment.start,
+        //             children: [
+        //               Text(
+        //                 'Failed to create timetable',
+        //                 style: TextStyle(
+        //                   fontWeight: FontWeight.bold,
+        //                   color: Colors.white,
+        //                 ),
+        //               ),
+        //               const SizedBox(height: 4),
+        //               Text(
+        //                 'TIme table already exist,kindly update the time table',
+        //                 style: TextStyle(color: Colors.white70),
+        //                 maxLines: 2,
+        //                 overflow: TextOverflow.ellipsis,
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //     backgroundColor: Colors.red.shade800,
+        //     behavior: SnackBarBehavior.floating,
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(10),
+        //     ),
+        //     duration: const Duration(seconds: 4),
+        //     action: SnackBarAction(
+        //       label: 'DISMISS',
+        //       textColor: Colors.white,
+        //       onPressed: () {
+        //         scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+        //       },
+        //     ),
+        //   ),
+        // );
         // throw Exception('Failed to create timetable: ${response.body}');
+
       }
     } catch (e) {
       // Show an enhanced error SnackBar for caught exceptions
-      scaffoldMessengerKey.currentState?.showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Error creating timetable',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$e',
-                      style: TextStyle(color: Colors.white70),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 4),
-          action: SnackBarAction(
-            label: 'DISMISS',
-            textColor: Colors.white,
-            onPressed: () {
-              scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
+      // scaffoldMessengerKey.currentState?.showSnackBar(
+      //   SnackBar(
+      //     content: Row(
+      //       children: [
+      //         Icon(Icons.error_outline, color: Colors.white),
+      //         const SizedBox(width: 12),
+      //         Expanded(
+      //           child: Column(
+      //             mainAxisSize: MainAxisSize.min,
+      //             crossAxisAlignment: CrossAxisAlignment.start,
+      //             children: [
+      //               Text(
+      //                 'Error creating timetable',
+      //                 style: TextStyle(
+      //                   fontWeight: FontWeight.bold,
+      //                   color: Colors.white,
+      //                 ),
+      //               ),
+      //               const SizedBox(height: 4),
+      //               Text(
+      //                 '$e',
+      //                 style: TextStyle(color: Colors.white70),
+      //                 maxLines: 2,
+      //                 overflow: TextOverflow.ellipsis,
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //     backgroundColor: Colors.red.shade800,
+      //     behavior: SnackBarBehavior.floating,
+      //     shape: RoundedRectangleBorder(
+      //       borderRadius: BorderRadius.circular(10),
+      //     ),
+      //     duration: const Duration(seconds: 4),
+      //     action: SnackBarAction(
+      //       label: 'DISMISS',
+      //       textColor: Colors.white,
+      //       onPressed: () {
+      //         scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+      //       },
+      //     ),
+      //   ),
+      // );
       // throw Exception('Error creating timetable: $e');
     }  }
 
