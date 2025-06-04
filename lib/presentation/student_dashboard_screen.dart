@@ -138,49 +138,11 @@ class StudentDashboardScreen extends ConsumerWidget {
                       onEdit: onEdit,
                     ),
                     const SizedBox(height: 16),
-                    todaysClassAsync.when(
-                      loading:
-                          () =>
-                              const Center(child: CircularProgressIndicator()),
-                      error:
-                          (err, _) => Text(
-                            'Class error: $err',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                      data: (cls) {
-                        if (cls == null) {
-                          return const Text(
-                            'No class scheduled for today.',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          );
-                        }
-                        final date = DateFormat(
-                          'yyyy-MM-dd',
-                        ).format(DateTime.parse(cls.startTime));
-                        final start = DateFormat(
-                          'hh:mm a',
-                        ).format(DateTime.parse(cls.startTime));
-                        final end = DateFormat(
-                          'hh:mm a',
-                        ).format(DateTime.parse(cls.endTime));
-
-                        return TodaysClassCard(
-                          date: date,
-                          className: cls.title,
-                          timeRange: '$start - $end',
-                          leading: Image.asset(
-                            'assets/class.png',
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => const Icon(
-                                  Icons.book,
-                                  size: 40,
-                                  color: Colors.grey,
-                                ),
-                          ),
-                          onJoin: () => joinZoomMeeting(context, cls.zoomLink),
-                        );
-                      },
+                    const TodaysClassesWidget(
+                      // You can control whether to show the header with date/time and user info
+                      showHeader: true,
+                      // Optional: Provide custom join meeting behavior
+                      // onJoinMeeting: ,
                     ),
                     const SizedBox(height: 16),
                     assignmentsAsync.when(
