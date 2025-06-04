@@ -387,6 +387,7 @@ class _CreateTimetableDialogState extends State<CreateTimetableDialog> {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ElevatedButton.icon(
             onPressed: _addNewEvent,
