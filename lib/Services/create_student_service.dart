@@ -16,7 +16,7 @@ class AddStudentApiService {
     required String password,
     required BuildContext context,
   }) async {
-    final url = Uri.parse("${CommonClass.urlCommon}/admin/createStudent");
+    final url = Uri.parse("${CommonClass.urlCommon}api/admin/createStudent");
 
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 

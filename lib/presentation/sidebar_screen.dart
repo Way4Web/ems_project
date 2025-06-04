@@ -25,13 +25,13 @@ class SidebarScreen extends ConsumerWidget {
     // Delete the token from secure storage
     await secureStorage.delete(key: 'token');
     // Navigate to the SignInScreen
-    ref.invalidate(singleStudentProvider);  // Add this line
-    ref.invalidate(loginStateProvider);     // Consider adding this too
+    ref.invalidate(singleStudentProvider); // Add this line
+    ref.invalidate(loginStateProvider); // Consider adding this too
 
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -59,9 +59,55 @@ class SidebarScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Drawer Example'),
+      appBar: AppBar(surfaceTintColor: Colors.white,
+        title: const Text(
+          'EMS Admin Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2D3142),
+          ),
+        ),
         backgroundColor: Colors.white,
+        elevation: 2,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Decorative top element
+            Container(
+              width: 80,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3F51B5),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Main dashboard title
+            Text(
+              'EMS ADMIN ',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2D3142),
+                letterSpacing: 1.2,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.1),
+                    offset: const Offset(1, 1),
+                    blurRadius: 3,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Subtitle with current info
+          ],
+        ),
       ),
       drawer: Drawer(
         backgroundColor: Colors.white,
@@ -282,7 +328,7 @@ class SidebarScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
-              onTap: () => _logout(context,ref),
+              onTap: () => _logout(context, ref),
             ),
           ],
         ),
