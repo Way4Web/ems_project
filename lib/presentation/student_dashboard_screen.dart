@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/student_dashboard_provider.dart';
 import '../../providers/student_provider.dart';
+import '../Services/login_api.dart';
 
 class StudentDashboardScreen extends ConsumerWidget {
   final String name;
@@ -35,10 +36,13 @@ class StudentDashboardScreen extends ConsumerWidget {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   // Logout method
-  Future<void> _logout(BuildContext context) async {
+  Future<void> _logout(BuildContext context, dynamic ref) async {
     // Delete the token from secure storage
     await secureStorage.delete(key: 'token');
     // Navigate to the SignInScreen
+    ref.invalidate(singleStudentProvider);  // Add this line
+    ref.invalidate(loginStateProvider);     // Consider adding this too
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
@@ -87,37 +91,6 @@ class StudentDashboardScreen extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Container(
-              //   width: double.infinity,
-              //   color: Colors.blue,
-              //   padding: const EdgeInsets.all(16),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       const CircleAvatar(
-              //         radius: 40,
-              //         backgroundColor: Colors.white,
-              //         child: Icon(Icons.person, size: 50, color: Colors.blue),
-              //       ),
-              //       const SizedBox(height: 10),
-              //       Text(
-              //         name,
-              //         style: const TextStyle(
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold,
-              //           color: Colors.white,
-              //         ),
-              //       ),
-              //       Text(
-              //         organization,
-              //         style: const TextStyle(
-              //           fontSize: 14,
-              //           color: Colors.white70,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.zero,
@@ -129,20 +102,6 @@ class StudentDashboardScreen extends ConsumerWidget {
                       ),
                     ),
                     const Divider(),
-                    // ListTile(
-                    //   leading: const Icon(Icons.person_outline),
-                    //   title: const Text("My Profile"),
-                    //   onTap: () {
-                    //     Navigator.pop(context);
-                    //   },
-                    // ),
-                    // ListTile(
-                    //   leading: const Icon(Icons.settings),
-                    //   title: const Text("Settings"),
-                    //   onTap: () {
-                    //     // Handle settings tap
-                    //   },
-                    // ),
                   ],
                 ),
               ),
@@ -151,7 +110,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                 title: const Text("Logout"),
                 onTap: () async {
                   Navigator.pop(context);
-                  await _logout(context);
+                  await _logout(context,ref);
                 },
               ),
             ],

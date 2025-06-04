@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:ems_project/Domain/assignment_model.dart';
 import 'package:ems_project/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,8 +9,6 @@ final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
 class ClassSessionRepository {
   Future<List<ClassSession>> fetchClassSessions() async {
-    // Replace with your actual API endpoint
-    // final url = 'http://192.168.29.189:5000/api/student/classes';
     final url = Uri.parse(
       '${CommonClass.urlCommon}api/student/classes',
     );

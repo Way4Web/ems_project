@@ -4,7 +4,6 @@ import 'package:ems_project/presentation/registration_screen.dart';
 import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/student_dashboard_screen.dart';
 import 'package:ems_project/presentation/teacher_dashboard_screen.dart';
-import 'package:ems_project/presentation/widget/edit_single_student.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -279,6 +278,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       if (success) {
         // Navigate to the AddOrganisation screen if login is successful.
         if (loginState.role == 'student') {
+          ref.invalidate(singleStudentProvider);
+
           final student = await ref.read(singleStudentProvider.future);
 
           Navigator.pushReplacement(

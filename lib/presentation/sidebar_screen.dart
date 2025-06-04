@@ -20,10 +20,13 @@ class SidebarScreen extends ConsumerWidget {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   // Logout method
-  Future<void> _logout(BuildContext context) async {
+  Future<void> _logout(BuildContext context, dynamic ref) async {
     // Delete the token from secure storage
     await secureStorage.delete(key: 'token');
     // Navigate to the SignInScreen
+    ref.invalidate(singleStudentProvider);  // Add this line
+    ref.invalidate(loginStateProvider);     // Consider adding this too
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
@@ -276,7 +279,7 @@ class SidebarScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
-              onTap: () => _logout(context),
+              onTap: () => _logout(context,ref),
             ),
           ],
         ),
