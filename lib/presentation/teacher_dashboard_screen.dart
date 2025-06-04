@@ -111,6 +111,25 @@ class _TeacherDashboardScreenState
     }
   }
 
+  void initState() {
+    super.initState();
+    // Force refresh when widget is first created
+    Future.microtask(() => ref.invalidate(singleTeacherProvider));
+    Future.microtask(() => ref.invalidate(assignmentsProviderStudent));
+    Future.microtask(() => ref.invalidate(classSessionNotifierProvider));
+    Future.microtask(() => ref.invalidate(timetableProvider));
+    Future.microtask(() => ref.invalidate(attendanceStatsProvider));
+    Future.microtask(() => ref.invalidate(assignmentsProviderTeacher));
+    Future.microtask(() => ref.invalidate(classSessionNotifierProvider));
+    Future.microtask(() => ref.invalidate(attendanceStatsProvider));
+    Future.microtask(() => ref.invalidate(attendanceApiServiceProvider));
+  }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final teacherAsync = ref.watch(singleTeacherProvider);
@@ -409,7 +428,7 @@ class _TeacherDashboardScreenState
               onTap: () => _handleLogout(context,ref),
             ),
 
-            const SizedBox(height: 50),
+            // const SizedBox(height: 50),
           ],
         ),
       ),

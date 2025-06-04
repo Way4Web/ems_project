@@ -3,6 +3,8 @@ import 'package:ems_project/presentation/sidebar_screen.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:ems_project/presentation/student_dashboard_screen.dart';
 import 'package:ems_project/presentation/teacher_dashboard_screen.dart';
+import 'package:ems_project/presentation/widget/student_screen.dart';
+import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -41,7 +43,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => StartupScreen(),
         '/signIn': (context) => SignInScreen(),
         '/teacherDash': (context) => TeacherDashboardScreen(),
-        '/studentDash': (context) => SidebarScreen(),
+        '/studentDash': (context) => StudentScreen(),
       },
     );
   }
@@ -83,6 +85,8 @@ class _StartupScreenState extends ConsumerState<StartupScreen> {
 
     if (token != null) {
       if (role == 'student') {
+        ref.invalidate(singleStudentProvider);
+
         Navigator.pushReplacementNamed(context, '/studentDash');
       } else if (role == 'teacher') {
         Navigator.pushReplacementNamed(context, '/teacherDash');

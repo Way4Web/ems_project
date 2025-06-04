@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+
+import '../../Services/student_dashboard_service.dart';
 
 /// Data model for a single homework entry.
 class HomeWorkData {
@@ -15,19 +18,19 @@ class HomeWorkData {
   bool isSubmitted; // Tracks whether homework is submitted (mutable)
 
   HomeWorkData(
-      this.id, {
-        required this.tag,
-        required this.title,
-        required this.teacherName,
-        required this.dueDate,
-        required this.progress,
-        this.thumbnailUrl,
-        required this.isSubmitted,
-      });
+    this.id, {
+    required this.tag,
+    required this.title,
+    required this.teacherName,
+    required this.dueDate,
+    required this.progress,
+    this.thumbnailUrl,
+    required this.isSubmitted,
+  });
 }
 
 /// The “Home Works” container + header + list of cards.
-class HomeWorksWidget extends StatefulWidget {
+class HomeWorksWidget extends ConsumerStatefulWidget {
   final List<HomeWorkData> items;
   final VoidCallback onFilterTap; // Callback to open subject filter
 
@@ -38,13 +41,19 @@ class HomeWorksWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _HomeWorksWidgetState createState() => _HomeWorksWidgetState();
+  ConsumerState<HomeWorksWidget> createState() => _HomeWorksWidgetState();
 }
 
-class _HomeWorksWidgetState extends State<HomeWorksWidget> {
+class _HomeWorksWidgetState extends ConsumerState<HomeWorksWidget> {
   /// Refreshes the UI after changes to data.
   void _refreshUI() {
     setState(() {});
+  }
+
+  void initState() {
+    super.initState();
+    // Force refresh when widget is first created
+    Future.microtask(() => ref.invalidate(assignmentsProvider));
   }
 
   @override
@@ -104,18 +113,20 @@ class _HomeWorksWidgetState extends State<HomeWorksWidget> {
             )
           else
             Column(
-              children: widget.items.map((data) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: _HomeWorkCard(
-                    data: data,
-                    onSubmissionSuccess: _refreshUI, // Pass callback to refresh UI
-                  ),
-                );
-              }).toList(),
+              children:
+                  widget.items.map((data) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: _HomeWorkCard(
+                        data: data,
+                        onSubmissionSuccess:
+                            _refreshUI, // Pass callback to refresh UI
+                      ),
+                    );
+                  }).toList(),
             ),
         ],
       ),
@@ -160,16 +171,18 @@ class _HomeWorkCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(8),
-                image: data.thumbnailUrl != null
-                    ? DecorationImage(
-                  image: NetworkImage(data.thumbnailUrl!),
-                  fit: BoxFit.cover,
-                )
-                    : null,
+                image:
+                    data.thumbnailUrl != null
+                        ? DecorationImage(
+                          image: NetworkImage(data.thumbnailUrl!),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
-              child: data.thumbnailUrl == null
-                  ? const Icon(Icons.image, size: 30, color: Colors.white30)
-                  : null,
+              child:
+                  data.thumbnailUrl == null
+                      ? const Icon(Icons.image, size: 30, color: Colors.white30)
+                      : null,
             ),
             const SizedBox(width: 12),
 
@@ -218,9 +231,9 @@ class _HomeWorkCard extends StatelessWidget {
                   // Teacher + due date
                   Text(
                     '${data.teacherName}   Due by: '
-                        '${data.dueDate.day.toString().padLeft(2, '0')}/'
-                        '${data.dueDate.month.toString().padLeft(2, '0')}/'
-                        '${data.dueDate.year}',
+                    '${data.dueDate.day.toString().padLeft(2, '0')}/'
+                    '${data.dueDate.month.toString().padLeft(2, '0')}/'
+                    '${data.dueDate.year}',
                     style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   ),
                 ],
@@ -232,109 +245,110 @@ class _HomeWorkCard extends StatelessWidget {
             SizedBox(
               width: 100, // Adjust width for a larger button
               height: 40, // Adjust height for a more prominent button
-              child: data.isSubmitted
-                  ? Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: data.progress,
-                    strokeWidth: 4,
-                    color: _getProgressColor(data.progress),
-                    backgroundColor: Colors.grey[200],
-                  ),
-                  Text(
-                    '${(data.progress).round()}%',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              )
-                  : ElevatedButton(
-                onPressed: () async {
-                  final FlutterSecureStorage secureStorage =
-                  FlutterSecureStorage();
-
-                  final String apiUrl =
-                      "http://46.202.190.84:8002/api/student/submitAssignment/${data.id}/submit";
-
-                  try {
-                    final token = await secureStorage.read(key: "token");
-
-                    if (token == null) {
-                      throw Exception(
-                        "Token not found. Please log in again.",
-                      );
-                    }
-
-                    final response = await http.post(
-                      Uri.parse(apiUrl),
-                      headers: <String, String>{
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer $token',
-                      },
-                    );
-
-                    if (response.statusCode == 200) {
-                      // Successful submission
-                      final responseData = jsonDecode(response.body);
-                      print("Success: ${responseData['message']}");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Assignment submitted successfully!",
+              child:
+                  data.isSubmitted
+                      ? Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: data.progress,
+                            strokeWidth: 4,
+                            color: _getProgressColor(data.progress),
+                            backgroundColor: Colors.grey[200],
                           ),
-                          backgroundColor: Colors.green,
-
-                        ),
-                      );
-
-                      // Mark the assignment as submitted
-                      data.isSubmitted = true;
-
-                      // Trigger UI refresh
-                      onSubmissionSuccess();
-                    } else {
-                      print(
-                        "Error: ${response.statusCode}, ${response.body}",
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Failed to submit assignment. Please try again.",
+                          Text(
+                            '${(data.progress).round()}%',
+                            style: const TextStyle(fontSize: 12),
                           ),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    print("Exception: $e");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "An error occurred. Please try again.",
-                        ),
-                        backgroundColor: Colors.red,
+                        ],
+                      )
+                      : ElevatedButton(
+                        onPressed: () async {
+                          final FlutterSecureStorage secureStorage =
+                              FlutterSecureStorage();
 
+                          final String apiUrl =
+                              "http://46.202.190.84:8002/api/student/submitAssignment/${data.id}/submit";
+
+                          try {
+                            final token = await secureStorage.read(
+                              key: "token",
+                            );
+
+                            if (token == null) {
+                              throw Exception(
+                                "Token not found. Please log in again.",
+                              );
+                            }
+
+                            final response = await http.post(
+                              Uri.parse(apiUrl),
+                              headers: <String, String>{
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer $token',
+                              },
+                            );
+
+                            if (response.statusCode == 200) {
+                              // Successful submission
+                              final responseData = jsonDecode(response.body);
+                              print("Success: ${responseData['message']}");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Assignment submitted successfully!",
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              // Mark the assignment as submitted
+                              data.isSubmitted = true;
+
+                              // Trigger UI refresh
+                              onSubmissionSuccess();
+                            } else {
+                              print(
+                                "Error: ${response.statusCode}, ${response.body}",
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Failed to submit assignment. Please try again.",
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            print("Exception: $e");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "An error occurred. Please try again.",
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          fixedSize: const Size(100, 40),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  fixedSize: const Size(100, 40),
-                  padding: EdgeInsets.zero,
-                ),
-                child: const Text(
-                  'Submit',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             ),
           ],
         ),

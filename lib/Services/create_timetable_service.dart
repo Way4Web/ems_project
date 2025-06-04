@@ -139,7 +139,7 @@ class TimeTableService {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${response.body}',
+                        'TIme table already exist,kindly update the time table',
                         style: TextStyle(color: Colors.white70),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

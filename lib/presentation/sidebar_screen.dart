@@ -3,6 +3,7 @@ import 'package:ems_project/presentation/add_organisation.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:ems_project/presentation/student_dashboard_screen.dart';
 import 'package:ems_project/presentation/widget/edit_single_student.dart';
+import 'package:ems_project/presentation/widget/student_screen.dart';
 import 'package:ems_project/providers/student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,90 +189,92 @@ class SidebarScreen extends ConsumerWidget {
                       ],
                     ),
                   ] else
-                    buildMenuItem(
-                      context: context,
-                      icon: Icons.dashboard_outlined,
-                      title: 'Dashboard',
-                      children: [
-                        ListTile(
-                          title: const Text('Student Dashboard'),
-                          onTap: () async {
-                            // Show a loading spinner while fetching data
-                            showDialog(
-                              context: context,
-                              builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              barrierDismissible: false,
-                            );
-
-                            try {
-                              // Fetch the student data
-                              final student = await ref.read(singleStudentProvider.future);
-
-                              // Define the onEdit function
-                              void onEdit() async {
-                                final result = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => EditSingleStudentDialog(
-                                    studentName: student.name,
-                                    studentEmail: student.email,
-                                    studentId: student.id,
-                                    onUpdate: (updatedId, updatedName, updatedEmail) {
-                                      // Invalidate the provider to fetch updated data after edit
-                                      ref.invalidate(singleStudentProvider);
-
-                                      // You can also modify the student's data locally before passing it again to the screen
-                                      student.name = updatedName;
-                                      student.email = updatedEmail;
-                                    },
-                                  ),
-                                );
-
-                                if (result == true) {
-                                  // Ensure the provider is invalidated after dialog closes
-                                  ref.invalidate(singleStudentProvider);
-                                }
-                              }
-                              Navigator.of(context).pop();
-
-                              // Navigate to StudentDashboardScreen with the onEdit function
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => StudentDashboardScreen(
-                                    name: student.name,
-                                    organization: student.organization.name,
-                                    status: student.status,
-                                    email: student.email,
-                                    id: student.id,
-                                    onEdit: onEdit, // Pass the onEdit function here
-                                  ),
-                                ),
-                              );
-                            } catch (error) {
-                              // Dismiss the loading spinner if an error occurs
-                              Navigator.of(context).pop();
-
-                              // Show an error dialog
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Error'),
-                                  content: Text('Failed to load data: $error'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                    // buildMenuItem(
+                    //   context: context,
+                    //   icon: Icons.dashboard_outlined,
+                    //   title: 'Dashboard',
+                    //   children: [
+                    //     ListTile(
+                    //       title: const Text('Student Dashboard'),
+                    //       onTap: () async {
+                    //         // Show a loading spinner while fetching data
+                    //         showDialog(
+                    //           context: context,
+                    //           builder: (context) => const Center(
+                    //             child: CircularProgressIndicator(),
+                    //           ),
+                    //           barrierDismissible: false,
+                    //         );
+                    //
+                    //         try {
+                    //           // Fetch the student data
+                    //           final student = await ref.read(singleStudentProvider.future);
+                    //
+                    //           // Define the onEdit function
+                    //           void onEdit() async {
+                    //             final result = await showDialog<bool>(
+                    //               context: context,
+                    //               builder: (context) => EditSingleStudentDialog(
+                    //                 studentName: student.name,
+                    //                 studentEmail: student.email,
+                    //                 studentId: student.id,
+                    //                 onUpdate: (updatedId, updatedName, updatedEmail) {
+                    //                   // Invalidate the provider to fetch updated data after edit
+                    //                   ref.invalidate(singleStudentProvider);
+                    //
+                    //                   // You can also modify the student's data locally before passing it again to the screen
+                    //                   student.name = updatedName;
+                    //                   student.email = updatedEmail;
+                    //                 },
+                    //               ),
+                    //             );
+                    //
+                    //             if (result == true) {
+                    //               // Ensure the provider is invalidated after dialog closes
+                    //               ref.invalidate(singleStudentProvider);
+                    //             }
+                    //           }
+                    //           Navigator.of(context).pop();
+                    //
+                    //           // Navigate to StudentDashboardScreen with the onEdit function
+                    //           Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //               builder: (context) => StudentDashboardScreen(
+                    //                 name: student.name,
+                    //                 organization: student.organization.name,
+                    //                 status: student.status,
+                    //                 email: student.email,
+                    //                 id: student.id,
+                    //                 onEdit: onEdit, // Pass the onEdit function here
+                    //               ),
+                    //             ),
+                    //           );
+                    //         }
+                    //         catch (error) {
+                    //           // Dismiss the loading spinner if an error occurs
+                    //           Navigator.of(context).pop();
+                    //
+                    //           // Show an error dialog
+                    //           showDialog(
+                    //             context: context,
+                    //             builder: (context) => AlertDialog(
+                    //               title: const Text('Error'),
+                    //               content: Text('Failed to load data: $error'),
+                    //               actions: [
+                    //                 TextButton(
+                    //                   onPressed: () => Navigator.of(context).pop(),
+                    //                   child: const Text('OK'),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           );
+                    //         }
+                    //       },
+                    //     ),
+                    //   ],
+                    // ),
+                    StudentScreen(),
                 ],
               ),
             ),
