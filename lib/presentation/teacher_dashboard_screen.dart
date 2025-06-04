@@ -118,7 +118,10 @@ class _TeacherDashboardScreenState
           // IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshData),
         ],
       ),
-      drawer: _buildSidebar(context, teacherAsync),
+      drawer: _buildSidebar(
+        context,
+        //  teacherAsync
+      ),
       body: Stack(
         children: [
           RefreshIndicator(
@@ -364,94 +367,113 @@ class _TeacherDashboardScreenState
     );
   }
 
-  Widget _buildSidebar(BuildContext context, AsyncValue<dynamic> teacherAsync) {
+  Widget _buildSidebar(
+    BuildContext context,
+    // , AsyncValue<dynamic> teacherAsync
+  ) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          teacherAsync.when(
-            loading:
-                () => Container(
-                  height: 200,
-                  color: Colors.blue,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                ),
-            error:
-                (err, stack) => Container(
-                  height: 200,
-                  color: Colors.blue,
-                  child: const Center(
-                    child: Text(
-                      'Error loading profile',
-                      style: TextStyle(color: Colors.white),
+      child: SafeArea(
+        child: Column(
+          // padding: EdgeInsets.zero,
+          children: [
+            // teacherAsync.when(
+            //   loading:
+            //       () => const Center(
+            //         child: CircularProgressIndicator(color: Colors.blue),
+            //       ),
+            //   error:
+            //       (err, stack) => const Center(
+            //         child: Text(
+            //           'Error loading profile',
+            //           style: TextStyle(color: Colors.white),
+            //         ),
+            //       ),
+            //   data:
+            //       (teacherData) => Padding(
+            //         padding: const EdgeInsets.all(16.0),
+            //         child:
+            //          Column(
+            //           crossAxisAlignment: CrossAxisAlignment.start,
+            //           mainAxisAlignment: MainAxisAlignment.end,
+            //           children: [
+            //             CircleAvatar(
+            //               radius: 36,
+            //               backgroundColor: Colors.white,
+            //               child: Text(
+            //                 (teacherData['name'] as String?)?.isNotEmpty == true
+            //                     ? (teacherData['name'] as String)
+            //                         .substring(0, 1)
+            //                         .toUpperCase()
+            //                     : 'T',
+            //                 style: const TextStyle(
+            //                   fontSize: 36.0,
+            //                   color: Colors.blue,
+            //                 ),
+            //               ),
+            //             ),
+            //             const SizedBox(height: 16),
+            //             Text(
+            //               teacherData['name'] ?? 'Teacher',
+            //               style: const TextStyle(
+            //                 fontSize: 18,
+            //                 fontWeight: FontWeight.bold,
+            //                 color: Colors.white,
+            //               ),
+            //             ),
+            //             Text(
+            //               teacherData['email'] ?? 'teacher@example.com',
+            //               style: const TextStyle(
+            //                 color: Colors.white,
+            //                 fontSize: 14,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            // ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    title: const Text(
+                      'EMS Project',
+                      style: TextStyle(color: Colors.black, fontSize: 24),
                     ),
                   ),
-                ),
-            data:
-                (teacherData) => Container(
-                  height: 200,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(
-                        'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029',
-                      ),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        CircleAvatar(
-                          radius: 36,
-                          backgroundColor: Colors.white,
-                          child: Text(
-                            (teacherData['name'] as String?)?.isNotEmpty == true
-                                ? (teacherData['name'] as String)
-                                    .substring(0, 1)
-                                    .toUpperCase()
-                                : 'T',
-                            style: const TextStyle(
-                              fontSize: 36.0,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          teacherData['name'] ?? 'Teacher',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          teacherData['email'] ?? 'teacher@example.com',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-          ),
+                  const Divider(),
+                  // ListTile(
+                  //   leading: const Icon(Icons.person_outline),
+                  //   title: const Text("My Profile"),
+                  //   onTap: () {
+                  //     Navigator.pop(context);
+                  //   },
+                  // ),
+                  // ListTile(
+                  //   leading: const Icon(Icons.settings),
+                  //   title: const Text("Settings"),
+                  //   onTap: () {
+                  //     // Handle settings tap
+                  //   },
+                  // ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.logout,
+                //  color: Colors.red
+              ),
+              title: const Text(
+                'Logout',
+                //  style: TextStyle(color: Colors.red)
+              ),
+              onTap: () => _handleLogout(context),
+            ),
 
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
-            onTap: () => _handleLogout(context),
-          ),
-
-          const SizedBox(height: 50),
-        ],
+            const SizedBox(height: 50),
+          ],
+        ),
       ),
     );
   }
@@ -616,9 +638,10 @@ class StudentProgressWidget extends StatelessWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) => RecordStudentProgressDialog(
-                    organizationId: '67bed520465b90e0acad21f2',
-                  ),
+                  builder:
+                      (context) => RecordStudentProgressDialog(
+                        organizationId: '67bed520465b90e0acad21f2',
+                      ),
                 );
               },
               style: ButtonStyle(
@@ -631,7 +654,8 @@ class StudentProgressWidget extends StatelessWidget {
                   Text('Add Progress', style: TextStyle(color: Colors.white)),
                 ],
               ),
-            ),          ],
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         SizedBox(
