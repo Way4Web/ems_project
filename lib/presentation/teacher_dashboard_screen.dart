@@ -1,5 +1,6 @@
 import 'package:ems_project/Domain/get_all_assignment_studentProgress_TeacherDashboard.dart';
 import 'package:ems_project/Services/get_class_session_service.dart';
+import 'package:ems_project/Services/login_api.dart';
 import 'package:ems_project/Services/teacher_assignment_service.dart';
 import 'package:ems_project/presentation/widget/assignment_card.dart';
 import 'package:ems_project/presentation/widget/attendance_pie_chart.dart';
@@ -9,6 +10,7 @@ import 'package:ems_project/presentation/widget/profile_card.dart';
 import 'package:ems_project/presentation/widget/record_student_progress.dart';
 import 'package:ems_project/presentation/widget/timetable_screen_teacher.dart';
 import 'package:ems_project/presentation/widget/upcoming_event_widget.dart';
+import 'package:ems_project/providers/student_provider.dart';
 import 'package:ems_project/providers/teacher_provider.dart';
 import 'package:ems_project/presentation/signin_screen.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +64,7 @@ class _TeacherDashboardScreenState
     }
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder:
@@ -90,6 +92,8 @@ class _TeacherDashboardScreenState
         await secureStorage.delete(key: 'token');
         await secureStorage.delete(key: 'user');
         print('Token and user data deleted successfully');
+        ref.invalidate(singleStudentProvider);  // Add this line
+        ref.invalidate(loginStateProvider);     // Consider adding this too
 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const SignInScreen()),
@@ -98,7 +102,10 @@ class _TeacherDashboardScreenState
       } catch (e) {
         print('Error during logout: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error during logout. Please try again.')),
+          SnackBar(content: Text('Error during logout. Please try again.'),
+            backgroundColor: Colors.red,
+
+          ),
         );
       }
     }
@@ -376,61 +383,6 @@ class _TeacherDashboardScreenState
         child: Column(
           // padding: EdgeInsets.zero,
           children: [
-            // teacherAsync.when(
-            //   loading:
-            //       () => const Center(
-            //         child: CircularProgressIndicator(color: Colors.blue),
-            //       ),
-            //   error:
-            //       (err, stack) => const Center(
-            //         child: Text(
-            //           'Error loading profile',
-            //           style: TextStyle(color: Colors.white),
-            //         ),
-            //       ),
-            //   data:
-            //       (teacherData) => Padding(
-            //         padding: const EdgeInsets.all(16.0),
-            //         child:
-            //          Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           mainAxisAlignment: MainAxisAlignment.end,
-            //           children: [
-            //             CircleAvatar(
-            //               radius: 36,
-            //               backgroundColor: Colors.white,
-            //               child: Text(
-            //                 (teacherData['name'] as String?)?.isNotEmpty == true
-            //                     ? (teacherData['name'] as String)
-            //                         .substring(0, 1)
-            //                         .toUpperCase()
-            //                     : 'T',
-            //                 style: const TextStyle(
-            //                   fontSize: 36.0,
-            //                   color: Colors.blue,
-            //                 ),
-            //               ),
-            //             ),
-            //             const SizedBox(height: 16),
-            //             Text(
-            //               teacherData['name'] ?? 'Teacher',
-            //               style: const TextStyle(
-            //                 fontSize: 18,
-            //                 fontWeight: FontWeight.bold,
-            //                 color: Colors.white,
-            //               ),
-            //             ),
-            //             Text(
-            //               teacherData['email'] ?? 'teacher@example.com',
-            //               style: const TextStyle(
-            //                 color: Colors.white,
-            //                 fontSize: 14,
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            // ),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -442,20 +394,6 @@ class _TeacherDashboardScreenState
                     ),
                   ),
                   const Divider(),
-                  // ListTile(
-                  //   leading: const Icon(Icons.person_outline),
-                  //   title: const Text("My Profile"),
-                  //   onTap: () {
-                  //     Navigator.pop(context);
-                  //   },
-                  // ),
-                  // ListTile(
-                  //   leading: const Icon(Icons.settings),
-                  //   title: const Text("Settings"),
-                  //   onTap: () {
-                  //     // Handle settings tap
-                  //   },
-                  // ),
                 ],
               ),
             ),
@@ -468,7 +406,7 @@ class _TeacherDashboardScreenState
                 'Logout',
                 //  style: TextStyle(color: Colors.red)
               ),
-              onTap: () => _handleLogout(context),
+              onTap: () => _handleLogout(context,ref),
             ),
 
             const SizedBox(height: 50),

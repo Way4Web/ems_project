@@ -249,12 +249,18 @@ void _showDonorActionsDialog(
 
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Donor deleted successfully!")),
+                    SnackBar(content: Text("Donor deleted successfully!"),
+                      backgroundColor: Colors.green,
+
+                    ),
                   );
                   ref.read(donorProvider.notifier).fetchDonors();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete donor.")),
+                    SnackBar(content: Text("Failed to delete donor."),
+                      backgroundColor: Colors.red,
+
+                    ),
                   );
                 }
                 Navigator.of(context).pop();

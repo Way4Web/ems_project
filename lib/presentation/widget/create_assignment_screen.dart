@@ -56,7 +56,7 @@ class _CreateAssignmentScreenState
 
         if (selectedStudentId == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a student')),
+            const SnackBar(content: Text('Please select a student'),),
           );
           return;
         }

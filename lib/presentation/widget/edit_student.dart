@@ -181,13 +181,19 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
       final apiService = EditApiStudentDetails(); // Ensure this is your correct API service
       await apiService.updateStudentDetails(studentId, name, email,context); // Call your API
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Student details updated successfully')),
+        SnackBar(content: Text('Student details updated successfully'),
+          backgroundColor: Colors.green,
+
+        ),
       );
       // Return true to indicate a successful update
       Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+
+        ),
       );
     }
   }

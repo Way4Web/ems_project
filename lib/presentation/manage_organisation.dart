@@ -125,11 +125,16 @@ class _ManageOrganisationScreenState extends ConsumerState<ManageOrganisationScr
         try {
           await ref.read(organizationsProvider.notifier).deleteOrganization(orgId, context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Organization deleted')),
+            SnackBar(content: Text('Organization deleted'),
+              backgroundColor: Colors.green,
+            ),
           );
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot delete organization with associated users')),
+            SnackBar(content: Text('Cannot delete organization with associated users'),
+              backgroundColor: Colors.red,
+
+            ),
           );
         }
       }

@@ -247,12 +247,18 @@ void _showParentActionsDialog(
 
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Parent deleted successfully!")),
+                    SnackBar(content: Text("Parent deleted successfully!"),
+                      backgroundColor: Colors.green,
+
+                    ),
                   );
                   ref.read(parentProvider.notifier).fetchParents();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete parent.")),
+                    SnackBar(content: Text("Failed to delete parent."),
+                      backgroundColor: Colors.red,
+
+                    ),
                   );
                 }
                 Navigator.of(context).pop();

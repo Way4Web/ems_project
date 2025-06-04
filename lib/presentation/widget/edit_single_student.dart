@@ -174,7 +174,10 @@ class _EditSingleStudentDialogState extends State<EditSingleStudentDialog> {
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Student details updated successfully')),
+        const SnackBar(content: Text('Student details updated successfully'),
+          backgroundColor: Colors.green,
+
+        ),
       );
 
       // Trigger the onUpdate callback if provided
@@ -187,7 +190,10 @@ class _EditSingleStudentDialogState extends State<EditSingleStudentDialog> {
     } catch (e) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+
+        ),
       );
     }
   }

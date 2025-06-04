@@ -297,12 +297,18 @@ void _showStudentActionsDialog(
 
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Student deleted successfully!")),
+                    SnackBar(content: Text("Student deleted successfully!"),
+                      backgroundColor: Colors.green,
+
+                    ),
                   );
                   ref.read(studentProvider.notifier).fetchStudents();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete student.")),
+                    SnackBar(content: Text("Failed to delete student."),
+                      backgroundColor: Colors.red,
+
+                    ),
                   );
                 }
                 Navigator.of(context).pop();

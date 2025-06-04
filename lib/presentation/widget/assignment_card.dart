@@ -210,6 +210,8 @@ class _AssignmentCardState extends ConsumerState<AssignmentCard> {
                                                         content: Text(
                                                           'Assignment deleted successfully',
                                                         ),
+                                                        backgroundColor: Colors.green,
+
                                                       ),
                                                     );
                                                   } catch (error) {

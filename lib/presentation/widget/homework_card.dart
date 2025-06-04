@@ -282,6 +282,8 @@ class _HomeWorkCard extends StatelessWidget {
                           content: Text(
                             "Assignment submitted successfully!",
                           ),
+                          backgroundColor: Colors.green,
+
                         ),
                       );
 
@@ -299,6 +301,7 @@ class _HomeWorkCard extends StatelessWidget {
                           content: Text(
                             "Failed to submit assignment. Please try again.",
                           ),
+                          backgroundColor: Colors.red,
                         ),
                       );
                     }
@@ -309,6 +312,8 @@ class _HomeWorkCard extends StatelessWidget {
                         content: Text(
                           "An error occurred. Please try again.",
                         ),
+                        backgroundColor: Colors.red,
+
                       ),
                     );
                   }

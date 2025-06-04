@@ -527,7 +527,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         } else {
           // If registration fails, show a SnackBar with the error message.
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.message)),
+            SnackBar(content: Text(response.message),
+              backgroundColor: Colors.red,
+
+            ),
           );
         }
 
@@ -539,7 +542,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         // Remove the loading spinner in case of error
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: ${e.toString()}')),
+          SnackBar(content: Text('An error occurred: ${e.toString()}'),
+            backgroundColor: Colors.red,
+
+          ),
         );
       }
 

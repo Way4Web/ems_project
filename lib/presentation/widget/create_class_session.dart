@@ -87,7 +87,10 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
         // Validate that endTime is after startTime
         if (DateTime.parse(endTime).isBefore(DateTime.parse(startTime))) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('End time must be after start time')),
+            const SnackBar(content: Text('End time must be after start time'),
+              backgroundColor: Colors.red,
+
+            ),
           );
           return;
         }

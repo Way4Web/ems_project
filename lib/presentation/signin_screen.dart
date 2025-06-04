@@ -316,7 +316,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         // Handle login failure (show an error message, etc.)
         debugPrint('Login failed.');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed. Please try again.')),
+          SnackBar(content: Text('Login failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
 

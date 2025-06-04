@@ -363,7 +363,10 @@ class _AddOrganisationScreenState extends ConsumerState<AddOrganisation> {
       } catch (e) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: ${e.toString()}')),
+          SnackBar(content: Text('An error occurred: ${e.toString()}'),
+            backgroundColor: Colors.red,
+
+          ),
         );
       }
 

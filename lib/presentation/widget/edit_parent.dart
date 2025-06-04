@@ -166,13 +166,19 @@ class _EditParentDialogState extends State<EditParentDialog> {
       final apiService = EditApiParentDetails(); // Ensure this is your correct API service
       await apiService.updateParentDetails(parentId, name, email,context); // Call your API
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Parent details updated successfully')),
+        SnackBar(content: Text('Parent details updated successfully'),
+          backgroundColor: Colors.green,
+
+        ),
       );
       // Return true to indicate a successful update
       Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+
+        ),
       );
     }
   }

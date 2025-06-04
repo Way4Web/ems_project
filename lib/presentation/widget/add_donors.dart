@@ -341,7 +341,9 @@ class _AddDonorsScreenState extends ConsumerState<AddDonors> {
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Donor added successfully!")),
+                          SnackBar(content: Text("Donor added successfully!"),
+                            backgroundColor: Colors.green,
+                          ),
                         );
                         Navigator.pop(context);
                       } else {
@@ -350,6 +352,8 @@ class _AddDonorsScreenState extends ConsumerState<AddDonors> {
                             content: Text(
                               "Failed to add Donor. Please try again later.",
                             ),
+                            backgroundColor: Colors.red,
+
                           ),
                         );
                       }

@@ -248,12 +248,18 @@ void _showTeacherActionsDialog(
 
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Teacher deleted successfully!")),
+                    SnackBar(content: Text("Teacher deleted successfully!"),
+                      backgroundColor: Colors.green,
+
+                    ),
                   );
                   ref.read(teacherProvider.notifier).fetchTeachers();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete teacher.")),
+                    SnackBar(content: Text("Failed to delete teacher."),
+                      backgroundColor: Colors.red,
+
+                    ),
                   );
                 }
                 Navigator.of(context).pop();

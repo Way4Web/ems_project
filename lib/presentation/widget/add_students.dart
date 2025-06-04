@@ -336,12 +336,18 @@ class _AddStudentsScreenState extends ConsumerState<AddStudents> {
 
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Student added successfully!")),
+                          SnackBar(content: Text("Student added successfully!"),
+                            backgroundColor: Colors.green,
+
+                          ),
                         );
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Failed to add student. Please try again later.")),
+                          SnackBar(content: Text("Failed to add student. Please try again later."),
+                            backgroundColor: Colors.red,
+
+                          ),
                         );
                       }
                     },

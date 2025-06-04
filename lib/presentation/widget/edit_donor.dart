@@ -164,13 +164,19 @@ class _EditDonorDialogState extends State<EditDonorDialog> {
       final apiService = EditApiDonorDetails(); // Ensure this is your correct API service
       await apiService.updateDonorDetails(donorsId, name, email,context); // Call your API
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Donor details updated successfully')),
+        SnackBar(content: Text('Donor details updated successfully'),
+          backgroundColor: Colors.green,
+
+        ),
       );
       // Return true to indicate a successful update
       Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+
+        ),
       );
     }
   }

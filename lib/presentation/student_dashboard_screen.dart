@@ -284,7 +284,10 @@ void joinZoomMeeting(BuildContext context, String zoomLink) async {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Could not launch Zoom link: $zoomLink")),
+        SnackBar(content: Text("Could not launch Zoom link: $zoomLink"),
+          backgroundColor: Colors.red,
+
+        ),
       );
     }
   } finally {
