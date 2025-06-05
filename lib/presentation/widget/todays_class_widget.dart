@@ -39,6 +39,31 @@ class ClassSession {
       imageUrl: json['imageUrl'],
     );
   }
+
+  // Helper method to check if a date falls within this session's timeframe
+  bool isActiveOnDate(DateTime date) {
+    // Convert the date to start of day for comparison
+    final compareDate = DateTime(date.year, date.month, date.day);
+
+    // Parse UTC times and convert to local for comparison
+    final sessionStartDate = DateTime(
+      DateTime.parse(startTime).toLocal().year,
+      DateTime.parse(startTime).toLocal().month,
+      DateTime.parse(startTime).toLocal().day,
+    );
+
+    final sessionEndDate = DateTime(
+      DateTime.parse(endTime).toLocal().year,
+      DateTime.parse(endTime).toLocal().month,
+      DateTime.parse(endTime).toLocal().day,
+    );
+
+    // Check if the date falls within or equals the start/end dates
+    return (compareDate.isAtSameMomentAs(sessionStartDate) ||
+        compareDate.isAfter(sessionStartDate)) &&
+        (compareDate.isAtSameMomentAs(sessionEndDate) ||
+            compareDate.isBefore(sessionEndDate));
+  }
 }
 
 // API service
@@ -78,17 +103,14 @@ final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 // Provider for selected date
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
-// Provider for class sessions for the selected date
+// Updated provider for class sessions for the selected date
 final classSessionsForDateProvider = FutureProvider.autoDispose.family<List<ClassSession>, DateTime>((ref, selectedDate) async {
   final apiService = ref.read(apiServiceProvider);
   final allSessions = await apiService.fetchClassSessions();
 
-  // Filter sessions for the selected date
+  // Filter sessions active on the selected date (between start and end date inclusive)
   final filteredSessions = allSessions.where((session) {
-    final sessionDate = DateTime.parse(session.startTime);
-    return sessionDate.year == selectedDate.year &&
-        sessionDate.month == selectedDate.month &&
-        sessionDate.day == selectedDate.day;
+    return session.isActiveOnDate(selectedDate);
   }).toList();
 
   // Sort by start time
@@ -110,22 +132,34 @@ final allClassSessionsProvider = FutureProvider<List<ClassSession>>((ref) async 
   return allSessions;
 });
 
-// Provider for events for calendar
+// Updated provider for events for calendar - Show events on all active days
 final classSessionEventsProvider = Provider<Map<DateTime, List<ClassSession>>>((ref) {
   final allSessions = ref.watch(allClassSessionsProvider);
-
   final Map<DateTime, List<ClassSession>> eventMap = {};
 
   allSessions.whenData((sessions) {
     for (var session in sessions) {
-      final sessionDate = DateTime.parse(session.startTime);
-      final dateKey = DateTime(sessionDate.year, sessionDate.month, sessionDate.day);
+      // Get start and end dates for the session - convert from UTC to local time
+      final sessionStart = DateTime.parse(session.startTime).toLocal();
+      final sessionEnd = DateTime.parse(session.endTime).toLocal();
 
-      if (eventMap[dateKey] == null) {
-        eventMap[dateKey] = [];
+      // Create date-only objects for start and end
+      final startDate = DateTime(sessionStart.year, sessionStart.month, sessionStart.day);
+      final endDate = DateTime(sessionEnd.year, sessionEnd.month, sessionEnd.day);
+
+      // Add the session to each day between start and end dates inclusive
+      for (var date = startDate;
+      date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
+      date = date.add(const Duration(days: 1))) {
+
+        final dateKey = DateTime(date.year, date.month, date.day);
+
+        if (eventMap[dateKey] == null) {
+          eventMap[dateKey] = [];
+        }
+
+        eventMap[dateKey]!.add(session);
       }
-
-      eventMap[dateKey]!.add(session);
     }
   });
 
@@ -199,19 +233,6 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                // Row(
-                //   children: [
-                //     Icon(Icons.access_time, size: 20, color: Colors.blue),
-                //     SizedBox(width: 8),
-                //     Text(
-                //       '2025-06-05 05:38:43', // Updated current date/time
-                //       style: TextStyle(
-                //         fontSize: 16,
-                //         fontWeight: FontWeight.w500,
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 SizedBox(height: 8),
                 Row(
                   children: [
@@ -432,31 +453,38 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                     separatorBuilder: (context, index) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final session = classSessions[index];
-                      final startTime = DateFormat('hh:mm a').format(DateTime.parse(session.startTime));
-                      final endTime = DateFormat('hh:mm a').format(DateTime.parse(session.endTime));
 
-                      // Check if class is active now
+                      // Format session dates and times for display
+                      // Convert UTC times to local time zone
+                      final startDate = DateTime.parse(session.startTime).toLocal();
+                      final endDate = DateTime.parse(session.endTime).toLocal();
+
+                      // Same day format
+                      final startTime = DateFormat('hh:mm a').format(startDate);
+                      final endTime = DateFormat('hh:mm a').format(endDate);
+
+                      // Add date info if multi-day class session
+                      String timeDisplay;
+                      if (startDate.year == endDate.year &&
+                          startDate.month == endDate.month &&
+                          startDate.day == endDate.day) {
+                        // Same day session
+                        timeDisplay = '$startTime - $endTime';
+                      } else {
+                        // Multi-day session
+                        final startDateStr = DateFormat('MMM d').format(startDate);
+                        final endDateStr = DateFormat('MMM d').format(endDate);
+                        timeDisplay = 'From $startDateStr, $startTime to $endDateStr, $endTime';
+                      }
+
+                      // Check if class is active now - using local time for comparison
                       final now = DateTime.now();
-                      final sessionStart = DateTime.parse(session.startTime);
-                      final sessionEnd = DateTime.parse(session.endTime);
+                      // Parse dates and convert to local time zone for proper comparison
+                      final sessionStart = DateTime.parse(session.startTime).toLocal();
+                      final sessionEnd = DateTime.parse(session.endTime).toLocal();
                       final isActive = now.isAfter(sessionStart) && now.isBefore(sessionEnd);
                       final isPast = now.isAfter(sessionEnd);
                       final isFuture = now.isBefore(sessionStart);
-
-                      // Status indicator color
-                      Color statusColor;
-                      String statusText;
-
-                      // if (isActive) {
-                      //   statusColor = Colors.green;
-                      //   statusText = "Active";
-                      // } else if (isPast) {
-                      //   statusColor = Colors.grey;
-                      //   statusText = "Completed";
-                      // } else {
-                      //   statusColor = Colors.orange;
-                      //   statusText = "Upcoming";
-                      // }
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -506,6 +534,23 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
+                                      // Show active indicator if class is currently running
+                                      if (isActive)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green[100],
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'Active',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green[800],
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -517,11 +562,13 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                                         color: Colors.grey,
                                       ),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        '$startTime - $endTime',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
+                                      Expanded(
+                                        child: Text(
+                                          timeDisplay,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -556,7 +603,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                                 );
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor:  Colors.blue[50],
+                                backgroundColor: Colors.blue[50],
                                 foregroundColor: Colors.blue[700],
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
