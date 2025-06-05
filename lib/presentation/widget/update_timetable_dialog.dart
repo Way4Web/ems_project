@@ -34,7 +34,7 @@ class _UpdateTimetableDialogState extends ConsumerState<UpdateTimetableDialog> {
   bool _isLoading = false;
 
   // Updated date and user info
-  final DateTime currentDateTime = DateTime.parse('2025-05-19 12:04:05');
+  final DateTime currentDateTime = DateTime.now() ;
   final String currentUser = 'Way4Web';
 
   // Date format for UI display
