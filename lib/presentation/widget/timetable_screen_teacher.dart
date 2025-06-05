@@ -30,7 +30,7 @@ class _TimetableWidgetState extends ConsumerState<TimetableWidget> {
   int _currentPageIndex = 0;
 
   // Default timetable ID if needed
-  final String defaultTimetableId = '682b0e9b9d783e6f901e6f85';
+  final String defaultTimetableId = '683fe90e4d24675f3e27f78c';
 
   // Current date/time and user
   final DateTime currentDateTime = DateTime.parse('2025-06-03 11:14:42');
