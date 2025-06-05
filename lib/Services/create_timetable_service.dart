@@ -246,7 +246,7 @@ class TimeTableService {
     try {
       final response = await http.put(
         // Uri.parse('$baseUrl/teacher/updateTimeTable/$timetableId'),
-        Uri.parse('$baseUrl/teacher/updateTimeTable/682b0e9b9d783e6f901e6f85'),
+        Uri.parse('$baseUrl/teacher/updateTimeTable/6840569a4d24675f3e28382b'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
