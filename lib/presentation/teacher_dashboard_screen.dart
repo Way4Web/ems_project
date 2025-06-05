@@ -309,6 +309,8 @@ class _TeacherDashboardScreenState
                                       },
                                       calendarFormat: CalendarFormat.month,
                                       daysOfWeekHeight: 30,
+                                      availableGestures: AvailableGestures.none, // Disable all gestures
+
                                       headerStyle: const HeaderStyle(
                                         formatButtonVisible: false,
                                         titleCentered: true,
@@ -321,6 +323,7 @@ class _TeacherDashboardScreenState
                                           color: Colors.black,
                                         ),
                                       ),
+
                                       calendarStyle: CalendarStyle(
                                         todayDecoration: const BoxDecoration(
                                           color: Colors.blue,
@@ -340,6 +343,9 @@ class _TeacherDashboardScreenState
                                     ),
                                   ),
                                 ),
+
+
+
                                 const SizedBox(height: 20),
 
                                 // Pass the selected date to TimetableWidget
