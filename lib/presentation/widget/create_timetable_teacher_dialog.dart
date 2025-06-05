@@ -17,7 +17,7 @@ class _CreateTimetableDialogState extends State<CreateTimetableDialog> {
 
   // Format for dates and default date
   final DateFormat dateFormat = DateFormat('dd-MM-yyyy HH:mm');
-  final DateTime defaultDateTime = DateTime.parse('2025-05-19 09:27:08Z');
+  final DateTime defaultDateTime = DateTime.now() ;
   static const String currentUser = 'Way4Web';
 
   @override
