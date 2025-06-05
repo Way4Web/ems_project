@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../Services/student_dashboard_service.dart';
+import 'create_class_session.dart';
 
 class CreateAssignmentScreen extends ConsumerStatefulWidget {
   @override
@@ -157,29 +158,35 @@ class _CreateAssignmentScreenState
               const SizedBox(height: 10),
               Consumer(
                 builder: (context, ref, _) {
-                  // Pass the required argument (e.g., organization ID)
-                  final studentsAsyncValue = ref.watch(
-                    studentsProvider("67bed520465b90e0acad21f2"),
-                  );
+                  final studentDataState = ref.watch(studentDataProvider);
 
-                  return studentsAsyncValue.when(
-                    data: (students) {
+                  switch (studentDataState.status) {
+                    case StudentDataStatus.loading:
+                      return const Center(child: CircularProgressIndicator());
+
+                    case StudentDataStatus.success:
+                      final students =
+                          studentDataState.organization?.students ?? [];
+
                       if (students.isEmpty) {
                         return const Text('No students available');
                       }
+
                       return DropdownButtonFormField<String>(
                         dropdownColor: Colors.white,
-
                         value: selectedStudentId,
                         items:
-                            students
-                                .map(
-                                  (student) => DropdownMenuItem<String>(
-                                    value: student.id,
-                                    child: Text(student.name),
-                                  ),
-                                )
-                                .toList(),
+                        students
+                            .map(
+                              (student) => DropdownMenuItem<String>(
+                            value: student.id,
+                            child: SizedBox(
+                              width: 200,
+                              child: Text(student.name),
+                            ),
+                          ),
+                        )
+                            .toList(),
                         onChanged: (value) {
                           setState(() {
                             selectedStudentId = value;
@@ -196,12 +203,16 @@ class _CreateAssignmentScreenState
                           return null;
                         },
                       );
-                    },
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (error, stack) => const Text('Failed to load students'),
-                  );
+
+                    case StudentDataStatus.error:
+                      return Text(
+                        'Failed to load students: ${studentDataState.errorMessage}',
+                      );
+
+                    case StudentDataStatus.initial:
+                    default:
+                      return const Text('Loading students...');
+                  }
                 },
               ),
               const SizedBox(height: 10),

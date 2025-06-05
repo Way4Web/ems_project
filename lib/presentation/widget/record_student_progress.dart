@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../providers/get_all_student_provider.dart'
     show Student, studentsProvider;
+import 'create_class_session.dart';
 
 // Define constants for current date and user
 const String currentUserLogin = 'Way4Web';
@@ -88,25 +89,25 @@ class _RecordStudentProgressDialogState
 
       try {
         // Get student details from selected ID
-        final studentsAsyncValue = ref.read(
-          studentsProvider(widget.organizationId),
-        );
-
-        String studentName = "Unknown";
-        studentsAsyncValue.whenData((students) {
-          final selectedStudent = students.firstWhere(
-            (s) => s.id == selectedStudentId,
-            orElse:
-                () => Student(
-                  id: selectedStudentId!,
-                  name: "Unknown",
-                  email: "",
-                  role: "",
-                  organization: "",
-                ),
-          );
-          studentName = selectedStudent.name;
-        });
+        // final studentsAsyncValue = ref.read(
+        //   studentsProvider(widget.organizationId),
+        // );
+        //
+        // String studentName = "Unknown";
+        // studentsAsyncValue.whenData((students) {
+        //   final selectedStudent = students.firstWhere(
+        //     (s) => s.id == selectedStudentId,
+        //     orElse:
+        //         () => Student(
+        //           id: selectedStudentId!,
+        //           name: "Unknown",
+        //           email: "",
+        //           role: "",
+        //           organization: "",
+        //         ),
+        //   );
+        //   studentName = selectedStudent.name;
+        // });
 
         // Create the API payload
         final apiPayload = {
@@ -144,7 +145,7 @@ class _RecordStudentProgressDialogState
         // Create the record for the callback
         final record = StudentProgressRecord(
           studentId: selectedStudentId!,
-          studentName: studentName,
+          studentName: selectedStudentId!,
           module: selectedModule!,
           pagesRead: int.tryParse(pagesReadController.text) ?? 0,
           versesMemorized: int.tryParse(versesMemorizedController.text) ?? 0,
@@ -173,9 +174,9 @@ class _RecordStudentProgressDialogState
   @override
   Widget build(BuildContext context) {
     // Watch the student async value from provider
-    final studentsAsyncValue = ref.watch(
-      studentsProvider(widget.organizationId),
-    );
+    // final studentsAsyncValue = ref.watch(
+    //   studentsProvider(widget.organizationId),
+    // );
 
     return Dialog(
       backgroundColor: Colors.white,
@@ -254,64 +255,64 @@ class _RecordStudentProgressDialogState
                       const SizedBox(height: 8),
 
                       // Student dropdown section using AsyncValue
-                      studentsAsyncValue.when(
-                        data: (students) {
-                          if (students.isEmpty) {
-                            return const Text('No students available');
-                          }
-                          return DropdownButtonFormField<String>(
-                            dropdownColor: Colors.white,
-                            value: selectedStudentId,
-                            items:
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final studentDataState = ref.watch(studentDataProvider);
+
+                          switch (studentDataState.status) {
+                            case StudentDataStatus.loading:
+                              return const Center(child: CircularProgressIndicator());
+
+                            case StudentDataStatus.success:
+                              final students =
+                                  studentDataState.organization?.students ?? [];
+
+                              if (students.isEmpty) {
+                                return const Text('No students available');
+                              }
+
+                              return DropdownButtonFormField<String>(
+                                dropdownColor: Colors.white,
+                                value: selectedStudentId,
+                                items:
                                 students
                                     .map(
                                       (student) => DropdownMenuItem<String>(
-                                        value: student.id,
-                                        child: SizedBox(
-                                          width: 200,
-                                          child: Text(student.name),
-                                        ),
-                                      ),
-                                    )
+                                    value: student.id,
+                                    child: SizedBox(
+                                      width: 200,
+                                      child: Text(student.name),
+                                    ),
+                                  ),
+                                )
                                     .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedStudentId = value;
-                              });
-                            },
-                            decoration: const InputDecoration(
-                              labelText: 'Select Student',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select a student';
-                              }
-                              return null;
-                            },
-                          );
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedStudentId = value;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: 'Select Student',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please select a student';
+                                  }
+                                  return null;
+                                },
+                              );
+
+                            case StudentDataStatus.error:
+                              return Text(
+                                'Failed to load students: ${studentDataState.errorMessage}',
+                              );
+
+                            case StudentDataStatus.initial:
+                            default:
+                              return const Text('Loading students...');
+                          }
                         },
-                        loading:
-                            () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                        error:
-                            (error, stack) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Error loading students: $error',
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                                ElevatedButton(
-                                  onPressed:
-                                      () => ref.refresh(
-                                        studentsProvider(widget.organizationId),
-                                      ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
                       ),
 
                       const SizedBox(height: 16),

@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:ems_project/Services/create_class_session_service.dart';
 import 'package:ems_project/Services/get_class_session_service.dart';
 import 'package:ems_project/providers/get_all_student_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class CreateClassSession extends ConsumerStatefulWidget {
@@ -87,9 +91,9 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
         // Validate that endTime is after startTime
         if (DateTime.parse(endTime).isBefore(DateTime.parse(startTime))) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('End time must be after start time'),
+            const SnackBar(
+              content: Text('End time must be after start time'),
               backgroundColor: Colors.red,
-
             ),
           );
           return;
@@ -135,7 +139,18 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Load students when screen initializes
+    Future.microtask(
+      () => ref.read(studentDataProvider.notifier).loadStudents(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final studentData = ref.watch(studentDataProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Create Class Session')),
       body: SingleChildScrollView(
@@ -163,60 +178,62 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
                 const SizedBox(height: 10),
 
                 // Students Dropdown
-                Consumer(
-                  builder: (context, ref, _) {
-                    final studentsAsyncValue = ref.watch(
-                      studentsProvider(
-                        "67bed520465b90e0acad21f2",
-                      ), // Replace with your organization ID
-                    );
+                // Students Dropdown
+                 Consumer(
+                   builder: (context, ref, _) {
+                     final studentDataState = ref.watch(studentDataProvider);
 
-                    return studentsAsyncValue.when(
-                      data: (students) {
-                        if (students.isEmpty) {
-                          return const Text('No students available');
-                        }
-                        return DropdownButtonFormField<String>(
-                          dropdownColor: Colors.white,
-                          value: selectedStudentId,
-                          items:
-                              students
-                                  .map(
-                                    (student) => DropdownMenuItem<String>(
-                                      value: student.id,
-                                      child: SizedBox(
-                                        width: 200,
-                                        child: Text(student.name),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedStudentId = value;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            labelText: 'Select Student',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select a student';
-                            }
-                            return null;
-                          },
-                        );
-                      },
-                      loading:
-                          () =>
-                              const Center(child: CircularProgressIndicator()),
-                      error:
-                          (error, stack) =>
-                              const Text('Failed to load students'),
-                    );
-                  },
-                ),
+                     switch (studentDataState.status) {
+                       case StudentDataStatus.loading:
+                         return const Center(child: CircularProgressIndicator());
+
+                       case StudentDataStatus.success:
+                         final students = studentDataState.organization?.students ?? [];
+
+                         if (students.isEmpty) {
+                           return const Text('No students available');
+                         }
+
+                         return DropdownButtonFormField<String>(
+                           dropdownColor: Colors.white,
+                           value: selectedStudentId,
+                           items: students
+                               .map(
+                                 (student) => DropdownMenuItem<String>(
+                                   value: student.id,
+                                   child: SizedBox(
+                                     width: 200,
+                                     child: Text(student.name),
+                                   ),
+                                 ),
+                               )
+                               .toList(),
+                           onChanged: (value) {
+                             setState(() {
+                               selectedStudentId = value;
+                             });
+                           },
+                           decoration: const InputDecoration(
+                             labelText: 'Select Student',
+                             border: OutlineInputBorder(),
+                           ),
+                           validator: (value) {
+                             if (value == null || value.isEmpty) {
+                               return 'Please select a student';
+                             }
+                             return null;
+                           },
+                         );
+
+                       case StudentDataStatus.error:
+                         return Text('Failed to load students: ${studentDataState.errorMessage}');
+
+                       case StudentDataStatus.initial:
+                       default:
+                         return const Text('Loading students...');
+                     }
+                   },
+                 ),
                 const SizedBox(height: 10),
 
                 // Zoom Link
@@ -305,3 +322,173 @@ class _CreateClassSessionState extends ConsumerState<CreateClassSession> {
     );
   }
 }
+
+/// Student Model
+class Student {
+  final String id;
+  final String name;
+  final String email;
+
+  Student({required this.id, required this.name, required this.email});
+
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      email: json['email'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name, 'email': email};
+  }
+}
+
+/// Organization Model
+class Organization {
+  final String organizationId;
+  final String organizationName;
+  final List<Student> students;
+
+  Organization({
+    required this.organizationId,
+    required this.organizationName,
+    required this.students,
+  });
+
+  factory Organization.fromJson(Map<String, dynamic> json) {
+    return Organization(
+      organizationId: json['organizationId'] as String,
+      organizationName: json['organizationName'] as String,
+      students: (json['students'] as List)
+          .map(
+            (student) => Student.fromJson(student as Map<String, dynamic>),
+      )
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'organizationId': organizationId,
+      'organizationName': organizationName,
+      'students': students.map((student) => student.toJson()).toList(),
+    };
+  }
+}
+
+/// Student Service for API calls
+class StudentService {
+  final String baseUrl = 'http://46.202.190.84:8002/api/teacher/getAllStudents';
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
+
+  // Retrieve the token from secure storage
+
+  Future<Organization> getAllStudents() async {
+    final token = await secureStorage.read(key: "token");
+
+    if (token == null) {
+      throw Exception("Token not found. Please log in again.");
+    }
+
+    final url =
+    Uri.parse(baseUrl);
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Added 'Bearer' for proper token format
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return Organization.fromJson(
+          json.decode(response.body) as Map<String, dynamic>,
+        );
+      } else {
+        throw Exception('Failed to load students: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching students: $e');
+    }
+  }
+}
+
+/// Provider for the StudentService
+final studentServiceProvider = Provider<StudentService>((ref) {
+  return StudentService();
+});
+
+/// Student Data Status Enum
+enum StudentDataStatus { initial, loading, success, error }
+
+/// Student Data State Class
+class StudentDataState {
+  final StudentDataStatus status;
+  final Organization? organization;
+  final String? errorMessage;
+
+  StudentDataState({
+    this.status = StudentDataStatus.initial,
+    this.organization,
+    this.errorMessage,
+  });
+
+  StudentDataState copyWith({
+    StudentDataStatus? status,
+    Organization? organization,
+    String? errorMessage,
+  }) {
+    return StudentDataState(
+      status: status ?? this.status,
+      organization: organization ?? this.organization,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
+/// StateNotifier for handling student data
+class StudentDataNotifier extends StateNotifier<StudentDataState> {
+  final StudentService _studentService;
+
+  StudentDataNotifier(this._studentService) : super(StudentDataState());
+
+  Future<void> loadStudents() async {
+    state = state.copyWith(status: StudentDataStatus.loading);
+    try {
+      final organization = await _studentService.getAllStudents();
+      state = state.copyWith(
+        status: StudentDataStatus.success,
+        organization: organization,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: StudentDataStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+}
+
+/// Provider for StudentDataNotifier
+final studentDataProvider =
+StateNotifierProvider<StudentDataNotifier, StudentDataState>((ref) {
+  final studentService = ref.watch(studentServiceProvider);
+  return StudentDataNotifier(studentService);
+});
+
+/// Helper provider to easily access the students list from the organization
+final studentsProvider = Provider<List<Student>>((ref) {
+  final studentDataState = ref.watch(studentDataProvider);
+
+  // Return empty list if organization is null
+  if (studentDataState.organization == null) {
+    return [];
+  }
+
+  return studentDataState.organization!.students;
+});
+
