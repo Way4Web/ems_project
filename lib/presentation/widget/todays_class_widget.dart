@@ -84,8 +84,7 @@ final classSessionsForDateProvider = FutureProvider.autoDispose.family<List<Clas
   final allSessions = await apiService.fetchClassSessions();
 
   // Filter sessions for the selected date
-  final filteredSessions =
-  allSessions.where((session) {
+  final filteredSessions = allSessions.where((session) {
     final sessionDate = DateTime.parse(session.startTime);
     return sessionDate.year == selectedDate.year &&
         sessionDate.month == selectedDate.month &&
@@ -94,56 +93,68 @@ final classSessionsForDateProvider = FutureProvider.autoDispose.family<List<Clas
 
   // Sort by start time
   filteredSessions.sort(
-        (a, b) =>
-        DateTime.parse(a.startTime).compareTo(DateTime.parse(b.startTime)),
+        (a, b) => DateTime.parse(a.startTime).compareTo(DateTime.parse(b.startTime)),
   );
 
   return filteredSessions;
 });
 
-// Function to join zoom meeting (can be overridden when using the widget)
-typedef JoinMeetingCallback =
-void Function(BuildContext context, String? zoomLink);
+// All class sessions provider (not filtered by date)
+final allClassSessionsProvider = FutureProvider<List<ClassSession>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  final allSessions = await apiService.fetchClassSessions();
 
-// void defaultJoinZoomMeeting(BuildContext context, String? zoomLink) {
-//   if (zoomLink != null && zoomLink.isNotEmpty) {
-//     print('Joining meeting with link: $zoomLink');
-//     ScaffoldMessenger.of(
-//       context,
-//     ).showSnackBar(const SnackBar(content: Text('Joining class meeting...')));
-//   } else {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(
-//         content: Text('No meeting link available for this class'),
-//         backgroundColor: Colors.red,
-//       ),
-//     );
-//   }
-// }
+  // Sort by date and time
+  allSessions.sort((a, b) => DateTime.parse(a.startTime).compareTo(DateTime.parse(b.startTime)));
+
+  return allSessions;
+});
+
+// Provider for events for calendar
+final classSessionEventsProvider = Provider<Map<DateTime, List<ClassSession>>>((ref) {
+  final allSessions = ref.watch(allClassSessionsProvider);
+
+  final Map<DateTime, List<ClassSession>> eventMap = {};
+
+  allSessions.whenData((sessions) {
+    for (var session in sessions) {
+      final sessionDate = DateTime.parse(session.startTime);
+      final dateKey = DateTime(sessionDate.year, sessionDate.month, sessionDate.day);
+
+      if (eventMap[dateKey] == null) {
+        eventMap[dateKey] = [];
+      }
+
+      eventMap[dateKey]!.add(session);
+    }
+  });
+
+  return eventMap;
+});
+
+// Function to join zoom meeting (can be overridden when using the widget)
+typedef JoinMeetingCallback = void Function(BuildContext context, String? zoomLink);
 
 // The actual widget you can include in your dashboard
 class TodaysClassesWidget extends ConsumerStatefulWidget {
   final bool showHeader;
   final JoinMeetingCallback? onJoinMeeting;
+  final bool showAllClasses; // New parameter to show all classes
 
   const TodaysClassesWidget({
     Key? key,
     this.showHeader = true,
     this.onJoinMeeting,
+    this.showAllClasses = false, // Default to false to maintain backward compatibility
   }) : super(key: key);
 
   @override
-  ConsumerState<TodaysClassesWidget> createState() =>
-      _TodaysClassesWidgetState();
+  ConsumerState<TodaysClassesWidget> createState() => _TodaysClassesWidgetState();
 }
 
 class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
   bool _showCalendar = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +165,9 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
     // Watch the class sessions provider for the selected date
     final classSessionsAsync = ref.watch(classSessionsForDateProvider(selectedDate));
 
+    // Watch events for the calendar
+    final events = ref.watch(classSessionEventsProvider);
+
     // Check if the selected date is today
     final today = DateTime.now();
     final isToday = selectedDate.year == today.year &&
@@ -161,7 +175,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
         selectedDate.day == today.day;
 
     // Title text - show "Today's Class" if the selected date is today, otherwise show "Classes for [date]"
-    final titleText = isToday ? "Today's Class" : "Classes for ${DateFormat('MMM d').format(selectedDate)}";
+    final titleText = isToday ? "Today's Classes" : "Classes for ${DateFormat('MMM d').format(selectedDate)}";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,19 +199,19 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 20, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text(
-                      '2025-06-05 05:38:43', // Updated current date/time
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     Icon(Icons.access_time, size: 20, color: Colors.blue),
+                //     SizedBox(width: 8),
+                //     Text(
+                //       '2025-06-05 05:38:43', // Updated current date/time
+                //       style: TextStyle(
+                //         fontSize: 16,
+                //         fontWeight: FontWeight.w500,
+                //       ),
+                //     ),
+                //   ],
+                // ),
                 SizedBox(height: 8),
                 Row(
                   children: [
@@ -216,7 +230,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
             ),
           ),
 
-        // Today's Classes Card
+        // Classes Card
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -287,47 +301,78 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                   ),
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   padding: const EdgeInsets.all(8),
-                  child: Column(
-                    children: [
-                      TableCalendar(
-                        firstDay: DateTime.utc(2020, 1, 1),
-                        lastDay: DateTime.utc(2030, 12, 31),
-                        focusedDay: selectedDate,
-                        selectedDayPredicate: (day) {
-                          return isSameDay(selectedDate, day);
-                        },
-                        onDaySelected: (selectedDay, focusedDay) {
-                          ref.read(selectedDateProvider.notifier).state = selectedDay;
-                          setState(() {
-                            _showCalendar = false;
-                          });
-                        },
-                        calendarFormat: CalendarFormat.month,
-                        headerStyle: const HeaderStyle(
-                          formatButtonVisible: false,
-                          titleCentered: true,
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        TableCalendar(
+                          firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: selectedDate,
+                          calendarFormat: _calendarFormat,
+                          eventLoader: (day) {
+                            final normalizedDay = DateTime(day.year, day.month, day.day);
+                            return events[normalizedDay] ?? [];
+                          },
+                          selectedDayPredicate: (day) {
+                            return isSameDay(selectedDate, day);
+                          },
+                          onDaySelected: (selectedDay, focusedDay) {
+                            ref.read(selectedDateProvider.notifier).state = selectedDay;
+                            setState(() {
+                              _showCalendar = false;
+                            });
+                          },
+                          onFormatChanged: (format) {
+                            setState(() {
+                              _calendarFormat = format;
+                            });
+                          },
+                          calendarBuilders: CalendarBuilders(
+                            markerBuilder: (context, date, events) {
+                              if (events.isNotEmpty) {
+                                return Positioned(
+                                  right: 1,
+                                  bottom: 1,
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.blue,
+                                    ),
+                                    width: 8,
+                                    height: 8,
+                                  ),
+                                );
+                              }
+                              return null;
+                            },
+                          ),
+                          headerStyle: const HeaderStyle(
+                            formatButtonVisible: true,
+                            titleCentered: true,
+                          ),
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              ref.read(selectedDateProvider.notifier).state = DateTime.now();
-                            },
-                            child: const Text('Today'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _showCalendar = false;
-                              });
-                            },
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                ref.read(selectedDateProvider.notifier).state = DateTime.now();
+                              },
+                              child: const Text('Today'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showCalendar = false;
+                                });
+                              },
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -335,13 +380,11 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
 
               // Class Sessions List
               classSessionsAsync.when(
-                loading:
-                    () => const Padding(
+                loading: () => const Padding(
                   padding: EdgeInsets.symmetric(vertical: 32.0),
                   child: Center(child: CircularProgressIndicator()),
                 ),
-                error:
-                    (error, stack) => Padding(
+                error: (error, stack) => Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 32.0,
                     horizontal: 16.0,
@@ -386,16 +429,34 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: classSessions.length,
-                    separatorBuilder:
-                        (context, index) => const Divider(height: 1),
+                    separatorBuilder: (context, index) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final session = classSessions[index];
-                      final startTime = DateFormat(
-                        'hh:mm a',
-                      ).format(DateTime.parse(session.startTime));
-                      final endTime = DateFormat(
-                        'hh:mm a',
-                      ).format(DateTime.parse(session.endTime));
+                      final startTime = DateFormat('hh:mm a').format(DateTime.parse(session.startTime));
+                      final endTime = DateFormat('hh:mm a').format(DateTime.parse(session.endTime));
+
+                      // Check if class is active now
+                      final now = DateTime.now();
+                      final sessionStart = DateTime.parse(session.startTime);
+                      final sessionEnd = DateTime.parse(session.endTime);
+                      final isActive = now.isAfter(sessionStart) && now.isBefore(sessionEnd);
+                      final isPast = now.isAfter(sessionEnd);
+                      final isFuture = now.isBefore(sessionStart);
+
+                      // Status indicator color
+                      Color statusColor;
+                      String statusText;
+
+                      // if (isActive) {
+                      //   statusColor = Colors.green;
+                      //   statusText = "Active";
+                      // } else if (isPast) {
+                      //   statusColor = Colors.grey;
+                      //   statusText = "Completed";
+                      // } else {
+                      //   statusColor = Colors.orange;
+                      //   statusText = "Upcoming";
+                      // }
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -412,13 +473,11 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child:
-                              session.imageUrl != null
+                              child: session.imageUrl != null
                                   ? Image.network(
                                 session.imageUrl!,
                                 fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) => const Icon(
+                                errorBuilder: (_, __, ___) => const Icon(
                                   Icons.person,
                                   size: 32,
                                   color: Colors.grey,
@@ -436,13 +495,18 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    session.title,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        session.title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
@@ -468,17 +532,19 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                             // Join button
                             TextButton(
                               onPressed: () {
-                                final now = DateTime.now();
-                                final sessionStart = DateTime.parse(session.startTime);
-                                final sessionEnd = DateTime.parse(session.endTime);
-
-                                // Always try to join when the button is clicked, but show a warning for past classes
-                                if (!isToday || now.isAfter(sessionEnd)) {
-                                  // Show warning but still allow joining
+                                // Always try to join when the button is clicked, but show warnings for non-active classes
+                                if (isPast) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Note: This class is not currently active, but attempting to join anyway'),
+                                      content: Text('This class has already ended, but attempting to join anyway'),
                                       backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                } else if (isFuture) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Joining this class'),
+                                      backgroundColor: Colors.blue,
                                     ),
                                   );
                                 }
@@ -490,7 +556,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
                                 );
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.blue[50],
+                                backgroundColor:  Colors.blue[50],
                                 foregroundColor: Colors.blue[700],
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -518,11 +584,7 @@ class _TodaysClassesWidgetState extends ConsumerState<TodaysClassesWidget> {
       ],
     );
   }
-
-
 }
-
-
 
 // Function to join zoom meeting by opening the URL
 void defaultJoinZoomMeeting(BuildContext context, String? zoomLink) async {
@@ -556,9 +618,3 @@ void defaultJoinZoomMeeting(BuildContext context, String? zoomLink) async {
     );
   }
 }
-
-
-
-
-
-
